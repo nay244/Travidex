@@ -1,0 +1,14 @@
+# Brainstorming visual-companion mockups (local only)
+.superpowers/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Node / Expo (for when the app scaffolding lands)
+node_modules/
+.expo/
+dist/
+*.log
+.env
+.env.local
