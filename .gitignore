@@ -4,6 +4,7 @@
 # OS / editor
 .DS_Store
 Thumbs.db
+nul
 
 # Node / Expo (for when the app scaffolding lands)
 node_modules/
