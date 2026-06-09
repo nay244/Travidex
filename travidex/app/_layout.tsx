@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import { ReactNode } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Slot } from 'expo-router';
