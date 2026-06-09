@@ -3,6 +3,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useSight } from '../../hooks/useSight';
 import { LogFindSheet } from '../../components/LogFindSheet';
+import { YourPhotos } from '../../components/YourPhotos';
 
 export default function SightDetail() {
   const t = useTheme();
@@ -44,6 +45,8 @@ export default function SightDetail() {
 
         {sight.hint && <Text style={[t.type.body, { color: t.colors.text2 }]}>💡 {sight.hint}</Text>}
         {sight.about && <Text style={[t.type.body, { color: t.colors.text2 }]}>{sight.about}</Text>}
+
+        {found && <YourPhotos sightId={sight.id} />}
 
         <Text style={[t.type.label, { color: t.colors.text3 }]}>Recent finds</Text>
         {recentFinds.map(f => (

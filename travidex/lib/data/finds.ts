@@ -29,3 +29,12 @@ export async function getRecentFinds(sightId: string, limit = 10): Promise<Recen
   if (error) throw new Error(error.message);
   return (data ?? []) as RecentFind[];
 }
+
+export async function getUserFindCount(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('finds')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
