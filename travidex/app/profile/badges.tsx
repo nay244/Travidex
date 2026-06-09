@@ -11,7 +11,7 @@ export default function Badges() {
   const [earned, setEarned] = useState<string[]>([]);
 
   useEffect(() => {
-    if (session?.user) getUserBadges(session.user.id).then(setEarned);
+    if (session?.user) getUserBadges(session.user.id).then(setEarned).catch(err => console.warn('getUserBadges failed', err));
   }, [session?.user?.id]);
 
   return (
