@@ -11,7 +11,7 @@ create table community_submissions (
   busyness text,
   reference_photo text,
   location geography(point, 4326) not null,
-  status text not null default 'pending',
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
   reject_reason text,
   moderated_by uuid references auth.users(id),
   reviewed_at timestamptz,

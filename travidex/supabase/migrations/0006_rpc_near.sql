@@ -1,6 +1,7 @@
 create or replace function sights_near(lat double precision, lng double precision, radius_m double precision)
 returns setof sights
 language sql stable
+set search_path = public, extensions
 as $$
   select *
   from sights

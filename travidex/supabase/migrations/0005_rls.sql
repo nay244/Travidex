@@ -10,7 +10,8 @@ create policy "catalog read sights" on sights for select to authenticated using 
 alter table profiles enable row level security;
 create policy "profiles read" on profiles for select to authenticated using (true);
 create policy "profiles insert own" on profiles for insert to authenticated with check (user_id = auth.uid());
-create policy "profiles update own" on profiles for update to authenticated using (user_id = auth.uid());
+create policy "profiles update own" on profiles for update to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 -- Finds: public read (feed/completion), owner write.
 alter table finds enable row level security;
@@ -36,4 +37,5 @@ create policy "subs read own or approved" on community_submissions for select to
 create policy "subs insert own pending" on community_submissions for insert to authenticated
   with check (user_id = auth.uid() and status = 'pending');
 create policy "subs update own pending" on community_submissions for update to authenticated
-  using (user_id = auth.uid() and status = 'pending');
+  using (user_id = auth.uid() and status = 'pending')
+  with check (user_id = auth.uid() and status = 'pending');
