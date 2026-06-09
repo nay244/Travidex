@@ -3,9 +3,17 @@ import { renderWithTheme } from '../../test-utils';
 import Map from '../(tabs)/map';
 import Profile from '../(tabs)/profile';
 
-it('renders the Map placeholder', async () => {
+jest.mock('../../hooks/useCityCatalog', () => ({
+  useCityCatalog: jest.fn(() => ({
+    sights: [], completion: { found: 0, total: 0 }, loading: false, reload: jest.fn(),
+  })),
+}));
+jest.mock('../../context/CityProvider', () => ({ useCity: () => ({ cityId: 'city-1' }) }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+
+it('renders the Map screen', async () => {
   await renderWithTheme(<Map />);
-  expect(screen.getByText('Map')).toBeOnTheScreen();
+  expect(screen.getByTestId('map-view')).toBeOnTheScreen();
 });
 
 it('renders the Profile placeholder', async () => {
