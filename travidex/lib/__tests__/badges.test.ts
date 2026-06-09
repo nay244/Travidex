@@ -15,3 +15,8 @@ it('awards find milestones', () => {
   expect(evaluateBadges({ totalFinds: 50, citiesClaimed: 0, countriesExplored: 0 }))
     .toEqual(expect.arrayContaining(['first_find', 'finds_10', 'finds_50']));
 });
+
+it('awards countries_5 only at 5 explored countries', () => {
+  expect(evaluateBadges({ totalFinds: 0, citiesClaimed: 0, countriesExplored: 5 })).toContain('countries_5');
+  expect(evaluateBadges({ totalFinds: 0, citiesClaimed: 0, countriesExplored: 4 })).not.toContain('countries_5');
+});
