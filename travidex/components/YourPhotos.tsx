@@ -18,12 +18,16 @@ export function YourPhotos({ sightId }: { sightId: string }) {
 
   async function add() {
     if (!session?.user) return;
-    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.6 });
-    if (res.canceled) return;
-    const asset = res.assets[0];
-    const blob = await (await fetch(asset.uri)).blob();
-    await uploadUserPhoto(session.user.id, sightId, blob, asset.fileName ?? `${Date.now()}.jpg`);
-    await refresh();
+    try {
+      const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.6 });
+      if (res.canceled) return;
+      const asset = res.assets[0];
+      const blob = await (await fetch(asset.uri)).blob();
+      await uploadUserPhoto(session.user.id, sightId, blob, asset.fileName ?? `${Date.now()}.jpg`);
+      await refresh();
+    } catch (err) {
+      console.warn('upload failed', err);
+    }
   }
 
   return (
