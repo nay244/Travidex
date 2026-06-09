@@ -16,3 +16,16 @@ export async function getFoundSightIds(userId: string, sightIds: string[]): Prom
   if (error) throw new Error(error.message);
   return new Set((data ?? []).map((r: { sight_id: string }) => r.sight_id));
 }
+
+export type RecentFind = { id: string; comment: string | null; found_at: string; user_id: string };
+
+export async function getRecentFinds(sightId: string, limit = 10): Promise<RecentFind[]> {
+  const { data, error } = await supabase
+    .from('finds')
+    .select('id, comment, found_at, user_id')
+    .eq('sight_id', sightId)
+    .order('found_at', { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as RecentFind[];
+}

@@ -13,3 +13,13 @@ export async function getSightsForCity(cityId: string): Promise<Sight[]> {
   if (error) throw new Error(error.message);
   return (data ?? []) as unknown as Sight[];
 }
+
+export async function getSightById(id: string): Promise<Sight | null> {
+  const { data, error } = await supabase
+    .from('sights')
+    .select(SIGHT_COLUMNS)
+    .eq('id', id)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as unknown as Sight) ?? null;
+}
