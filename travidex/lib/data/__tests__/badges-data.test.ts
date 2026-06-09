@@ -41,4 +41,6 @@ it('getUserBadges returns earned codes', async () => {
 it('getUserFindCount returns the count', async () => {
   mockHeadEq.mockResolvedValue({ count: 7, error: null });
   await expect(getUserFindCount('u1')).resolves.toBe(7);
+  expect(mockSelectCount).toHaveBeenCalledWith('id', { count: 'exact', head: true });
+  expect(mockHeadEq).toHaveBeenCalledWith('user_id', 'u1');
 });
