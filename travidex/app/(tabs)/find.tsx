@@ -1,10 +1,32 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
-export default function Screen() {
+
+export default function Find() {
   const t = useTheme();
+  const router = useRouter();
+  const [permission, requestPermission] = useCameraPermissions();
+
+  if (!permission?.granted) {
+    return (
+      <View style={{ flex: 1, backgroundColor: t.colors.bg, alignItems: 'center', justifyContent: 'center', gap: t.spacing.s4 }}>
+        <Text style={[t.type.body, { color: t.colors.text2 }]}>Travidex needs your camera to log finds.</Text>
+        <Pressable onPress={requestPermission} style={{ backgroundColor: t.colors.actionPositive, padding: t.spacing.s4, borderRadius: t.radii.sm }}>
+          <Text style={[t.type.h3, { color: t.colors.textOnAccent }]}>Enable camera</Text>
+        </Pressable>
+        <Pressable onPress={() => router.push('/find/pick')}>
+          <Text style={[t.type.body, { color: t.colors.text3 }]}>{'Skip & pick a sight'}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  // Camera chrome is intentionally fixed black viewfinder + white shutter (not themed).
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: t.colors.bg }}>
-      <Text style={[t.type.h2, { color: t.colors.text1 }]}>Find</Text>
+    <View style={{ flex: 1, backgroundColor: '#000' }}>
+      <CameraView style={{ flex: 1 }} />
+      <Pressable onPress={() => router.push('/find/pick')} style={{ position: 'absolute', bottom: 40, alignSelf: 'center', backgroundColor: '#fff', width: 70, height: 70, borderRadius: 35 }} />
     </View>
   );
 }
