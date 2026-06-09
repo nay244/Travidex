@@ -17,7 +17,7 @@ export default function Login() {
     setError(null);
     try {
       await signInWithEmail(email, pw);
-      // Session change is observed by AuthProvider; index route redirects to tabs.
+      // On success the session updates; the (auth) layout redirects to the tabs.
     } catch (e: any) {
       setError(e.message);
     } finally {
