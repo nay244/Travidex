@@ -16,16 +16,21 @@ export function useProfile() {
 
   useEffect(() => {
     (async () => {
-      if (!session?.user) return;
+      if (!session?.user) { setLoading(false); return; }
       const uid = session.user.id;
-      const [city, country, count] = await Promise.all([
-        getCityProgress(uid), getCountryProgress(uid), getUserFindCount(uid),
-      ]);
-      const s = computeStats(city, country, count);
-      setStats(s);
-      await awardBadges(uid, evaluateBadges(s));
-      setEarnedBadges(await getUserBadges(uid));
-      setLoading(false);
+      try {
+        const [city, country, count] = await Promise.all([
+          getCityProgress(uid), getCountryProgress(uid), getUserFindCount(uid),
+        ]);
+        const s = computeStats(city, country, count);
+        setStats(s);
+        await awardBadges(uid, evaluateBadges(s));
+        setEarnedBadges(await getUserBadges(uid));
+      } catch {
+        // swallow — loading is always cleared in finally
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [session?.user?.id]);
 
