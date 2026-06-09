@@ -1,0 +1,30 @@
+<!-- @dsCard group="Colors" viewport="700x200" subtitle="Text tiers + accent tints (dim / line / glow)" name="Text & tints" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; background:var(--bg); padding:22px; display:flex; gap:28px; }
+  .col { flex:1; }
+  .lbl { font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin-bottom:12px; }
+  .tline { font-family:var(--font-sans); font-size:16px; margin-bottom:9px; display:flex; align-items:baseline; gap:10px; }
+  .tname { font-family:var(--font-mono); font-size:10px; color:var(--text-3); }
+  .tints { display:flex; flex-direction:column; gap:8px; }
+  .tint { height:30px; border-radius:var(--radius-sm); display:flex; align-items:center; padding:0 12px; font-family:var(--font-mono); font-size:10px; letter-spacing:.04em; }
+</style></head>
+<body>
+  <div class="col">
+    <div class="lbl">Text on dark</div>
+    <div class="tline" style="color:var(--text-1)">Primary text <span class="tname">--text-1</span></div>
+    <div class="tline" style="color:var(--text-2)">Secondary text <span class="tname">--text-2</span></div>
+    <div class="tline" style="color:var(--text-3)">Tertiary / caption <span class="tname">--text-3</span></div>
+    <div class="tline" style="color:var(--text-disabled)">Disabled <span class="tname">--text-disabled</span></div>
+  </div>
+  <div class="col">
+    <div class="lbl">Accent tints — fill 16% · line 40% · glow</div>
+    <div class="tints">
+      <div class="tint" style="background:var(--green-dim); color:var(--green); box-shadow:inset 0 0 0 1px var(--green-line)">green-dim · green-line</div>
+      <div class="tint" style="background:var(--amber-dim); color:var(--amber); box-shadow:inset 0 0 0 1px var(--amber-line)">amber-dim · amber-line</div>
+      <div class="tint" style="background:var(--blue-dim); color:var(--blue); box-shadow:inset 0 0 0 1px var(--blue-line)">blue-dim · blue-line</div>
+    </div>
+  </div>
+</body></html>

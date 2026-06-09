@@ -1,0 +1,17 @@
+/* ============================================================
+   Travidex Design System — global entry point
+   Consumers link THIS one file. Import-only.
+   ============================================================ */
+
+/* Webfonts: Space Grotesk (UI) + Space Mono (data/labels) */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+/* Tokens */
+@import "tokens/colors.css";
+@import "tokens/typography.css";
+@import "tokens/spacing.css";
+@import "tokens/elevation.css";
+@import "tokens/motion.css";
+
+/* Base */
+@import "tokens/base.css";

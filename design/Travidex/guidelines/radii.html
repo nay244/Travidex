@@ -1,0 +1,19 @@
+<!-- @dsCard group="Spacing" viewport="700x200" subtitle="Corner radii — rounded, layered" name="Radii" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; background:var(--bg); padding:24px; display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap; }
+  .box { background:var(--surface-2); border:1px solid var(--border-default); display:flex; align-items:flex-end; justify-content:center; padding-bottom:8px; }
+  .px { font-family:var(--font-mono); font-size:10px; color:var(--text-3); }
+  .cap { font-family:var(--font-mono); font-size:9px; letter-spacing:.06em; color:var(--text-3); text-align:center; margin-top:6px; }
+  .u { text-align:center; }
+</style></head>
+<body>
+  <div class="u"><div class="box" style="width:78px;height:78px;border-radius:var(--radius-sm)"><span class="px">10</span></div><div class="cap">sm · chip</div></div>
+  <div class="u"><div class="box" style="width:78px;height:78px;border-radius:var(--radius-md)"><span class="px">14</span></div><div class="cap">md · tile</div></div>
+  <div class="u"><div class="box" style="width:78px;height:78px;border-radius:var(--radius-lg)"><span class="px">18</span></div><div class="cap">lg · card</div></div>
+  <div class="u"><div class="box" style="width:78px;height:78px;border-radius:var(--radius-xl)"><span class="px">24</span></div><div class="cap">xl · sheet/hero</div></div>
+  <div class="u"><div class="box" style="width:78px;height:78px;border-radius:var(--radius-2xl)"><span class="px">30</span></div><div class="cap">2xl · sheet top</div></div>
+  <div class="u"><div class="box" style="width:78px;height:42px;border-radius:var(--radius-pill)"><span class="px">pill</span></div><div class="cap">chips, buttons</div></div>
+</body></html>

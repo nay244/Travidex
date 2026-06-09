@@ -1,0 +1,184 @@
+/* ============================================================
+   Travidex — Color tokens (themed)
+   LIGHT is the DEFAULT theme (:root).
+   DARK is opt-in via [data-theme="dark"] — a premium feature.
+
+   Accents carry FIXED semantic meaning in both themes:
+     green = found/claimed/success · amber = in-progress + Log/Find
+     blue  = personal/info · locked = unseen/disabled
+   On light, accents are DEEP (contrast on white).
+   On dark, accents are BRIGHT and GLOW (the reward).
+   Variable names are identical across themes — components never
+   branch on theme; they just read tokens.
+   ============================================================ */
+
+/* ---------- LIGHT (default) ---------- */
+:root {
+  color-scheme: light;
+
+  /* Surfaces — soft cool paper, white cards lift off it */
+  --bg:               #eceef3;
+  --surface-1:        #ffffff;
+  --surface-2:        #f2f4f8;
+  --surface-3:        #e7eaf1;
+  --surface-4:        #ffffff;
+  --surface-overlay:  rgba(255, 255, 255, 0.74);  /* glass over light map */
+  --surface-scrim:    rgba(18, 22, 30, 0.42);      /* modal backdrop */
+
+  /* Hairline borders — dark ink at low opacity */
+  --border-subtle:    rgba(22, 30, 48, 0.07);
+  --border-default:   rgba(22, 30, 48, 0.12);
+  --border-strong:    rgba(22, 30, 48, 0.20);
+  --divider:          rgba(22, 30, 48, 0.08);
+
+  /* Text — cool near-black, three tiers */
+  --text-1:           #161a21;
+  --text-2:           #525b69;
+  --text-3:           #838b99;
+  --text-disabled:    #b0b6c1;
+  --text-on-accent:   #ffffff;   /* white on deep accent fills */
+
+  /* GREEN — found / claimed / complete / success */
+  --green:            #1f9d57;
+  --green-bright:     #27b566;
+  --green-deep:       #15663b;
+  --green-dim:        rgba(31, 157, 87, 0.12);
+  --green-line:       rgba(31, 157, 87, 0.30);
+  --green-glow:       rgba(31, 157, 87, 0.22);
+
+  /* AMBER/GOLD — in-progress + primary Log/Find action */
+  --amber:            #bd7d12;
+  --amber-bright:     #e0a23c;
+  --amber-deep:       #8f5e0e;
+  --amber-dim:        rgba(189, 125, 18, 0.13);
+  --amber-line:       rgba(189, 125, 18, 0.34);
+  --amber-glow:       rgba(189, 125, 18, 0.22);
+
+  /* BLUE — personal data / info / type tags */
+  --blue:             #2f6fe0;
+  --blue-bright:      #5187e8;
+  --blue-deep:        #1d4fac;
+  --blue-dim:         rgba(47, 111, 224, 0.11);
+  --blue-line:        rgba(47, 111, 224, 0.30);
+
+  /* LOCKED / unseen / disabled */
+  --locked:           #aab2c0;
+  --locked-text:      #838b99;
+
+  /* Destructive */
+  --danger:           #d83a3a;
+  --danger-dim:       rgba(216, 58, 58, 0.12);
+
+  /* Map (Apple-Maps-light feel) */
+  --map-land:         #e9ebe4;
+  --map-land-2:       #dfe2da;
+  --map-water:        rgba(150, 195, 230, 0.55);
+  --map-green:        rgba(120, 180, 130, 0.30);
+  --map-road:         rgba(255, 255, 255, 0.90);
+  --map-road-hi:      rgba(189, 125, 18, 0.40);
+
+  /* Hero / celebration wash (radial center → bg) */
+  --wash-1:           #dff0e6;
+  --wash-2:           var(--bg);
+  /* Veil over full-screen profile background art (keeps content legible) */
+  --art-veil:         rgba(236, 238, 243, 0.62);
+
+  /* Photo placeholder */
+  --ph-stripe:        rgba(22, 30, 48, 0.05);
+  --ph-base:          var(--surface-2);
+
+  /* ---- Semantic aliases (defined ONCE; follow theme via the vars above) ---- */
+  --color-found:        var(--green);
+  --color-found-bg:     var(--green-dim);
+  --color-progress:     var(--amber);
+  --color-progress-bg:  var(--amber-dim);
+  --color-info:         var(--blue);
+  --color-info-bg:      var(--blue-dim);
+
+  --action-primary:      var(--amber);
+  --action-primary-press:var(--amber-deep);
+  --action-positive:     var(--green);
+
+  --pin-found:          var(--green);
+  --pin-unseen:         var(--locked);
+  --pin-selected:       var(--amber);
+
+  --chunk-claimed:      var(--green);
+  --chunk-progress:     var(--amber);
+  --chunk-untouched:    var(--locked);
+}
+
+/* ---------- DARK (premium, opt-in) ---------- */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces — cool blue-black, ascending elevation */
+  --bg:               #0d0f14;
+  --surface-1:        #12151c;
+  --surface-2:        #1a1d24;
+  --surface-3:        #21252f;
+  --surface-4:        #2a2f3a;
+  --surface-overlay:  rgba(16, 19, 26, 0.66);
+  --surface-scrim:    rgba(7, 9, 13, 0.60);
+
+  /* Borders — white at low opacity */
+  --border-subtle:    rgba(255, 255, 255, 0.06);
+  --border-default:   rgba(255, 255, 255, 0.10);
+  --border-strong:    rgba(255, 255, 255, 0.16);
+  --divider:          rgba(255, 255, 255, 0.07);
+
+  /* Text — cool whites, never pure */
+  --text-1:           #f3f6fb;
+  --text-2:           #a6b0c0;
+  --text-3:           #717b8b;
+  --text-disabled:    #49515f;
+  --text-on-accent:   #0d0f14;   /* dark on bright accent fills */
+
+  /* GREEN — bright + glows */
+  --green:            #4ade80;
+  --green-bright:     #6ef0a0;
+  --green-deep:       #2e8b57;
+  --green-dim:        rgba(74, 222, 128, 0.16);
+  --green-line:       rgba(74, 222, 128, 0.40);
+  --green-glow:       rgba(74, 222, 128, 0.45);
+
+  /* AMBER */
+  --amber:            #e0a23c;
+  --amber-bright:     #f4b850;
+  --amber-deep:       #c9882b;
+  --amber-dim:        rgba(224, 162, 60, 0.16);
+  --amber-line:       rgba(224, 162, 60, 0.40);
+  --amber-glow:       rgba(224, 162, 60, 0.45);
+
+  /* BLUE */
+  --blue:             #8fb6ff;
+  --blue-bright:      #aecbff;
+  --blue-deep:        #5b7fd6;
+  --blue-dim:         rgba(143, 182, 255, 0.16);
+  --blue-line:        rgba(143, 182, 255, 0.40);
+
+  /* LOCKED */
+  --locked:           #3a4150;
+  --locked-text:      #717b8b;
+
+  /* Destructive */
+  --danger:           #ff6b6b;
+  --danger-dim:       rgba(255, 107, 107, 0.16);
+
+  /* Map (dark instrument) */
+  --map-land:         #11161f;
+  --map-land-2:       #18202c;
+  --map-water:        rgba(40, 70, 110, 0.45);
+  --map-green:        rgba(46, 90, 70, 0.28);
+  --map-road:         rgba(255, 255, 255, 0.08);
+  --map-road-hi:      rgba(224, 162, 60, 0.18);
+
+  /* Hero / celebration wash */
+  --wash-1:           #16241c;
+  --wash-2:           var(--bg);
+  --art-veil:         rgba(13, 15, 20, 0.66);
+
+  /* Photo placeholder */
+  --ph-stripe:        rgba(255, 255, 255, 0.035);
+  --ph-base:          var(--surface-2);
+}

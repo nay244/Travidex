@@ -1,0 +1,52 @@
+/* ============================================================
+   Travidex — Spacing & layout tokens
+   4pt base grid. iOS-native rhythm.
+   ============================================================ */
+
+:root {
+  /* ---- Spacing scale (4pt base) ---- */
+  --space-0:  0;
+  --space-1:  2px;
+  --space-2:  4px;
+  --space-3:  8px;
+  --space-4:  12px;
+  --space-5:  16px;   /* default gutter */
+  --space-6:  20px;
+  --space-7:  24px;
+  --space-8:  32px;
+  --space-9:  40px;
+  --space-10: 48px;
+  --space-11: 64px;
+
+  /* ---- Screen layout ---- */
+  --screen-gutter:    16px;  /* default left/right page padding */
+  --screen-gutter-lg: 20px;  /* roomy screens (detail, onboarding) */
+  --content-max:      440px; /* phone content cap on larger viewports */
+
+  /* ---- iOS chrome heights ---- */
+  --statusbar-h:   54px;   /* notch / dynamic-island safe area */
+  --navheader-h:   52px;
+  --tabbar-h:      84px;   /* incl. home-indicator inset */
+  --homeindicator: 34px;
+  --fab-size:      62px;   /* raised center Find button */
+
+  /* ---- Component sizing ---- */
+  --hit-min:       44px;   /* min tap target (never smaller) */
+  --row-h:         72px;   /* SightRow height */
+  --input-h:       50px;
+  --btn-h:         52px;
+  --btn-h-sm:      40px;
+  --chip-h:        28px;
+  --avatar:        40px;
+  --pin:           34px;
+
+  /* ---- Radii ---- */
+  --radius-xs:    6px;
+  --radius-sm:    10px;
+  --radius-md:    14px;
+  --radius-lg:    18px;   /* default card */
+  --radius-xl:    24px;   /* sheets, hero cards */
+  --radius-2xl:   30px;   /* bottom-sheet top corners */
+  --radius-pill:  999px;
+  --radius-card:  var(--radius-lg);
+}

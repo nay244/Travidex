@@ -1,0 +1,37 @@
+<!-- @dsCard group="Colors" viewport="700x360" subtitle="Light (default) + Dark (Travidex+) — ascending elevation" name="Surfaces" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; background:#1b1e24; padding:20px; }
+  .panel { border-radius:var(--radius-lg); padding:16px; margin-bottom:14px; }
+  .lt { background:#eceef3; }
+  .dk { background:#0d0f14; }
+  .ttl { font-family:var(--font-mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .ttl.lt { color:#525b69; } .ttl.dk { color:#a6b0c0; }
+  .pill { font-family:var(--font-mono); font-size:9px; padding:2px 7px; border-radius:999px; letter-spacing:.06em; }
+  .row { display:flex; gap:10px; }
+  .sw { flex:1; border-radius:var(--radius-md); padding:12px; height:74px; display:flex; flex-direction:column; justify-content:space-between; }
+  .nm { font-family:var(--font-sans); font-weight:600; font-size:12px; }
+  .hex { font-family:var(--font-mono); font-size:10px; letter-spacing:.03em; opacity:.7; }
+</style></head>
+<body>
+  <div class="panel lt">
+    <div class="ttl lt">Light <span class="pill" style="background:#fff;color:#525b69;box-shadow:inset 0 0 0 1px rgba(22,30,48,.12)">DEFAULT</span></div>
+    <div class="row">
+      <div class="sw" style="background:#eceef3;box-shadow:inset 0 0 0 1px rgba(22,30,48,.10)"><span class="nm" style="color:#161a21">bg</span><span class="hex" style="color:#525b69">#eceef3</span></div>
+      <div class="sw" style="background:#ffffff;box-shadow:inset 0 0 0 1px rgba(22,30,48,.10)"><span class="nm" style="color:#161a21">surface-1</span><span class="hex" style="color:#525b69">#ffffff</span></div>
+      <div class="sw" style="background:#f2f4f8;box-shadow:inset 0 0 0 1px rgba(22,30,48,.10)"><span class="nm" style="color:#161a21">surface-2</span><span class="hex" style="color:#525b69">#f2f4f8</span></div>
+      <div class="sw" style="background:#e7eaf1;box-shadow:inset 0 0 0 1px rgba(22,30,48,.10)"><span class="nm" style="color:#161a21">surface-3</span><span class="hex" style="color:#525b69">#e7eaf1</span></div>
+    </div>
+  </div>
+  <div class="panel dk">
+    <div class="ttl dk">Dark <span class="pill" style="background:rgba(224,162,60,.16);color:#e0a23c">TRAVIDEX+</span></div>
+    <div class="row">
+      <div class="sw" style="background:#0d0f14;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)"><span class="nm" style="color:#f3f6fb">bg</span><span class="hex" style="color:#a6b0c0">#0d0f14</span></div>
+      <div class="sw" style="background:#12151c;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)"><span class="nm" style="color:#f3f6fb">surface-1</span><span class="hex" style="color:#a6b0c0">#12151c</span></div>
+      <div class="sw" style="background:#1a1d24;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)"><span class="nm" style="color:#f3f6fb">surface-2</span><span class="hex" style="color:#a6b0c0">#1a1d24</span></div>
+      <div class="sw" style="background:#21252f;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)"><span class="nm" style="color:#f3f6fb">surface-3</span><span class="hex" style="color:#a6b0c0">#21252f</span></div>
+    </div>
+  </div>
+</body></html>

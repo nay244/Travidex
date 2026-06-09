@@ -1,0 +1,52 @@
+<!-- @dsCard group="Components" viewport="700x300" subtitle="Button · Avatar · TypeTag · Badge" name="Core" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin:0; background:var(--bg); padding:22px 24px; }
+  .group { margin-bottom:20px; }
+  .glabel { font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin-bottom:11px; }
+  .row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:48px; padding:0 22px; border-radius:var(--radius-pill); font-family:var(--font-sans); font-weight:600; font-size:16px; letter-spacing:-.01em; border:1px solid transparent; }
+  .b-primary { background:var(--amber); color:var(--text-on-accent); box-shadow:var(--glow-fab); }
+  .b-positive { background:var(--green); color:var(--text-on-accent); box-shadow:0 6px 20px var(--green-glow); }
+  .b-secondary { background:var(--surface-2); color:var(--text-1); border-color:var(--border-default); }
+  .b-ghost { background:transparent; color:var(--text-1); }
+  .b-disabled { background:var(--surface-2); color:var(--text-1); border-color:var(--border-default); opacity:.4; }
+  .chip { display:inline-flex; align-items:center; gap:5px; height:28px; padding:0 10px; border-radius:var(--radius-pill); font-family:var(--font-sans); font-weight:500; font-size:13px; background:var(--blue-dim); color:var(--blue); box-shadow:inset 0 0 0 1px var(--blue-line); }
+  .badge { display:inline-flex; align-items:center; gap:5px; height:22px; padding:0 8px; border-radius:var(--radius-pill); font-family:var(--font-mono); font-weight:700; font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+  .dot { width:6px; height:6px; border-radius:50%; }
+  .av { width:40px; height:40px; border-radius:50%; background:var(--surface-3); display:inline-flex; align-items:center; justify-content:center; font-family:var(--font-sans); font-weight:600; color:var(--text-2); box-shadow:inset 0 0 0 1px var(--border-default); }
+  .av.ring { box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--green); }
+  svg { width:17px; height:17px; }
+</style></head>
+<body>
+  <div class="group">
+    <div class="glabel">Button — primary (amber) · positive (green) · secondary · ghost · disabled</div>
+    <div class="row">
+      <span class="btn b-primary"><i data-lucide="plus"></i>Log find</span>
+      <span class="btn b-positive"><i data-lucide="navigation"></i>Navigate</span>
+      <span class="btn b-secondary">Not now</span>
+      <span class="btn b-ghost">Skip</span>
+      <span class="btn b-disabled">Disabled</span>
+    </div>
+  </div>
+  <div class="group">
+    <div class="glabel">TypeTag (blue) · Badge statuses · Avatar</div>
+    <div class="row">
+      <span class="chip"><i data-lucide="landmark" style="width:13px;height:13px"></i>Historic</span>
+      <span class="chip">Scenic</span>
+      <span class="chip">Food</span>
+      <span style="width:14px"></span>
+      <span class="badge" style="background:var(--amber-dim);color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber-line)"><span class="dot" style="background:var(--amber)"></span>Pending</span>
+      <span class="badge" style="background:var(--green-dim);color:var(--green);box-shadow:inset 0 0 0 1px var(--green-line)">Approved</span>
+      <span class="badge" style="background:var(--danger-dim);color:var(--danger);box-shadow:inset 0 0 0 1px rgba(255,107,107,.4)">Rejected</span>
+      <span class="badge" style="background:var(--blue-dim);color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue-line)">Community</span>
+      <span style="width:6px"></span>
+      <span class="av">MV</span>
+      <span class="av ring">JP</span>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+</body></html>

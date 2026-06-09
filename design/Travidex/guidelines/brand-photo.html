@@ -1,0 +1,27 @@
+<!-- @dsCard group="Brand" viewport="700x230" subtitle="Striped placeholder for missing imagery · found = full-color, unseen = dimmed" name="Imagery & placeholders" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; background:var(--bg); padding:24px; display:flex; gap:16px; }
+  .fig { flex:1; }
+  .ph { height:128px; border-radius:var(--radius-lg); border:1px solid var(--border-subtle); }
+  .unseen { filter:grayscale(0.7) brightness(0.5); }
+  .cap { font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; color:var(--text-3); margin-top:10px; display:flex; align-items:center; gap:7px; }
+  .chk { width:16px; height:16px; border-radius:50%; background:var(--green); box-shadow:var(--glow-pin); display:inline-flex; align-items:center; justify-content:center; color:var(--bg); font-size:11px; font-weight:700; }
+  .lock { width:16px; height:16px; border-radius:50%; background:var(--locked); }
+</style></head>
+<body>
+  <div class="fig">
+    <div class="tvx-photo-ph ph" data-label="reference photo"></div>
+    <div class="cap">placeholder · .tvx-photo-ph</div>
+  </div>
+  <div class="fig">
+    <div class="tvx-photo-ph ph" data-label="found · full color"></div>
+    <div class="cap"><span class="chk">✓</span> found — full-color hero</div>
+  </div>
+  <div class="fig">
+    <div class="tvx-photo-ph ph unseen" data-label="unseen"></div>
+    <div class="cap"><span class="lock"></span> unseen — dimmed / desaturated</div>
+  </div>
+</body></html>

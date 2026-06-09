@@ -1,0 +1,49 @@
+# Travidex — iOS UI Kit
+
+A high-fidelity, interactive recreation of the Travidex iOS app. Open **`index.html`** to click through it, or **`overview.html`** to see the hero screens side-by-side on a pan/zoom canvas.
+
+> Full as-built flow, interactions, and data model: **`../../Travidex-Screen-Flow-and-Design.md`**.
+
+## Flow
+`Welcome → (auth) → Map Home`. The bottom **TabBar** switches **Map · Explore · ⬗Find · Community · Profile**. The center **stamp** button logs a find but is **disabled until a sight is selected** from the Map list.
+
+```
+Map: select a row → ⬗ enables → tap ⬗ → Find Success (new) or Already-logged (if found)
+     row "see more" chevron → Sight Detail
+Explore: country pill (flag+code) → Country picker; city tile → Region Dex;
+         US states tile → state's cities → Region Dex
+Profile: Badges/Achievements rails → full pages; Customize → Appearance / Profile Art
+```
+
+## Screens
+| File | Screen | Notes |
+|---|---|---|
+| `Welcome.jsx` | Onboarding | Collector's-board hero, Sign in with Apple / email auth |
+| `MapHome.jsx` | Map Home | Themed map, found/unseen pins, 3-snap **dex bottom sheet**, **dex-order list** (no sort tabs), tap-to-select + see-more chevron, hollow unfound thumbs |
+| `SightDetail.jsx` | Sight Detail | Hero photo, #dex + found badges, type tags, Access/Size/Busyness, **inline** Navigate + Log find (no duplicate bottom bar), hint, about, your photos, recent finds |
+| `FindSuccess.jsx` | Find Success | New find: stamp + confetti + completion bar + badge. **`already` mode**: "Already in your dex" notice (no bar/badge), Map / View entry |
+| `ChunkMap.jsx` | Explore Chunk-Map | Country switcher (**flag + code**) + Country picker; `tier:"cities"` → city tiles; `tier:"states"` → **state tiles → drill into cities**; gradient completion fill |
+| `RegionDex.jsx` | Region Dex | Pokédex-style list of a city's sights: search + sort/filter, type chips, **favorite top-right**, **dex # bottom-right**, found = full image / unfound = hollow |
+| `Community.jsx` | Community | Friends/Global/Nearby finds feed |
+| `Profile.jsx` | Profile | **Profile-art background**, identity, Sights/Cities/Countries, World completion, **Badges & Achievements rails** (4 + `>`), Customize rows |
+| `ProfilePages.jsx` | Monthly Badges · Achievements (+ detail) | Per-year month grids; leveled awards grid w/ hollow locked icons → how-to-unlock detail |
+| `ProfileArt.jsx` | Profile Art picker | Progress-unlocked background designs (locked show criteria + progress) |
+| `Appearance.jsx` | Appearance | Light (free) / Dark (**Travidex+ premium**, unlockable to preview) |
+
+## Architecture
+- **`app.jsx`** — app shell: tab + overlay state, `attemptLog()` (found→already / unfound→log), `logFind()`, theme (`data-theme`), `premium`, `mapSelected`, `regionDex`, `profileArtId`.
+- **`primitives.jsx`** — kit-local components (`Icon`, `Press`, `Btn`, `Pin`, `Ring`, `CBar`, `Chunk`, `SightRow`, `MapBg`, `Seg`, `StatTile`, `TypeTag`) mirroring the published `components/`.
+- **`chrome.jsx`** — `TabBar` (5-tab + stamp FAB w/ `findEnabled`) + `SAFE_TOP`/`TAB_H`.
+- **`art.jsx`** — `PROFILE_ART` presets + `ArtLayer` + progress unlock eval.
+- **`data.jsx`** — `KYOTO_SIGHTS`, `COUNTRIES` (JP/FR cities, US states), `cityEntries()`, `ACHIEVEMENTS`, `BADGE_YEARS`, `FEED`.
+
+## Build notes
+- **Self-contained:** real tokens via `../../styles.css`; Lucide via CDN wrapped in a React `Icon` (builds the SVG imperatively).
+- **Theme:** light by default; dark via `data-theme="dark"` on `<html>` (set from Appearance / premium unlock). The device frame's `dark` prop follows it.
+- **Z-order:** tab bar 40 < Region Dex 46 < Sight Detail 47 < Find Success / Achievement Detail 48 < modal sheets (Appearance / Profile Art / Country picker / island/home-indicator) above.
+- **Known caveat:** the stamp FAB's grey→amber swap is instant — a CSS `background` transition was removed because this rendering engine froze it mid-transition; a native build can animate it.
+- **Map** is a CSS abstraction (`MapBg`); production uses `react-native-maps`. **Flag emoji** show as the flag on iOS, may fall back to letters elsewhere.
+- **Sample data:** US states (6) and non-Kyoto region-dex entries are representative samples to demonstrate the layout/hierarchy.
+
+## Files
+`index.html` · `overview.html` · `app.jsx` · `data.jsx` · `primitives.jsx` · `chrome.jsx` · `art.jsx` · `Welcome.jsx` · `MapHome.jsx` · `SightDetail.jsx` · `FindSuccess.jsx` · `ChunkMap.jsx` · `RegionDex.jsx` · `Community.jsx` · `Profile.jsx` · `ProfilePages.jsx` · `ProfileArt.jsx` · `Appearance.jsx` · `ios-frame.jsx` · `design-canvas.jsx`

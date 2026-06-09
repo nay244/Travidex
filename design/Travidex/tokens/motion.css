@@ -1,0 +1,33 @@
+/* ============================================================
+   Travidex — Motion tokens
+   Snappy & physical on REWARD moments (find, claim, ring fill);
+   smooth & quiet everywhere else. Respect reduced-motion.
+   ============================================================ */
+
+:root {
+  /* ---- Durations ---- */
+  --dur-instant: 90ms;
+  --dur-fast:    150ms;   /* press / hover / toggle */
+  --dur-med:     260ms;   /* sheet snap, screen content */
+  --dur-slow:    420ms;   /* ring fill, hero reveals */
+  --dur-celebrate: 720ms; /* find-success stamp / confetti */
+
+  /* ---- Easing ---- */
+  --ease-standard: cubic-bezier(0.4, 0.0, 0.2, 1);   /* general */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);    /* decelerate */
+  --ease-spring:   cubic-bezier(0.22, 1.4, 0.36, 1); /* overshoot pop (reward) */
+  --ease-sheet:    cubic-bezier(0.32, 0.72, 0, 1);   /* iOS bottom-sheet */
+
+  /* ---- Interaction primitives ---- */
+  --press-scale:  0.97;   /* buttons/rows squash on press */
+  --press-bright: 1.08;   /* accent fills brighten slightly on press */
+  --tap-scale:    0.94;   /* small icon buttons */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0ms; --dur-fast: 0ms; --dur-med: 0ms;
+    --dur-slow: 0ms; --dur-celebrate: 0ms;
+    --press-scale: 1; --tap-scale: 1; --press-bright: 1;
+  }
+}

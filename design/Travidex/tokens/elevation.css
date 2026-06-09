@@ -1,0 +1,47 @@
+/* ============================================================
+   Travidex — Elevation: shadows, glows, blur (themed)
+   LIGHT (default): soft cool-ink shadows, accent glow is gentle.
+   DARK: heavier black shadows, accent glow is the reward.
+   Glow composites reference themed accent vars, so they follow
+   the active theme automatically.
+   ============================================================ */
+
+:root {
+  /* ---- Ambient shadows (light: soft cool ink) ---- */
+  --shadow-sm:  0 1px 2px rgba(22,30,48,0.08);
+  --shadow-md:  0 4px 14px rgba(22,30,48,0.10);
+  --shadow-lg:  0 12px 32px rgba(22,30,48,0.14);
+  --shadow-sheet: 0 -8px 40px rgba(22,30,48,0.12);
+  --shadow-fab:   0 8px 24px rgba(22,30,48,0.18);
+
+  /* ---- Accent glows (follow theme via the *-line / *-glow vars) ---- */
+  --glow-found:    0 0 0 1px var(--green-line), 0 6px 20px var(--green-glow);
+  --glow-progress: 0 0 0 1px var(--amber-line), 0 6px 20px var(--amber-glow);
+  --glow-fab:      0 8px 22px var(--amber-glow), 0 2px 8px rgba(22,30,48,0.22);
+  --glow-pin:      0 0 12px var(--green-glow);
+
+  /* ---- Top sheen on raised surfaces ---- */
+  --sheen: inset 0 1px 0 rgba(255,255,255,0.65);
+
+  /* ---- Backdrop blur strengths (glass over map) ---- */
+  --blur-sm: 10px;
+  --blur-md: 20px;
+  --blur-lg: 32px;
+
+  /* ---- Focus ring ---- */
+  --focus-ring: 0 0 0 3px rgba(47,111,224,0.40);
+}
+
+[data-theme="dark"] {
+  --shadow-sm:  0 1px 2px rgba(0,0,0,0.40);
+  --shadow-md:  0 4px 14px rgba(0,0,0,0.45);
+  --shadow-lg:  0 12px 32px rgba(0,0,0,0.55);
+  --shadow-sheet: 0 -8px 40px rgba(0,0,0,0.55);
+  --shadow-fab:   0 8px 24px rgba(0,0,0,0.55);
+
+  --glow-fab: 0 6px 22px var(--amber-glow), 0 2px 6px rgba(0,0,0,0.5);
+
+  --sheen: inset 0 1px 0 rgba(255,255,255,0.05);
+
+  --focus-ring: 0 0 0 3px rgba(143,182,255,0.45);
+}

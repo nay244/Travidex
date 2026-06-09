@@ -1,0 +1,69 @@
+<!-- @dsCard group="Components" viewport="700x340" subtitle="BottomSheet (3 snap points) · Toast · EmptyState" name="Feedback" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin:0; background:var(--bg); padding:22px 24px; display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; }
+  .glabel { font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin:0 0 11px; }
+  /* sheet mock */
+  .sheetmock { width:210px; height:250px; position:relative; border-radius:var(--radius-lg); overflow:hidden; background:linear-gradient(160deg,#1a2433,#0d0f14); box-shadow:inset 0 0 0 1px var(--border-subtle); }
+  .mappins { position:absolute; inset:0; }
+  .mp { position:absolute; width:14px; height:14px; border-radius:50%; border:2px solid var(--bg); }
+  .sheet { position:absolute; left:0; right:0; bottom:0; height:62%; background:var(--surface-1); border-top-left-radius:var(--radius-2xl); border-top-right-radius:var(--radius-2xl); border-top:1px solid var(--border-default); box-shadow:var(--shadow-sheet); padding:10px 14px; }
+  .handle { width:38px; height:5px; border-radius:999px; background:var(--border-strong); margin:0 auto 12px; }
+  .pill { display:inline-block; font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; color:var(--green); background:var(--green-dim); padding:4px 9px; border-radius:999px; }
+  .line { height:10px; border-radius:4px; background:var(--surface-2); margin-top:10px; }
+  .snaps { font-family:var(--font-mono); font-size:10px; color:var(--text-3); margin-top:10px; letter-spacing:.06em; }
+
+  /* toasts */
+  .col { display:flex; flex-direction:column; gap:12px; }
+  .toast { display:flex; align-items:center; gap:12px; padding:12px 14px; width:300px; background:var(--surface-4); border-radius:var(--radius-md); box-shadow:var(--shadow-lg),inset 0 0 0 1px var(--border-default); }
+  .edge { width:3px; align-self:stretch; border-radius:999px; }
+  .tmsg { flex:1; font-family:var(--font-sans); font-size:14px; color:var(--text-1); }
+  .taction { font-family:var(--font-sans); font-weight:600; font-size:14px; }
+  .toast svg { width:16px; height:16px; }
+
+  /* empty */
+  .empty { width:280px; text-align:center; padding:20px; border-radius:var(--radius-lg); box-shadow:inset 0 0 0 1px var(--border-subtle); }
+  . recirc, .ecirc { width:52px; height:52px; border-radius:50%; background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--border-subtle); display:inline-flex; align-items:center; justify-content:center; color:var(--text-3); margin-bottom:10px; }
+  .etitle { font-family:var(--font-sans); font-weight:600; font-size:17px; }
+  .emsg { font-family:var(--font-sans); font-size:14px; color:var(--text-3); line-height:1.45; margin-top:6px; }
+  .ecirc svg { width:22px; height:22px; }
+</style></head>
+<body>
+  <div>
+    <div class="glabel">BottomSheet — peek / half / full</div>
+    <div class="sheetmock">
+      <div class="mappins">
+        <span class="mp" style="top:30px;left:40px;background:var(--green);box-shadow:var(--glow-pin)"></span>
+        <span class="mp" style="top:55px;left:130px;background:var(--locked)"></span>
+        <span class="mp" style="top:20px;left:150px;background:var(--green);box-shadow:var(--glow-pin)"></span>
+      </div>
+      <div class="sheet">
+        <div class="handle"></div>
+        <span class="pill">KYOTO · 3 OF 40</span>
+        <div class="line" style="width:90%"></div>
+        <div class="line" style="width:70%"></div>
+        <div class="line" style="width:80%"></div>
+        <div class="snaps">drag ↕ peek · half · full</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="glabel">Toast</div>
+    <div class="col">
+      <div class="toast"><span class="edge" style="background:var(--green)"></span><i data-lucide="check" style="color:var(--green)"></i><span class="tmsg">Added to your dex!</span></div>
+      <div class="toast"><span class="edge" style="background:var(--danger)"></span><i data-lucide="wifi-off" style="color:var(--danger)"></i><span class="tmsg">Couldn't reach the map.</span><span class="taction" style="color:var(--danger)">Retry</span></div>
+    </div>
+
+    <div class="glabel" style="margin-top:18px">EmptyState</div>
+    <div class="empty">
+      <span class="ecirc"><i data-lucide="map-pin"></i></span>
+      <div class="etitle">No finds yet</div>
+      <div class="emsg">Tap a pin to read its hint, then log your first find.</div>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+</body></html>

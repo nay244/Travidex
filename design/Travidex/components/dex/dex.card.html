@@ -1,0 +1,172 @@
+<!-- @dsCard group="Components" viewport="700x760" subtitle="SightPin · CompletionBar/Ring · ChunkTile · StatTile · SightRow · BadgeChip · FindFeedItem" name="Dex" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin:0; background:var(--bg); padding:22px 24px; }
+  .glabel { font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin:0 0 11px; }
+  .group { margin-bottom:22px; }
+  .row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:start; }
+
+  /* pins */
+  .pin { border-radius:50%; border:2px solid var(--bg); display:inline-flex; align-items:center; justify-content:center; }
+  .pin.found { width:32px; height:32px; background:var(--green); box-shadow:var(--glow-pin); }
+  .pin.unseen { width:32px; height:32px; background:var(--locked); box-shadow:var(--shadow-sm); }
+  .pin.sel { width:40px; height:40px; background:var(--amber); box-shadow:0 0 16px var(--amber-glow); }
+  .pin.cluster { width:38px; height:38px; background:var(--surface-3); color:var(--text-1); font-family:var(--font-mono); font-weight:700; font-size:13px; box-shadow:var(--shadow-md); }
+  .chk { width:12px; height:7px; border-left:2.5px solid var(--text-on-accent); border-bottom:2.5px solid var(--text-on-accent); transform:rotate(-45deg); margin-top:-2px; }
+  .dot-w { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); }
+
+  /* bar */
+  .barwrap { max-width:300px; }
+  .barhead { display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:7px; }
+  .bar { height:8px; border-radius:999px; background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--border-subtle); overflow:hidden; }
+  .bar > span { display:block; height:100%; border-radius:999px; }
+
+  /* chunk tiles */
+  .chunks { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:330px; }
+  .chunk { position:relative; overflow:hidden; aspect-ratio:1; padding:12px; border-radius:var(--radius-md); background:var(--surface-1); display:flex; flex-direction:column; justify-content:space-between; }
+  .chunk .fill { position:absolute; left:0; right:0; bottom:0; }
+  .chunk .region { position:relative; font-family:var(--font-mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3); }
+  .chunk .city { position:relative; font-family:var(--font-sans); font-weight:600; font-size:14px; color:var(--text-1); }
+  .chunk .cnt { position:relative; font-family:var(--font-mono); font-size:11px; font-weight:700; margin-top:3px; }
+  .marker { position:relative; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; }
+
+  /* stat tiles */
+  .stats { display:flex; gap:10px; max-width:330px; }
+  .stat { flex:1; padding:12px 8px; background:var(--surface-2); border-radius:var(--radius-md); box-shadow:inset 0 0 0 1px var(--border-subtle); display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .stat .v { font-family:var(--font-mono); font-weight:700; font-size:18px; color:var(--text-1); }
+  .stat .l { font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3); }
+  .stat svg { width:16px; height:16px; color:var(--text-3); }
+
+  /* rows */
+  .rows { max-width:340px; background:var(--surface-1); border-radius:var(--radius-lg); padding:6px; box-shadow:inset 0 0 0 1px var(--border-subtle); }
+  .srow { display:flex; align-items:center; gap:12px; height:64px; padding:0 10px; border-radius:var(--radius-md); }
+  .srow.sel { background:var(--surface-3); box-shadow:inset 0 0 0 1px var(--amber-line); }
+  .thumb { width:46px; height:46px; border-radius:var(--radius-sm); background:var(--surface-2); background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 2px,transparent 2px 9px); box-shadow:inset 0 0 0 1px var(--border-subtle); flex:none; }
+  .thumb.dim { filter:grayscale(.7) brightness(.6); }
+  .sname { font-family:var(--font-sans); font-weight:600; font-size:15px; }
+  .sdex { font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--text-3); }
+  .smeta { font-family:var(--font-mono); font-size:11px; color:var(--text-3); margin-top:3px; }
+  .scheck { width:24px; height:24px; border-radius:50%; background:var(--green-dim); box-shadow:inset 0 0 0 1px var(--green-line); display:inline-flex; align-items:center; justify-content:center; }
+  .scheck .c { width:9px; height:5px; border-left:2px solid var(--green); border-bottom:2px solid var(--green); transform:rotate(-45deg); margin-top:-1px; }
+  .sring { width:10px; height:10px; border-radius:50%; border:2px solid var(--locked); }
+  .thumb.hollow { background:var(--surface-2); background-image:none; box-shadow:inset 0 0 0 1.5px var(--border-default); display:inline-flex; align-items:center; justify-content:center; }
+  .thumb.hollow svg { width:18px; height:18px; }
+  .see { width:30px; height:30px; border-radius:50%; background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--border-subtle); display:inline-flex; align-items:center; justify-content:center; }
+  .see svg { width:15px; height:15px; }
+
+  /* badges */
+  .badges { display:flex; gap:12px; }
+  .badge { width:96px; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; padding:16px 8px; border-radius:var(--radius-lg); background:var(--surface-1); }
+  .badge.earned { box-shadow:inset 0 0 0 1px var(--amber-line); }
+  .badge.locked { box-shadow:inset 0 0 0 1px var(--border-subtle); }
+  .medal { width:50px; height:50px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; }
+  .medal.earned { background:var(--amber-dim); box-shadow:inset 0 0 0 1.5px var(--amber-line),0 0 16px var(--amber-glow); color:var(--amber); }
+  .medal.locked { background:var(--surface-2); box-shadow:inset 0 0 0 1.5px var(--border-default); color:var(--locked); }
+  .bname { font-family:var(--font-sans); font-weight:600; font-size:13px; }
+  .bcrit { font-family:var(--font-mono); font-size:10px; color:var(--text-3); }
+  .medal svg { width:20px; height:20px; }
+
+  /* feed */
+  .feed { max-width:340px; display:flex; gap:12px; padding:12px; border-radius:var(--radius-lg); background:var(--surface-1); box-shadow:inset 0 0 0 1px var(--border-subtle); }
+  .av { width:38px; height:38px; border-radius:50%; background:var(--surface-3); display:inline-flex; align-items:center; justify-content:center; font-family:var(--font-sans); font-weight:600; font-size:13px; color:var(--text-2); flex:none; }
+  .ftext { font-family:var(--font-sans); font-size:14px; color:var(--text-2); line-height:1.35; }
+  .fphoto { height:120px; margin-top:10px; border-radius:var(--radius-md); background:var(--surface-2); background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 2px,transparent 2px 11px); }
+  .fmeta { display:flex; gap:18px; margin-top:11px; font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--text-3); }
+</style></head>
+<body>
+  <div class="group">
+    <div class="glabel">SightPin — found · unseen · selected · cluster</div>
+    <div class="row">
+      <span class="pin found"><span class="chk"></span></span>
+      <span class="pin unseen"><span class="dot-w"></span></span>
+      <span class="pin sel"><span class="chk"></span></span>
+      <span class="pin cluster">8</span>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="group">
+      <div class="glabel">CompletionBar</div>
+      <div class="barwrap">
+        <div class="barhead"><span style="color:var(--text-2)">KYOTO</span><span style="color:var(--green);font-weight:700">40 <span style="color:var(--text-3)">/ 40</span></span></div>
+        <div class="bar"><span style="width:100%;background:var(--green);box-shadow:0 0 10px var(--green-glow)"></span></div>
+      </div>
+      <div class="barwrap" style="margin-top:14px">
+        <div class="barhead"><span style="color:var(--text-2)">PARIS</span><span style="color:var(--text-3);font-weight:700">3 / 40</span></div>
+        <div class="bar"><span style="width:18%;background:var(--amber)"></span></div>
+      </div>
+    </div>
+    <div class="group">
+      <div class="glabel">CompletionRing</div>
+      <div class="row">
+        <svg width="64" height="64" style="transform:rotate(-90deg)"><circle cx="32" cy="32" r="29" fill="none" stroke="var(--surface-2)" stroke-width="6"/><circle cx="32" cy="32" r="29" fill="none" stroke="var(--amber)" stroke-width="6" stroke-linecap="round" stroke-dasharray="182" stroke-dashoffset="61"/></svg>
+        <svg width="64" height="64" style="transform:rotate(-90deg);filter:drop-shadow(0 0 6px var(--green-glow))"><circle cx="32" cy="32" r="29" fill="none" stroke="var(--surface-2)" stroke-width="6"/><circle cx="32" cy="32" r="29" fill="none" stroke="var(--green)" stroke-width="6" stroke-linecap="round" stroke-dasharray="182" stroke-dashoffset="0"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="glabel">ChunkTile — claimed · in-progress · untouched</div>
+    <div class="chunks">
+      <div class="chunk" style="box-shadow:var(--glow-found);border:1px solid var(--green-line)">
+        <span class="fill" style="height:100%;background:var(--green-dim);border-top:2px solid var(--green)"></span>
+        <div style="position:relative;display:flex;justify-content:space-between"><span class="region">Kansai</span><span class="marker" style="background:var(--green);box-shadow:var(--glow-pin)"><span style="width:7px;height:4px;border-left:2px solid var(--text-on-accent);border-bottom:2px solid var(--text-on-accent);transform:rotate(-45deg);margin-top:-1px"></span></span></div>
+        <div><div class="city">Kyoto</div><div class="cnt" style="color:var(--green)">40<span style="color:var(--text-3)">/40</span></div></div>
+      </div>
+      <div class="chunk" style="border:1px solid var(--amber-line)">
+        <span class="fill" style="height:40%;background:linear-gradient(to top,var(--amber-dim),transparent)"></span>
+        <div style="position:relative;display:flex;justify-content:space-between"><span class="region">Kansai</span><span class="marker" style="background:var(--amber)"></span></div>
+        <div><div class="city">Osaka</div><div class="cnt" style="color:var(--text-3)">12<span>/30</span></div></div>
+      </div>
+      <div class="chunk" style="border:1px solid var(--border-default)">
+        <div style="position:relative;display:flex;justify-content:space-between"><span class="region">Kansai</span><span class="marker" style="border:2px solid var(--locked)"></span></div>
+        <div><div class="city" style="color:var(--text-2)">Kobe</div><div class="cnt" style="color:var(--text-3)">0<span>/18</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="glabel">StatTile — Access · Size · Busyness</div>
+    <div class="stats">
+      <div class="stat"><i data-lucide="footprints"></i><span class="v">Easy</span><span class="l">Access</span></div>
+      <div class="stat"><i data-lucide="maximize-2"></i><span class="v">Large</span><span class="l">Size</span></div>
+      <div class="stat"><i data-lucide="users"></i><span class="v">Busy</span><span class="l">Busyness</span></div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="group">
+      <div class="glabel">SightRow — found / selected / unfound (hollow) · tap row = select, chevron = see more</div>
+      <div class="rows">
+        <div class="srow"><span class="thumb"></span><span style="flex:1"><span><span class="sdex">#017</span> <span class="sname" style="color:var(--text-1)">Fushimi Inari</span></span><div class="smeta">1.2 km · Found</div></span><span class="see"><i data-lucide="chevron-right"></i></span></div>
+        <div class="srow sel"><span class="thumb"></span><span style="flex:1"><span><span class="sdex">#018</span> <span class="sname" style="color:var(--text-1)">Nishiki Market</span></span><div class="smeta">0.6 km</div></span><span class="see"><i data-lucide="chevron-right"></i></span></div>
+        <div class="srow"><span class="thumb hollow"><i data-lucide="mountain" style="color:var(--locked)"></i></span><span style="flex:1"><span><span class="sdex">#019</span> <span class="sname" style="color:var(--text-2)">Gion District</span></span><div class="smeta">Not found</div></span><span class="see"><i data-lucide="chevron-right"></i></span></div>
+      </div>
+    </div>
+    <div class="group">
+      <div class="glabel">BadgeChip — earned · locked</div>
+      <div class="badges">
+        <div class="badge earned"><span class="medal earned"><i data-lucide="flag"></i></span><span class="bname">First find</span><span class="bcrit" style="color:var(--amber)">Earned</span></div>
+        <div class="badge locked"><span class="medal locked"><i data-lucide="trophy"></i></span><span class="bname" style="color:var(--text-3)">City claimer</span><span class="bcrit">0/1</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="glabel">FindFeedItem</div>
+    <div class="feed">
+      <span class="av">M</span>
+      <div style="flex:1">
+        <div class="ftext"><b style="color:var(--text-1)">Mira</b> found <b style="color:var(--green)">Fushimi Inari</b> <span style="color:var(--text-3)">in Kyoto</span></div>
+        <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;color:var(--text-3);text-transform:uppercase;margin-top:2px">2h ago</div>
+        <div class="fphoto"></div>
+        <div class="fmeta"><span style="color:var(--green)">♥ 12</span><span>▢ 3</span></div>
+      </div>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+</body></html>

@@ -1,0 +1,114 @@
+<!-- @dsCard group="Travidex iOS" viewport="1400x980" subtitle="All seven screens side-by-side — labeled overview canvas" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Travidex — Screen Overview</title>
+  <link rel="stylesheet" href="../../styles.css">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    html, body { margin: 0; height: 100%; }
+    #root { height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="chrome.jsx"></script>
+  <script type="text/babel" src="art.jsx"></script>
+  <script type="text/babel" src="MapHome.jsx"></script>
+  <script type="text/babel" src="SightDetail.jsx"></script>
+  <script type="text/babel" src="ChunkMap.jsx"></script>
+  <script type="text/babel" src="RegionDex.jsx"></script>
+  <script type="text/babel" src="FindSuccess.jsx"></script>
+  <script type="text/babel" src="Community.jsx"></script>
+  <script type="text/babel" src="ProfilePages.jsx"></script>
+  <script type="text/babel" src="Profile.jsx"></script>
+  <script type="text/babel" src="Welcome.jsx"></script>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+
+  <script type="text/babel">
+    const noop = () => {};
+
+    // A static phone frame: rounded screen, dark canvas, screens fill it.
+    function Phone({ children }) {
+      return (
+        <div style={{ position: "relative", width: "100%", height: "100%", background: "var(--bg)", overflow: "hidden" }}>
+          {children}
+        </div>
+      );
+    }
+
+    const sights = KYOTO_SIGHTS.map((s) => ({ ...s }));
+    const foundSight = sights.find((s) => s.found);
+    const nishiki = { ...sights.find((s) => s.name.startsWith("Nishiki")), found: true };
+
+    function Overview() {
+      return (
+        <DesignCanvas>
+          <DCSection id="screens" title="Travidex — iOS screens" subtitle="Seven hero screens · tap the expand icon on any frame to view it fullscreen">
+
+            <DCArtboard id="welcome" label="01 · Welcome (A2)" width={402} height={874} style={{ background: "var(--bg)" }}>
+              <Phone><Welcome onEnter={noop} /></Phone>
+            </DCArtboard>
+
+            <DCArtboard id="map" label="02 · Map Home (B1)" width={402} height={874} style={{ background: "var(--bg)" }}>
+              <Phone>
+                <MapHome sights={sights} selected={nishiki} onSelect={noop} onSight={noop} onCity={noop} />
+                <TabBar active="map" onChange={noop} onFind={noop} findEnabled={true} />
+              </Phone>
+            </DCArtboard>
+
+            <DCArtboard id="detail" label="03 · Sight Detail (B2)" width={402} height={874} style={{ background: "var(--bg)" }}>
+              <Phone><SightDetail s={foundSight} onBack={noop} onLog={noop} onNavigate={noop} /></Phone>
+            </DCArtboard>
+
+            <DCArtboard id="success" label="04 · Find Success (B13)" width={402} height={874} style={{ background: "var(--bg)" }}>
+              <Phone>
+                <FindSuccess s={nishiki} foundCount={4} total={sights.length}
+                  badge={{ name: "Kyoto explorer", icon: "compass" }} onView={noop} onDone={noop} />
+              </Phone>
+            </DCArtboard>
+
+            <DCArtboard id="chunk" label="05 · Country Chunk-Map (B7)" width={402} height={874} style={{ background: "var(--bg)" }}>
+              <Phone>
+                <ChunkMap countries={COUNTRIES} onCity={noop} />
+                <TabBar active="explore" onChange={noop} onFind={noop} />
+              </Phone>
+            </DCArtboard>
+
+            <DCArtboard id="regiondex" label="06 · Region Dex (B7→list)" width={402} height={874} style={{ background: "var(--bg)" }}>
+              <Phone>
+                <RegionDex city={JAPAN_CHUNKS[0]} entries={cityEntries(JAPAN_CHUNKS[0])} onBack={noop} onSight={noop} />
+              </Phone>
+            </DCArtboard>
+
+            <DCArtboard id="community" label="06 · Community (B14a)" width={402} height={874} style={{ background: "var(--bg)" }}>
+              <Phone>
+                <Community feed={FEED} />
+                <TabBar active="community" onChange={noop} onFind={noop} />
+              </Phone>
+            </DCArtboard>
+
+            <DCArtboard id="profile" label="07 · Profile (B17)" width={402} height={874} style={{ background: "var(--bg)" }}>
+              <Phone>
+                <Profile achievements={ACHIEVEMENTS} badgeYears={BADGE_YEARS} sightsFound={62} citiesClaimed={2} countries={3} theme="light" premium={false} artId="aurora" onOpenAppearance={noop} onOpenArt={noop} onOpenBadges={noop} onOpenAchievements={noop} />
+                <TabBar active="profile" onChange={noop} onFind={noop} />
+              </Phone>
+            </DCArtboard>
+
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<Overview />);
+  </script>
+</body>
+</html>

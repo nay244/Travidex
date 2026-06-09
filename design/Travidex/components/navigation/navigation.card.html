@@ -1,0 +1,64 @@
+<!-- @dsCard group="Components" viewport="700x440" subtitle="TabBar (stamp Log-find button) · NavHeader · SegmentedControl · SearchBar" name="Navigation" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  body { margin:0; background:var(--bg); padding:22px 24px; }
+  .glabel { font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin:0 0 10px; }
+  .group { margin-bottom:20px; }
+  .frame { max-width:390px; }
+
+  /* NavHeader */
+  .nav { display:flex; align-items:center; height:52px; padding:0 8px; background:var(--surface-1); border:1px solid var(--border-subtle); border-radius:var(--radius-md); }
+  .nav .ico { width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; color:var(--text-1); }
+  .nav h1 { flex:1; text-align:center; font-family:var(--font-sans); font-weight:600; font-size:17px; margin:0; }
+
+  /* Segmented */
+  .seg { position:relative; display:flex; padding:3px; background:var(--surface-2); border-radius:var(--radius-pill); box-shadow:inset 0 0 0 1px var(--border-subtle); max-width:300px; }
+  .seg .thumb { position:absolute; top:3px; bottom:3px; left:3px; width:calc((100% - 6px)/3); background:var(--surface-4); border-radius:var(--radius-pill); box-shadow:var(--shadow-sm),var(--sheen); }
+  .seg button { position:relative; z-index:1; flex:1; height:34px; background:none; border:none; font-family:var(--font-sans); font-size:14px; color:var(--text-3); }
+  .seg button.on { color:var(--text-1); font-weight:600; }
+
+  /* Search */
+  .search { display:flex; align-items:center; gap:8px; height:50px; padding:0 14px; background:var(--surface-2); border-radius:var(--radius-md); box-shadow:inset 0 0 0 1px var(--border-subtle); max-width:340px; }
+  .search span.q { color:var(--text-3); font-family:var(--font-sans); font-size:16px; }
+
+  /* TabBar */
+  .tabbar { position:relative; display:flex; align-items:flex-start; justify-content:space-around; height:74px; padding-top:10px; background:var(--surface-overlay); backdrop-filter:blur(20px); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden; }
+  .tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-3); font-family:var(--font-sans); font-size:10px; font-weight:500; }
+  .tab.on { color:var(--text-1); font-weight:600; }
+  .fab { position:relative; top:-16px; width:58px; height:58px; border-radius:50%; border:3px solid var(--bg); background:var(--surface-3); color:var(--text-3); box-shadow:inset 0 0 0 1px var(--border-default); display:flex; align-items:center; justify-content:center; }
+  .fab.on { background:var(--amber); color:var(--text-on-accent); box-shadow:var(--glow-fab); }
+  .xfab { position:relative; top:-16px; width:58px; height:58px; border-radius:50%; border:3px solid var(--bg); display:flex; align-items:center; justify-content:center; box-shadow:var(--glow-fab); }
+  .tab svg { width:22px; height:22px; }
+  .ico svg { width:18px; height:18px; }
+  .search svg { width:16px; height:16px; }
+</style></head>
+<body>
+  <div class="frame">
+    <div class="group">
+      <div class="glabel">NavHeader</div>
+      <div class="nav"><span class="ico"><i data-lucide="chevron-left"></i></span><h1>Fushimi Inari</h1><span class="ico"><i data-lucide="heart"></i></span></div>
+    </div>
+    <div class="group">
+      <div class="glabel">SegmentedControl — sort</div>
+      <div class="seg"><span class="thumb"></span><button class="on">Distance</button><button>Dex #</button><button>Found</button></div>
+    </div>
+    <div class="group">
+      <div class="glabel">SearchBar</div>
+      <div class="search"><i data-lucide="search" style="color:var(--text-3)"></i><span class="q">Search sights in Kyoto</span></div>
+    </div>
+    <div class="group">
+      <div class="glabel">TabBar — center stamp Log-find button (disabled until a sight is selected → active)</div>
+      <div class="tabbar">
+        <div class="tab on"><i data-lucide="map"></i>Map</div>
+        <div class="tab"><i data-lucide="compass"></i>Explore</div>
+        <div class="fab on"><i data-lucide="stamp" style="width:26px;height:26px"></i></div>
+        <div class="tab"><i data-lucide="users"></i>Community</div>
+        <div class="tab"><i data-lucide="user"></i>Profile</div>
+      </div>
+    </div>
+  </div>
+  <script>lucide.createIcons();</script>
+</body></html>

@@ -1,0 +1,18 @@
+<!-- @dsCard group="Spacing" viewport="700x220" subtitle="Ambient shadow, and accent glow reserved for reward states" name="Elevation & glow" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; background:var(--bg); padding:28px 24px; display:flex; gap:20px; flex-wrap:wrap; align-items:center; }
+  .e { width:120px; height:74px; background:var(--surface-1); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; }
+  .cap { font-family:var(--font-mono); font-size:9px; letter-spacing:.06em; color:var(--text-3); text-align:center; margin-top:10px; }
+  .u { text-align:center; }
+  .glowtag { font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; }
+</style></head>
+<body>
+  <div class="u"><div class="e" style="box-shadow:var(--shadow-sm)"></div><div class="cap">shadow-sm</div></div>
+  <div class="u"><div class="e" style="box-shadow:var(--shadow-md)"></div><div class="cap">shadow-md</div></div>
+  <div class="u"><div class="e" style="box-shadow:var(--shadow-lg)"></div><div class="cap">shadow-lg</div></div>
+  <div class="u"><div class="e" style="box-shadow:var(--glow-found)"><span class="glowtag" style="color:var(--green)">found</span></div><div class="cap">glow-found</div></div>
+  <div class="u"><div class="e" style="box-shadow:var(--glow-progress)"><span class="glowtag" style="color:var(--amber)">in-progress</span></div><div class="cap">glow-progress</div></div>
+</body></html>

@@ -1,0 +1,59 @@
+/* ============================================================
+   Travidex — Base reset & primitives
+   Mobile-first, dark UI defaults.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  font-weight: var(--fw-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, p { margin: 0; }
+
+button { font-family: inherit; color: inherit; cursor: pointer; }
+
+a { color: var(--blue); text-decoration: none; }
+
+::selection { background: var(--amber-dim); color: var(--text-1); }
+
+/* Mono numerals stay tabular for aligned stats/counts */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Scrollbars (where visible) */
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* Reference-photo placeholder: subtle diagonal stripes + mono caption.
+   Use anywhere a real curated/user photo will be dropped in. */
+.tvx-photo-ph {
+  position: relative;
+  background-color: var(--ph-base);
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--ph-stripe) 0px,
+    var(--ph-stripe) 2px,
+    transparent 2px,
+    transparent 11px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono-sm);
+  letter-spacing: var(--ls-wide);
+  text-transform: lowercase;
+  overflow: hidden;
+}
+.tvx-photo-ph::after { content: attr(data-label); opacity: 0.7; }
