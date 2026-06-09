@@ -8,5 +8,6 @@
       "@/*": ["./*"]
     },
     "types": ["jest"]
-  }
+  },
+  "exclude": ["supabase"]
 }
