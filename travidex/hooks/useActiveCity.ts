@@ -6,6 +6,7 @@ export function useActiveCity(cityId: string) {
 
   useEffect(() => {
     let live = true;
+    setCity(null); // clear stale city while the new one loads
     getCityWithCountry(cityId)
       .then(c => { if (live) setCity(c); })
       .catch(err => console.warn('useActiveCity failed', err));

@@ -18,9 +18,10 @@ export async function getCityWithCountry(cityId: string): Promise<CityWithCountr
     .from('cities')
     .select('id, country_id, name, region, lat:st_y(center::geometry), lng:st_x(center::geometry), countries(code, name)')
     .eq('id', cityId)
-    .single();
+    .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
-  const { countries, ...city } = data as any;
-  return { ...(city as City), country_code: countries?.code ?? '', country_name: countries?.name ?? '' };
+  type Row = City & { countries: { code: string; name: string } | null };
+  const { countries, ...city } = data as unknown as Row;
+  return { ...city, country_code: countries?.code ?? '', country_name: countries?.name ?? '' };
 }

@@ -1,5 +1,5 @@
 const mockSingle = jest.fn();
-const mockEq = jest.fn(() => ({ single: mockSingle }));
+const mockEq = jest.fn(() => ({ maybeSingle: mockSingle }));
 const mockSelect = jest.fn(() => ({ eq: mockEq }));
 jest.mock('../../supabase', () => ({ supabase: { from: jest.fn(() => ({ select: mockSelect })) } }));
 
@@ -15,4 +15,14 @@ it('returns the city with flattened country code/name', async () => {
   const c = await getCityWithCountry('c1');
   expect(mockEq).toHaveBeenCalledWith('id', 'c1');
   expect(c).toMatchObject({ id: 'c1', name: 'Paris', country_code: 'FR', country_name: 'France' });
+});
+
+it('returns null when the city is not found', async () => {
+  mockSingle.mockResolvedValue({ data: null, error: null });
+  await expect(getCityWithCountry('missing')).resolves.toBeNull();
+});
+
+it('throws on supabase error', async () => {
+  mockSingle.mockResolvedValue({ data: null, error: { message: 'db fail' } });
+  await expect(getCityWithCountry('bad')).rejects.toThrow('db fail');
 });
