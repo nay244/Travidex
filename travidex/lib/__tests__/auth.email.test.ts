@@ -20,7 +20,7 @@ it('signUpWithEmail returns data on success', async () => {
   mockAuth.signUp.mockResolvedValue({ data: { user: { id: '1' } }, error: null } as any);
   const data = await signUpWithEmail('a@b.com', 'abcd1234');
   expect(mockAuth.signUp).toHaveBeenCalledWith({ email: 'a@b.com', password: 'abcd1234' });
-  expect(data.user.id).toBe('1');
+  expect(data.user?.id).toBe('1');
 });
 
 it('signUpWithEmail throws on error', async () => {

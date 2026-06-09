@@ -12,7 +12,7 @@ import { Text } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { AuthProvider, useAuth } from '../AuthProvider';
 
-const mockAuth = supabase.auth as {
+const mockAuth = supabase.auth as unknown as {
   getSession: jest.Mock;
   onAuthStateChange: jest.Mock;
 };
