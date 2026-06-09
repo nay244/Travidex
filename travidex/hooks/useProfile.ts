@@ -26,8 +26,8 @@ export function useProfile() {
         setStats(s);
         await awardBadges(uid, evaluateBadges(s));
         setEarnedBadges(await getUserBadges(uid));
-      } catch {
-        // swallow — loading is always cleared in finally
+      } catch (err) {
+        console.warn('useProfile load failed', err); // loading is still cleared in finally
       } finally {
         setLoading(false);
       }

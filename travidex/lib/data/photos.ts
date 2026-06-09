@@ -13,7 +13,8 @@ export async function getUserPhotos(userId: string): Promise<UserPhoto[]> {
 }
 
 export async function uploadUserPhoto(userId: string, sightId: string, blob: Blob, fileName: string): Promise<void> {
-  const path = `${userId}/${sightId}/${fileName}`;
+  const safeName = fileName.split(/[/\\]/).pop() || `${Date.now()}.jpg`; // strip any path segments
+  const path = `${userId}/${sightId}/${safeName}`;
   const { error: upErr } = await supabase.storage.from('user-photos').upload(path, blob, { contentType: 'image/jpeg' });
   if (upErr) throw new Error(upErr.message);
   const { data } = supabase.storage.from('user-photos').getPublicUrl(path);
