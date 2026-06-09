@@ -1,8 +1,7 @@
-import { Text, View } from 'react-native';
+import { Redirect } from 'expo-router';
+import { useAuth } from '../context/AuthProvider';
+
 export default function Index() {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Travidex</Text>
-    </View>
-  );
+  const { session } = useAuth();
+  return <Redirect href={session ? '/(tabs)/map' : '/(auth)/welcome'} />;
 }
