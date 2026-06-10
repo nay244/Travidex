@@ -64,9 +64,9 @@ export default function Paywall() {
         </Text>
       ))}
 
-      {packages.map((p, i) => (
+      {packages.map(p => (
         <Pressable
-          key={i}
+          key={p.identifier}
           onPress={() => buy(p)}
           disabled={buying}
           style={{

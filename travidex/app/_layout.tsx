@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native';
 import { Slot } from 'expo-router';
 import {
@@ -11,6 +11,13 @@ import Purchases from 'react-native-purchases';
 import { ThemeProvider } from '@/theme';
 import { AuthProvider, useAuth } from '../context/AuthProvider';
 import { EntitlementProvider } from '../context/EntitlementProvider';
+
+// Configure RevenueCat at module load so it runs before any provider effect
+// (child effects fire before parent effects, so a useEffect here would race
+// EntitlementProvider's first getCustomerInfo).
+const rcKey = process.env.EXPO_PUBLIC_RC_IOS_KEY;
+if (Platform.OS === 'ios' && rcKey) Purchases.configure({ apiKey: rcKey });
+else console.warn('RevenueCat not configured (missing EXPO_PUBLIC_RC_IOS_KEY or non-iOS)');
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const { loading } = useAuth();
@@ -29,12 +36,6 @@ export default function RootLayout() {
     SpaceGrotesk_400Regular, SpaceGrotesk_500Medium, SpaceGrotesk_600SemiBold, SpaceGrotesk_700Bold,
     SpaceMono_400Regular, SpaceMono_700Bold,
   });
-
-  useEffect(() => {
-    const key = process.env.EXPO_PUBLIC_RC_IOS_KEY;
-    if (Platform.OS === 'ios' && key) Purchases.configure({ apiKey: key });
-    else console.warn('RevenueCat not configured (missing EXPO_PUBLIC_RC_IOS_KEY or non-iOS)');
-  }, []);
 
   if (!loaded) return null;
   return (

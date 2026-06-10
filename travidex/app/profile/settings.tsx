@@ -19,6 +19,15 @@ export default function Settings() {
       .catch(() => {});
   }, []);
 
+  async function restorePurchases() {
+    try {
+      await restore();
+      Alert.alert('Purchases restored', 'Your Travidex+ access is up to date.');
+    } catch {
+      Alert.alert('Restore failed', 'Try again later.');
+    }
+  }
+
   async function toggleLocation(next: boolean) {
     if (next) {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -64,7 +73,7 @@ export default function Settings() {
       <Pressable onPress={() => supabase.auth.signOut()}>
         <Text style={[t.type.body, { color: t.colors.info }]}>Sign out</Text>
       </Pressable>
-      <Pressable onPress={() => restore()}>
+      <Pressable onPress={restorePurchases}>
         <Text style={[t.type.body, { color: t.colors.info }]}>Restore purchases</Text>
       </Pressable>
       <Pressable onPress={deleteAccount} disabled={busy}>
