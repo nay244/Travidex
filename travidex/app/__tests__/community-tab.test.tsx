@@ -3,12 +3,18 @@ jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('../../lib/data/feed', () => ({ getFeed: jest.fn() }));
 jest.mock('../../lib/relativeTime', () => ({ relativeTime: (_iso: string) => '5m ago' }));
 
+const mockUseAuth = jest.fn<{ session: { user: { id: string } } | null }, []>(() => ({ session: { user: { id: 'u1' } } }));
+jest.mock('../../context/AuthProvider', () => ({ useAuth: () => mockUseAuth() }));
+
 import { screen, fireEvent, waitFor } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test-utils';
 import { getFeed } from '../../lib/data/feed';
 import Community from '../(tabs)/community';
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockUseAuth.mockReturnValue({ session: { user: { id: 'u1' } } });
+});
 
 it('renders the feed with city and relative time', async () => {
   (getFeed as jest.Mock).mockResolvedValue([
@@ -33,4 +39,18 @@ it('renders without city_name gracefully', async () => {
   ]);
   renderWithTheme(<Community />);
   await waitFor(() => expect(screen.getByText('bob found Museum')).toBeOnTheScreen());
+});
+
+it('calls getFeed with the session user id', async () => {
+  (getFeed as jest.Mock).mockResolvedValue([]);
+  renderWithTheme(<Community />);
+  await waitFor(() => expect(getFeed).toHaveBeenCalledWith('u1'));
+});
+
+it('shows empty state and does not call getFeed when no session', async () => {
+  mockUseAuth.mockReturnValue({ session: null });
+  (getFeed as jest.Mock).mockResolvedValue([]);
+  renderWithTheme(<Community />);
+  await waitFor(() => expect(screen.getByText('No finds yet')).toBeOnTheScreen());
+  expect(getFeed).not.toHaveBeenCalled();
 });

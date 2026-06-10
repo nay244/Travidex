@@ -2,7 +2,7 @@ import { supabase } from '../supabase';
 
 export type UserPhoto = { id: string; sight_id: string; photo_url: string };
 
-function inferContentType(safeName: string): string {
+export function inferContentType(safeName: string): string {
   const ext = safeName.split('.').pop()?.toLowerCase() ?? '';
   if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
   if (ext === 'png') return 'image/png';

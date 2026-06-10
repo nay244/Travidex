@@ -2,22 +2,29 @@ import { useEffect, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
+import { useAuth } from '../../context/AuthProvider';
 import { getFeed, FeedItem } from '../../lib/data/feed';
 import { relativeTime } from '../../lib/relativeTime';
 
 export default function Community() {
   const t = useTheme();
   const router = useRouter();
+  const { session } = useAuth();
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    getFeed()
+    const userId = session?.user?.id;
+    if (!userId) {
+      setLoaded(true);
+      return;
+    }
+    getFeed(userId)
       .then(setFeed)
       .catch((e: any) => setError(e.message))
       .finally(() => setLoaded(true));
-  }, []);
+  }, [session]);
 
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
