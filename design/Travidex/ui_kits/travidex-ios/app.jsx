@@ -5,7 +5,7 @@ function App() {
   const [screen, setScreen] = useStateApp("welcome");   // welcome | app
   const [tab, setTab] = useStateApp("map");
   const [overlay, setOverlay] = useStateApp(null);       // {kind:'sight',s} | {kind:'success',s,badge}
-  const [sights, setSights] = useStateApp(() => KYOTO_SIGHTS.map((s) => ({ ...s })));
+  const [sightsByCity, setSightsByCity] = useStateApp(() => ({ "JP/Kyoto": KYOTO_SIGHTS.map((s) => ({ ...s })) }));
   const [theme, setTheme] = useStateApp("light");        // light (default) | dark (premium)
   const [premium, setPremium] = useStateApp(false);
   const [appearance, setAppearance] = useStateApp(false);
@@ -14,6 +14,8 @@ function App() {
   const [profilePage, setProfilePage] = useStateApp(null);  // 'badges' | 'achievements'
   const [achDetail, setAchDetail] = useStateApp(null);
   const [mapSelected, setMapSelected] = useStateApp(null);  // selected sight on Map (enables Log-find FAB)
+  const [mapLocation, setMapLocation] = useStateApp({ code: "JP", city: "Kyoto" }); // active Map location
+  const [locationOpen, setLocationOpen] = useStateApp(false); // location switcher sheet
   const [regionDex, setRegionDex] = useStateApp(null);      // city object → region dex list
 
   // progress drives both profile-art unlocks and achievement bars
@@ -21,7 +23,19 @@ function App() {
 
   React.useEffect(() => { document.documentElement.setAttribute("data-theme", theme); }, [theme]);
 
+  // Active Map city's sights (cached per city so finds persist across switches).
+  const mapKey = `${mapLocation.code}/${mapLocation.city}`;
+  const sights = sightsByCity[mapKey] || [];
   const foundCount = sights.filter((s) => s.found).length;
+
+  // Switch the Map to another city: seed its sights on first visit, then activate.
+  function goToLocation(code, city) {
+    const k = `${code}/${city}`;
+    setSightsByCity((m) => (m[k] ? m : { ...m, [k]: mapSights(code, city) }));
+    setMapLocation({ code, city });
+    setMapSelected(null);
+    setLocationOpen(false);
+  }
 
   function badgeFor(n) {
     if (n >= sights.length) return { name: "City claimer", icon: "trophy" };
@@ -30,7 +44,7 @@ function App() {
   }
 
   function logFind(s) {
-    setSights((prev) => prev.map((x) => (x.id === s.id ? { ...x, found: true, distance: x.distance } : x)));
+    setSightsByCity((m) => ({ ...m, [mapKey]: (m[mapKey] || []).map((x) => (x.id === s.id ? { ...x, found: true } : x)) }));
     const newCount = sights.filter((x) => x.found || x.id === s.id).length;
     setMapSelected(null);
     setOverlay({ kind: "success", s: { ...s, found: true }, badge: badgeFor(newCount), count: newCount });
@@ -50,7 +64,7 @@ function App() {
 
   // base tab content
   let base = null;
-  if (tab === "map") base = <MapHome sights={sights} selected={mapSelected} onSelect={setMapSelected} onSight={(s) => setOverlay({ kind: "sight", s })} onCity={() => {}} />;
+  if (tab === "map") base = <MapHome sights={sights} selected={mapSelected} onSelect={setMapSelected} onSight={(s) => setOverlay({ kind: "sight", s })} location={mapLocation} onOpenLocation={() => setLocationOpen(true)} />;
   else if (tab === "explore") base = <ChunkMap countries={COUNTRIES} onCity={(c) => setRegionDex(c)} />;
   else if (tab === "community") base = <Community feed={FEED} />;
   else if (tab === "profile") base = <Profile achievements={ACHIEVEMENTS} badgeYears={BADGE_YEARS} sightsFound={progress.sights} citiesClaimed={progress.cities} countries={progress.countries} theme={theme} premium={premium} artId={profileArtId} onOpenAppearance={() => setAppearance(true)} onOpenArt={() => setArtOpen(true)} onOpenBadges={() => setProfilePage("badges")} onOpenAchievements={() => setProfilePage("achievements")} />;
@@ -63,6 +77,15 @@ function App() {
         <React.Fragment>
           {base}
           <TabBar active={tab} onChange={setTab} onFind={() => attemptLog(mapSelected)} findEnabled={tab === "map" && !!mapSelected} />
+
+          {locationOpen && (
+            <LocationPicker
+              countries={COUNTRIES}
+              location={mapLocation}
+              onPick={(code, city) => goToLocation(code, city)}
+              onClose={() => setLocationOpen(false)}
+            />
+          )}
 
           {regionDex && (
             <RegionDex

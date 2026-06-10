@@ -177,4 +177,30 @@ const BADGES = [
   { name: "Night owl", earned: false, icon: "moon", criteria: "Log a find after 10pm" },
 ];
 
-Object.assign(window, { KYOTO_SIGHTS, JAPAN_CHUNKS, FRANCE_CITIES, USA_STATES, COUNTRIES, ACHIEVEMENTS, BADGE_YEARS, cityEntries, FEED, BADGES });
+// Look up a city record ({ city, region, found, total }) inside COUNTRIES,
+// flattening states for large countries.
+function findCity(code, cityName) {
+  const c = COUNTRIES.find((x) => x.code === code);
+  if (!c) return null;
+  const list = c.tier === "cities" ? c.cities : c.states.flatMap((s) => s.cities);
+  return list.find((x) => x.city === cityName) || null;
+}
+
+// Sights for the MAP screen of a given location: cityEntries() for the data,
+// plus deterministic x/y map positions (and a believable distance) for the pins.
+function mapSights(code, cityName) {
+  const cityObj = findCity(code, cityName) || { city: cityName, found: 0, total: 0 };
+  let seed = 0; for (const ch of cityName) seed = (seed * 31 + ch.charCodeAt(0)) % 997;
+  return cityEntries(cityObj).map((e, i) => {
+    if (e.x != null && e.y != null) return e; // Kyoto's real sights keep their coords
+    const a = (seed + i * 53) % 100, b = (seed + i * 89) % 100;
+    return {
+      ...e,
+      x: 12 + (a / 100) * 76,   // 12–88%
+      y: 14 + (b / 100) * 72,   // 14–86%
+      distance: e.distance && e.distance !== "\u2014" ? e.distance : `${(0.4 + ((seed + i) % 40) / 10).toFixed(1)} km`,
+    };
+  });
+}
+
+Object.assign(window, { KYOTO_SIGHTS, JAPAN_CHUNKS, FRANCE_CITIES, USA_STATES, COUNTRIES, ACHIEVEMENTS, BADGE_YEARS, cityEntries, findCity, mapSights, FEED, BADGES });

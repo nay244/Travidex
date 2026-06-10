@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "travidex-ui-kit",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "serve", "-l", "4173", "design/Travidex/ui_kits/travidex-ios"],
+      "port": 4173
+    }
+  ]
+}

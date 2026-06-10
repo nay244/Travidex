@@ -1,9 +1,11 @@
 // Travidex UI kit — Map Home (map + 3-snap dex bottom sheet)
 const { useState: useStateMap, useRef: useRefMap } = React;
 
-function MapHome({ sights, selected, onSelect, onSight, onCity }) {
+function MapHome({ sights, selected, onSelect, onSight, location, onOpenLocation }) {
   const [snap, setSnap] = useStateMap("half"); // peek | half | full
   const found = sights.filter((s) => s.found).length;
+  const city = (location && location.city) || "Kyoto";
+  const code = (location && location.code) || "JP";
 
   // snap -> sheet top (px from top of 874 frame). smaller top = taller sheet.
   const FRAME = 874;
@@ -44,9 +46,9 @@ function MapHome({ sights, selected, onSelect, onSight, onCity }) {
           </div>
           <Press scale={0.94} style={glassIcon}><Icon name="sliders-horizontal" size={18} color="var(--text-1)" /></Press>
         </div>
-        <Press scale={0.96} onClick={onCity} style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 7, height: 38, padding: "0 14px", background: "var(--surface-overlay)", backdropFilter: "blur(var(--blur-md))", WebkitBackdropFilter: "blur(var(--blur-md))", borderRadius: 999, boxShadow: "var(--shadow-md), inset 0 0 0 1px var(--border-subtle)", cursor: "pointer" }}>
-          <Icon name="map-pin" size={15} color="var(--green)" />
-          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "var(--text-1)" }}>Kyoto</span>
+        <Press scale={0.96} onClick={onOpenLocation} style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 8, height: 38, padding: "0 12px 0 8px", background: "var(--surface-overlay)", backdropFilter: "blur(var(--blur-md))", WebkitBackdropFilter: "blur(var(--blur-md))", borderRadius: 999, boxShadow: "var(--shadow-md), inset 0 0 0 1px var(--border-subtle)", cursor: "pointer" }}>
+          <Flag code={code} size={22} radius={5} style={{ boxShadow: "inset 0 0 0 1px var(--border-subtle)" }} />
+          <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "var(--text-1)" }}>{city}</span>
           <Icon name="chevron-down" size={14} color="var(--text-3)" />
         </Press>
       </div>
@@ -65,7 +67,7 @@ function MapHome({ sights, selected, onSelect, onSight, onCity }) {
           style={{ flex: "none", padding: "10px 16px 12px", cursor: "grab", touchAction: "none" }}>
           <div style={{ width: 38, height: 5, borderRadius: 999, background: "var(--border-strong)", margin: "0 auto 14px" }} />
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
-            <h2 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22, letterSpacing: "-0.01em", color: "var(--text-1)" }}>Kyoto</h2>
+            <h2 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 22, letterSpacing: "-0.01em", color: "var(--text-1)" }}>{city}</h2>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: "var(--amber)", letterSpacing: "0.04em" }}>{found}<span style={{ color: "var(--text-3)" }}> / {sights.length} found</span></span>
           </div>
           <CBar found={found} total={sights.length} showCount={false} height={7} />

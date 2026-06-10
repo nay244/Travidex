@@ -68,11 +68,13 @@ First-run / auth. Hero is a **collector's board** motif: a tilted grid of mini c
 
 ### 3.2 Map Home — `MapHome.jsx`
 The everyday home. A stylized (CSS) map with **sight pins** (green=found, dim=unseen, amber+enlarged=selected) under a **three-snap bottom sheet** (peek / half / full, draggable by the handle).
-- Top glass overlays: search field, filter button, a **city pill** (e.g. "Kyoto"), and a recenter button.
+- Top glass overlays: search field, filter button, a **location pill** (CSS **flag + city name** + chevron, e.g. 🇯🇵 Kyoto), and a recenter button.
 - Sheet header: city name + `found / total` + completion bar. **No sort tabs** — the list is shown in **dex-number order**.
 - **List rows** (`SightRow`): thumbnail (found = full image, unfound = **hollow** box w/ faint icon), dex `#`, name, distance/status, and a **"see more" chevron** on the right that opens **Sight Detail**.
 - **Selecting** a row (tapping the row, not the chevron) highlights it, shows a "Selected … TAP TO LOG" banner, and **enables the center stamp FAB**. Tapping the FAB logs that sight (→ Find Success), or shows the already-logged notice if it's already found.
 - Pin ⇄ row selection is synced.
+- **Location switcher (`LocationPicker.jsx`):** tapping the location pill opens a bottom sheet with two views — **cities** (current country header + a **Change** button, a *city* search field scoped to the current country, and the country's city list with `found/total` and a check on the current city) and **countries** ("Choose a country" list, each with flag + completion, reusing the flag assets). Picking a country re-scopes the city list; picking a **city calls `goToLocation(code, city)`**, which **swaps the map's pins + sheet list to that city's sights** and updates the pill/header. (Search stays confined to cities in the current country.)
+- **Per-city sights:** the active city's sights come from a cache in `app.jsx` (`sightsByCity`, keyed `"{code}/{city}"`). On first visit to a city the cache is seeded via `mapSights(code, city)`; finds mutate that city's entry, so progress **persists per city** when you switch away and back. Kyoto uses the hand-authored `KYOTO_SIGHTS`; other cities are synthesized (see §6).
 
 ### 3.3 Sight Detail — `SightDetail.jsx`
 The full dex entry. Hero reference photo (full-color if found, dimmed if unseen), `#dex` + Found badges, type tags, **Access · Size · Busyness** stat strip (the geocaching D/T/Size analog), **Navigate** (green) + **Log find** (amber) actions (inline only — no duplicate sticky bar), a collapsible **find hint**, About, **Your photos**, and **Recent finds**. Tapping **Log find** runs the same `attemptLog` logic as the FAB.
@@ -177,7 +179,7 @@ PROFILE
   Achievements rail ">" ▶ ..... Achievements page ─tap medallion▶ Achievement Detail
 ```
 
-**Shared logic in `app.jsx`:** `attemptLog(sight)` (found→already / unfound→log), `logFind` (mutates the sights array + opens Find Success + computes badge), theme state (`data-theme`), `premium` flag, `mapSelected`, `regionDex`, `profileArtId`, and which overlay/page is open.
+**Shared logic in `app.jsx`:** `attemptLog(sight)` (found→already / unfound→log), `logFind` (mutates the active city's sights in the `sightsByCity` cache + opens Find Success + computes badge), `goToLocation(code, city)` (seeds `sightsByCity["{code}/{city}"]` via `mapSights` on first visit, then switches the Map there & clears the selection), theme state (`data-theme`), `premium` flag, `mapSelected`, `regionDex`, `profileArtId`, and which overlay/page is open.
 
 ---
 
@@ -188,7 +190,9 @@ In `ui_kits/travidex-ios/data.jsx`:
 - `COUNTRIES` — `{ code, name, flag, tier: "cities"|"states", cities[] | states[] }`.
   - city: `{ city, region, found, total }`
   - state: `{ state, region, cities[] }` (state completion is summed from its cities)
-- `cityEntries(city)` — returns the region-dex list for a city (Kyoto uses real sights; others are synthesized from a name/type pool with plausible found states + detail fields).
+- `cityEntries(city)` — returns the region-dex list for a city (Kyoto uses real sights; others are synthesized from a name/type pool with plausible found states + detail fields). Used by **Region Dex**.
+- `findCity(code, cityName)` — looks up a city record inside `COUNTRIES` (flattening states for large countries). Returns `{ city, region, found, total }` or `null`.
+- `mapSights(code, cityName)` — returns the **Map** screen's sights for a city: `cityEntries(findCity(...))` plus deterministic `x`/`y` map-pin positions (12–88% / 14–86%) and a plausible `distance` for any synthesized sight. Kyoto's real sights keep their authored coords. This is what `app.jsx`'s `goToLocation` seeds into the `sightsByCity` cache when you switch the Map to a new city.
 - `ACHIEVEMENTS` — leveled: `{ id, name, icon, tone, level, maxLevel, current, target, unit, earned, howTo }`.
 - `BADGE_YEARS` — monthly: `{ year, months: [{ month, earned, icon?, tone?, task? }] }`.
 - `FEED`, `BADGES` (legacy), plus `PROFILE_ART` in `art.jsx` (`{ id, name, free?, criteria, unlock(progress), progress(progress) }`).
@@ -218,11 +222,12 @@ ui_kits/travidex-ios/
   index.html       ← run the interactive prototype
   overview.html    ← all hero screens side-by-side on a pan/zoom canvas
   app.jsx          ← app shell, navigation + state
-  data.jsx         ← sample data + cityEntries()
+  data.jsx         ← sample data + cityEntries() + findCity() + mapSights()
   primitives.jsx   ← kit-local components (Icon, Press, Btn, Pin, Ring, CBar, Chunk, SightRow, MapBg, …)
   chrome.jsx       ← TabBar (5-tab + stamp FAB) + SAFE_TOP/TAB_H
   art.jsx          ← PROFILE_ART presets + ArtLayer + unlock eval
-  Welcome · MapHome · SightDetail · FindSuccess · ChunkMap · RegionDex · Community ·
+  flags.jsx        ← CSS country flags (FLAGS, Flag) — Welcome board, Explore + Map location pickers
+  Welcome · MapHome · LocationPicker · SightDetail · FindSuccess · ChunkMap · RegionDex · Community ·
   Profile · ProfilePages (Badges/Achievements/Detail) · ProfileArt · Appearance .jsx
   ios-frame.jsx · design-canvas.jsx   ← starter scaffolds (device bezel; overview canvas)
 ```

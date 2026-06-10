@@ -6,6 +6,9 @@
 Thumbs.db
 nul
 
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
 # Node / Expo (for when the app scaffolding lands)
 node_modules/
 .expo/
