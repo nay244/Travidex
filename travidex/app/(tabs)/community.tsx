@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthProvider';
 import { getFeed, FeedItem } from '../../lib/data/feed';
 import { getFriendsOverview } from '../../lib/data/friends';
 import { relativeTime } from '../../lib/relativeTime';
+import { GemsTab } from '../../components/GemsTab';
 
 type Tab = 'friends' | 'gems';
 
@@ -122,7 +123,9 @@ export default function Community() {
           )}
         />
       ) : (
-        <View testID="gems-tab" />
+        <View testID="gems-tab" style={{ flex: 1 }}>
+          <GemsTab />
+        </View>
       )}
     </View>
   );

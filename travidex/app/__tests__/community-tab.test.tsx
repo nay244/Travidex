@@ -3,6 +3,10 @@ jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('../../lib/data/feed', () => ({ getFeed: jest.fn() }));
 jest.mock('../../lib/data/friends', () => ({ getFriendsOverview: jest.fn() }));
 jest.mock('../../lib/relativeTime', () => ({ relativeTime: (_iso: string) => '5m ago' }));
+// Stub GemsTab so community-tab tests remain focused on the Friends tab and tab switching
+jest.mock('../../components/GemsTab', () => ({
+  GemsTab: () => null,
+}));
 
 const mockUseAuth = jest.fn<{ session: { user: { id: string } } | null }, []>(() => ({ session: { user: { id: 'u1' } } }));
 jest.mock('../../context/AuthProvider', () => ({ useAuth: () => mockUseAuth() }));
