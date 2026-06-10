@@ -43,6 +43,59 @@ const FEED = [
   { id: 3, user: "Aiko", sight: "Dotonbori", city: "Osaka", date: "Yesterday", likes: 9, comments: 1, liked: false },
 ];
 
+/* Friends — for the Community friends list */
+const FRIENDS = [
+  { id: 1, name: "Mira Vale", handle: "@miravale", sights: 142, cities: 6, recent: "Fushimi Inari · 2h ago" },
+  { id: 2, name: "Devon Park", handle: "@devontrek", sights: 98, cities: 4, recent: "Tokyo Tower · 5h ago" },
+  { id: 3, name: "Aiko Tan", handle: "@aikowanders", sights: 67, cities: 3, recent: "Dotonbori · yesterday" },
+  { id: 4, name: "Lena Brandt", handle: "@lenab", sights: 51, cities: 3, recent: "Kinkaku-ji · 2d ago" },
+  { id: 5, name: "Sam Otieno", handle: "@samgoes", sights: 33, cities: 2, recent: "Nishiki Market · 4d ago" },
+  { id: 6, name: "Noor Haddad", handle: "@noorhad", sights: 21, cities: 1, recent: "Gion District · 1w ago" },
+];
+
+/* Hidden gems — user-shared sights NOT in the dex (community submissions, region-specific).
+   Kyoto's set is hand-authored; other cities synthesize via hiddenGems(). */
+const KYOTO_GEMS = [
+  { id: 1, name: "Hidden torii path behind Yoshida Hill", by: "Mira Vale", distance: 0.8, date: "2h ago", days: 0, favs: 47, faved: true,
+    note: "A quiet line of mossy gates locals use as a shortcut. No crowds, best in morning fog." },
+  { id: 2, name: "Rooftop garden over Teramachi arcade", by: "Sam Otieno", distance: 1.4, date: "Yesterday", days: 1, favs: 31, faved: false,
+    note: "Take the unmarked stairs by the bookshop — small garden with a view over the arcade glass." },
+  { id: 3, name: "Riverside cat shrine near Demachiyanagi", by: "Aiko Tan", distance: 2.2, date: "3d ago", days: 3, favs: 58, faved: false,
+    note: "Tiny shrine covered in cat figurines left by river walkers. The resident cat poses." },
+  { id: 4, name: "Sunset bench at Shogunzuka mound", by: "Lena Brandt", distance: 3.6, date: "5d ago", days: 5, favs: 24, faved: false,
+    note: "Skip the paid deck — this free bench 50m east has the same skyline view." },
+  { id: 5, name: "Night noodle stand under Sanjo bridge", by: "Devon Park", distance: 1.1, date: "1w ago", days: 7, favs: 19, faved: false,
+    note: "Appears after 9pm. Cash only, six seats, the owner stamps your hand like a dex entry." },
+];
+
+const GEM_TEMPLATES = [
+  { name: "Hidden viewpoint above {ref}", note: "A quiet overlook locals keep to themselves — best light an hour before sunset." },
+  { name: "Back-alley mural lane off {ref}", note: "A narrow lane of rotating street art. New pieces appear monthly." },
+  { name: "Tiny standing bar behind {ref}", note: "Six seats, no sign — look for the amber lantern. The owner loves travelers." },
+  { name: "Rooftop garden over {ref}", note: "Unmarked stairs by the flower shop lead to a small public terrace." },
+  { name: "Riverside reading bench near {ref}", note: "A shaded bench with the city's best people-watching. Free, always open." },
+];
+const GEM_REFS = ["the old market", "the station underpass", "the harbor steps", "the museum quarter", "the cathedral square", "the botanic gate"];
+const GEM_USERS = ["Mira Vale", "Devon Park", "Aiko Tan", "Lena Brandt", "Sam Otieno", "Noor Haddad"];
+
+// Region-specific hidden gems for the Community tab. Kyoto returns the authored
+// set; other cities synthesize a deterministic set seeded by the city name.
+function hiddenGems(code, cityName) {
+  if (code === "JP" && cityName === "Kyoto") return KYOTO_GEMS.map((g) => ({ ...g }));
+  let seed = 0; for (const ch of cityName) seed = (seed * 31 + ch.charCodeAt(0)) % 997;
+  return GEM_TEMPLATES.map((t, i) => ({
+    id: i + 1,
+    name: t.name.replace("{ref}", GEM_REFS[(seed + i) % GEM_REFS.length]),
+    by: GEM_USERS[(seed + i * 2) % GEM_USERS.length],
+    distance: +(0.4 + ((seed + i * 37) % 48) / 10).toFixed(1),
+    date: ["2h ago", "Yesterday", "3d ago", "5d ago", "1w ago"][i % 5],
+    days: [0, 1, 3, 5, 7][i % 5],
+    favs: 5 + ((seed + i * 61) % 60),
+    faved: false,
+    note: t.note,
+  }));
+}
+
 /* ---- Countries ----
    tier 'cities'  → board tiles are cities (small/medium countries).
    tier 'states'  → board tiles are states; tapping a state drills into its
@@ -203,4 +256,4 @@ function mapSights(code, cityName) {
   });
 }
 
-Object.assign(window, { KYOTO_SIGHTS, JAPAN_CHUNKS, FRANCE_CITIES, USA_STATES, COUNTRIES, ACHIEVEMENTS, BADGE_YEARS, cityEntries, findCity, mapSights, FEED, BADGES });
+Object.assign(window, { KYOTO_SIGHTS, JAPAN_CHUNKS, FRANCE_CITIES, USA_STATES, COUNTRIES, ACHIEVEMENTS, BADGE_YEARS, cityEntries, findCity, mapSights, hiddenGems, FEED, FRIENDS, BADGES });

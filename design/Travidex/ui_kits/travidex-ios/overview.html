@@ -22,12 +22,16 @@
   <script type="text/babel" src="primitives.jsx"></script>
   <script type="text/babel" src="chrome.jsx"></script>
   <script type="text/babel" src="art.jsx"></script>
+  <script type="text/babel" src="flags.jsx"></script>
   <script type="text/babel" src="MapHome.jsx"></script>
+  <script type="text/babel" src="LocationPicker.jsx"></script>
   <script type="text/babel" src="SightDetail.jsx"></script>
   <script type="text/babel" src="ChunkMap.jsx"></script>
   <script type="text/babel" src="RegionDex.jsx"></script>
+  <script type="text/babel" src="RegionHighlights.jsx"></script>
   <script type="text/babel" src="FindSuccess.jsx"></script>
   <script type="text/babel" src="Community.jsx"></script>
+  <script type="text/babel" src="ShareGem.jsx"></script>
   <script type="text/babel" src="ProfilePages.jsx"></script>
   <script type="text/babel" src="Profile.jsx"></script>
   <script type="text/babel" src="Welcome.jsx"></script>
@@ -60,7 +64,7 @@
 
             <DCArtboard id="map" label="02 · Map Home (B1)" width={402} height={874} style={{ background: "var(--bg)" }}>
               <Phone>
-                <MapHome sights={sights} selected={nishiki} onSelect={noop} onSight={noop} onCity={noop} />
+                <MapHome sights={sights} selected={nishiki} onSelect={noop} onSight={noop} location={{ code: "JP", city: "Kyoto" }} onOpenLocation={noop} />
                 <TabBar active="map" onChange={noop} onFind={noop} findEnabled={true} />
               </Phone>
             </DCArtboard>
@@ -91,7 +95,7 @@
 
             <DCArtboard id="community" label="06 · Community (B14a)" width={402} height={874} style={{ background: "var(--bg)" }}>
               <Phone>
-                <Community feed={FEED} />
+                <Community feed={FEED} friends={FRIENDS} location={{ code: "JP", city: "Kyoto" }} />
                 <TabBar active="community" onChange={noop} onFind={noop} />
               </Phone>
             </DCArtboard>

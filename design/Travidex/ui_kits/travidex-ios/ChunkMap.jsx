@@ -62,7 +62,7 @@ function ChunkMap({ countries, onCity }) {
         {/* country switcher + list toggle */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
           <Press scale={0.97} onClick={() => setPickerOpen(true)} style={{ display: "inline-flex", alignItems: "center", gap: 9, height: 42, padding: "0 14px", background: "var(--surface-1)", borderRadius: 999, boxShadow: "var(--shadow-sm), inset 0 0 0 1px var(--border-default)", border: "none", cursor: "pointer" }}>
-            <span style={{ fontSize: 20 }}>{country.flag}</span>
+            <Flag code={country.code} size={22} radius={4} style={{ boxShadow: "inset 0 0 0 1px var(--border-subtle)" }} />
             <span style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 16, letterSpacing: "0.02em", color: "var(--text-1)" }}>{country.code}</span>
             <Icon name="chevrons-up-down" size={15} color="var(--text-3)" />
           </Press>
@@ -85,7 +85,7 @@ function ChunkMap({ countries, onCity }) {
           <Ring found={ring.found} total={ring.total} size={62}>
             {level === "state-cities"
               ? <Icon name="map" size={20} color="var(--text-2)" />
-              : <span style={{ fontSize: 24 }}>{country.flag}</span>}
+              : <Flag code={country.code} size={28} radius={5} style={{ boxShadow: "inset 0 0 0 1px var(--border-subtle)" }} />}
           </Ring>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h1 style={{ fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 26, letterSpacing: "-0.015em", color: "var(--text-1)", lineHeight: 1.05 }}>{title}</h1>
@@ -104,7 +104,7 @@ function ChunkMap({ countries, onCity }) {
         {/* board */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
           {tiles.map((c) => (
-            <Chunk key={c.city} c={c} onClick={() => c._state ? setStateName(c._state) : onCity(c)} />
+            <Chunk key={c.city} c={c} onClick={() => c._state ? setStateName(c._state) : onCity({ ...c, code })} />
           ))}
         </div>
 
@@ -134,7 +134,7 @@ function CountryPicker({ countries, code, onPick, onClose }) {
             const active = country.code === code;
             return (
               <Press key={country.code} scale={0.99} onClick={() => onPick(country.code)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 14px", background: active ? "var(--surface-3)" : "var(--surface-2)", borderRadius: "var(--radius-lg)", boxShadow: active ? "inset 0 0 0 1px var(--green-line)" : "inset 0 0 0 1px var(--border-subtle)", border: "none", cursor: "pointer", textAlign: "left" }}>
-                <Ring found={s.claimed} total={s.units} size={46}><span style={{ fontSize: 18 }}>{country.flag}</span></Ring>
+                <Ring found={s.claimed} total={s.units} size={46}><Flag code={country.code} size={22} radius={4} style={{ boxShadow: "inset 0 0 0 1px var(--border-subtle)" }} /></Ring>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 16, color: "var(--text-1)" }}>{country.name}</p>
                   <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.03em", textTransform: "uppercase", color: "var(--text-3)", marginTop: 3 }}>{s.claimed}/{s.units} {s.unit} · {s.found}/{s.total} sights</p>

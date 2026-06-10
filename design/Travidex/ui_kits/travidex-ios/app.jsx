@@ -66,7 +66,7 @@ function App() {
   let base = null;
   if (tab === "map") base = <MapHome sights={sights} selected={mapSelected} onSelect={setMapSelected} onSight={(s) => setOverlay({ kind: "sight", s })} location={mapLocation} onOpenLocation={() => setLocationOpen(true)} />;
   else if (tab === "explore") base = <ChunkMap countries={COUNTRIES} onCity={(c) => setRegionDex(c)} />;
-  else if (tab === "community") base = <Community feed={FEED} />;
+  else if (tab === "community") base = <Community feed={FEED} friends={FRIENDS} location={mapLocation} />;
   else if (tab === "profile") base = <Profile achievements={ACHIEVEMENTS} badgeYears={BADGE_YEARS} sightsFound={progress.sights} citiesClaimed={progress.cities} countries={progress.countries} theme={theme} premium={premium} artId={profileArtId} onOpenAppearance={() => setAppearance(true)} onOpenArt={() => setArtOpen(true)} onOpenBadges={() => setProfilePage("badges")} onOpenAchievements={() => setProfilePage("achievements")} />;
 
   return (
