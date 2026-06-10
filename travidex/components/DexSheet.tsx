@@ -6,7 +6,13 @@ import { useTheme } from '@/theme';
 import { filterSights, sortSights, completion } from '../lib/sightList';
 import type { SightWithFind } from '../lib/types';
 
-export function DexSheet({ cityName, sights, onSelect }: { cityName: string; sights: SightWithFind[]; onSelect: (id: string) => void }) {
+export function DexSheet({ cityName, sights, onSelect, selectedId, onSeeMore }: {
+  cityName: string;
+  sights: SightWithFind[];
+  onSelect: (id: string) => void;
+  selectedId?: string | null;
+  onSeeMore?: (id: string) => void;
+}) {
   const t = useTheme();
   const [query, setQuery] = useState('');
   const { found, total } = completion(sights);
@@ -21,7 +27,18 @@ export function DexSheet({ cityName, sights, onSelect }: { cityName: string; sig
         onChangeText={setQuery}
         style={[t.type.body, { backgroundColor: t.colors.surface2, color: t.colors.text1, padding: t.spacing.s3, borderRadius: t.radii.sm, marginVertical: t.spacing.s3 }]}
       />
-      <FlatList data={visible} keyExtractor={s => s.id} renderItem={({ item }) => <SightRow sight={item} onPress={onSelect} />} />
+      <FlatList
+        data={visible}
+        keyExtractor={s => s.id}
+        renderItem={({ item }) => (
+          <SightRow
+            sight={item}
+            onPress={onSelect}
+            selected={selectedId === item.id}
+            onSeeMore={onSeeMore}
+          />
+        )}
+      />
     </View>
   );
 }

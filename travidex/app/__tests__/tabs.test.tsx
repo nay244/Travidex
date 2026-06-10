@@ -9,7 +9,10 @@ jest.mock('../../hooks/useCityCatalog', () => ({
   })),
 }));
 jest.mock('../../context/CityProvider', () => ({ useCity: () => ({ cityId: 'city-1', setCityId: jest.fn() }) }));
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  useFocusEffect: (cb: () => void) => { cb(); },
+}));
 jest.mock('../../hooks/useActiveCity', () => ({
   useActiveCity: () => ({ city: { id: 'c1', country_id: 'k1', name: 'Paris', region: null, lat: 48.85, lng: 2.35, country_code: 'FR', country_name: 'France' } }),
 }));
