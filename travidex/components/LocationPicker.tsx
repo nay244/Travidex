@@ -27,6 +27,15 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
   const [cityProg, setCityProg] = useState<Map<string, Progress>>(new Map());
   const [countryProg, setCountryProg] = useState<Map<string, Progress>>(new Map());
 
+  // Re-sync to the active city's country each time the sheet opens; the Modal
+  // stays mounted, so local state would otherwise go stale across reopens.
+  useEffect(() => {
+    if (!visible) return;
+    setBrowseId(initialCountryId);
+    setQ('');
+    setView('cities');
+  }, [visible]);
+
   useEffect(() => {
     if (!visible || !session?.user) return;
     const uid = session.user.id;

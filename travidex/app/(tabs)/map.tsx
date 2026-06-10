@@ -25,9 +25,10 @@ export default function MapScreen() {
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       <View style={{ flex: 1 }}>
         <MapView
+          key={cityId} // remount per city: fresh initialRegion without fighting user panning
           style={{ flex: 1 }}
           testID="map-view"
-          region={city ? { latitude: city.lat, longitude: city.lng, latitudeDelta: 0.08, longitudeDelta: 0.08 } : undefined}
+          initialRegion={city ? { latitude: city.lat, longitude: city.lng, latitudeDelta: 0.08, longitudeDelta: 0.08 } : undefined}
         >
           {sights.map(s => <SightPin key={s.id} sight={s} onPress={open} />)}
         </MapView>
