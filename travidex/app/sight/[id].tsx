@@ -1,4 +1,5 @@
 import { ScrollView, Text, View, Pressable } from 'react-native';
+import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useSight } from '../../hooks/useSight';
@@ -11,6 +12,8 @@ export default function SightDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { sight, found, recentFinds, loading, reload } = useSight(id!);
 
+  const [hintOpen, setHintOpen] = useState(false);
+
   if (loading || !sight) return <View style={{ flex: 1, backgroundColor: t.colors.bg }} />;
 
   const Stat = ({ label, value }: { label: string; value: string | null }) => (
@@ -22,9 +25,15 @@ export default function SightDetail() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: t.colors.bg }}>
-      <View style={{ height: 160, backgroundColor: t.colors.phBase, justifyContent: 'flex-end', padding: t.spacing.s4 }}>
-        <Text style={[t.type.label, { color: t.colors.text3 }]}>Reference — what to look for</Text>
-      </View>
+      {found ? (
+        <View testID="hero-found" style={{ height: 160, backgroundColor: t.colors.foundBg, borderWidth: 1, borderColor: t.colors.green, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={[t.type.dexNo, { color: t.colors.green }]}>#{sight.dex_no}</Text>
+        </View>
+      ) : (
+        <View testID="hero-unfound" style={{ height: 160, backgroundColor: 'transparent', borderWidth: 1, borderColor: t.colors.locked, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={[t.type.dexNo, { color: t.colors.text3 }]}>#{sight.dex_no}</Text>
+        </View>
+      )}
       <View style={{ padding: t.spacing.s5, gap: t.spacing.s4 }}>
         <Text style={[t.type.h1, { color: t.colors.text1 }]}>{sight.name}</Text>
         <Text style={[t.type.caption, { color: t.colors.info }]}>{sight.type_tags.join(' · ')}</Text>
@@ -43,7 +52,14 @@ export default function SightDetail() {
 
         {!found && <LogFindSheet sightId={sight.id} onLogged={reload} />}
 
-        {sight.hint && <Text style={[t.type.body, { color: t.colors.text2 }]}>💡 {sight.hint}</Text>}
+        {sight.hint && (
+          <View>
+            <Pressable testID="hint-toggle" onPress={() => setHintOpen(o => !o)} style={{ flexDirection: 'row', gap: t.spacing.s2 }}>
+              <Text style={[t.type.label, { color: t.colors.text2 }]}>Find hint {hintOpen ? '▾' : '▸'}</Text>
+            </Pressable>
+            {hintOpen && <Text style={[t.type.body, { color: t.colors.text2 }]}>{sight.hint}</Text>}
+          </View>
+        )}
         {sight.about && <Text style={[t.type.body, { color: t.colors.text2 }]}>{sight.about}</Text>}
 
         {found && <YourPhotos sightId={sight.id} />}
