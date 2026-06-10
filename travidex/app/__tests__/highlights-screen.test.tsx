@@ -29,6 +29,11 @@ jest.mock('../../context/AuthProvider', () => ({
   useAuth: () => ({ session: { user: { id: 'uid-1' } } }),
 }));
 
+let mockIsPremium = false;
+jest.mock('../../context/EntitlementProvider', () => ({
+  useEntitlement: () => ({ isPremium: mockIsPremium }),
+}));
+
 jest.mock('../../hooks/useCityCatalog', () => ({ useCityCatalog: jest.fn() }));
 jest.mock('../../hooks/useActiveCity', () => ({ useActiveCity: jest.fn() }));
 jest.mock('../../lib/data/photos', () => ({ getUserPhotos: jest.fn() }));
@@ -67,6 +72,7 @@ const cityData = { id: 'city-1', country_id: 'c1', name: 'Paris', region: null, 
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockIsPremium = false;
   (useCityCatalog as jest.Mock).mockReturnValue({
     sights,
     completion: { found: 2, total: 3 },
@@ -122,4 +128,36 @@ it('shows highlights-empty when no found sights', async () => {
   });
   await act(async () => { renderWithTheme(<RegionHighlights />); });
   expect(screen.getByTestId('highlights-empty')).toBeOnTheScreen();
+});
+
+it('renders frame chips (classic/gold/forest) with classic selected by default', async () => {
+  await act(async () => { renderWithTheme(<RegionHighlights />); });
+  await waitFor(() => expect(screen.getByTestId('frame-classic')).toBeOnTheScreen());
+  expect(screen.getByTestId('frame-gold')).toBeOnTheScreen();
+  expect(screen.getByTestId('frame-forest')).toBeOnTheScreen();
+  expect(screen.getByTestId('frame-classic')).toBeSelected();
+  expect(screen.getByTestId('frame-gold')).not.toBeSelected();
+  expect(screen.getByTestId('frame-forest')).not.toBeSelected();
+});
+
+it('free user tapping gold frame routes to paywall and frame stays classic', async () => {
+  mockIsPremium = false;
+  await act(async () => { renderWithTheme(<RegionHighlights />); });
+  await waitFor(() => expect(screen.getByTestId('frame-gold')).toBeOnTheScreen());
+  await act(async () => { fireEvent.press(screen.getByTestId('frame-gold')); });
+  expect(mockPush).toHaveBeenCalledWith('/paywall');
+  expect(screen.getByTestId('frame-classic')).toBeSelected();
+  expect(screen.getByTestId('frame-gold')).not.toBeSelected();
+});
+
+it('premium user tapping gold frame selects gold without paywall redirect', async () => {
+  mockIsPremium = true;
+  await act(async () => { renderWithTheme(<RegionHighlights />); });
+  await waitFor(() => expect(screen.getByTestId('frame-gold')).toBeOnTheScreen());
+  await act(async () => { fireEvent.press(screen.getByTestId('frame-gold')); });
+  expect(mockPush).not.toHaveBeenCalled();
+  await waitFor(() => {
+    expect(screen.getByTestId('frame-gold')).toBeSelected();
+    expect(screen.getByTestId('frame-classic')).not.toBeSelected();
+  });
 });

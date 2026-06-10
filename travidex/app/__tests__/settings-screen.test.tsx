@@ -4,13 +4,19 @@ jest.mock('expo-location', () => ({
 }));
 
 const mockReplace = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace }) }));
+const mockPush = jest.fn();
+jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace, push: mockPush }) }));
 
 jest.mock('../../lib/supabase', () => ({
   supabase: {
     auth: { signOut: jest.fn(() => Promise.resolve()) },
     functions: { invoke: jest.fn(() => Promise.resolve({ error: null })) },
   },
+}));
+
+const mockRestore = jest.fn();
+jest.mock('../../context/EntitlementProvider', () => ({
+  useEntitlement: () => ({ restore: mockRestore }),
 }));
 
 import { Alert } from 'react-native';
@@ -67,4 +73,16 @@ it('shows error alert and does not navigate when delete-account returns an error
     expect(supabase.auth.signOut).not.toHaveBeenCalled();
     expect(mockReplace).not.toHaveBeenCalled();
   });
+});
+
+it('navigates to Appearance screen', async () => {
+  await renderWithTheme(<Settings />);
+  fireEvent.press(screen.getByText('Appearance'));
+  expect(mockPush).toHaveBeenCalledWith('/profile/appearance');
+});
+
+it('restores purchases', async () => {
+  await renderWithTheme(<Settings />);
+  fireEvent.press(screen.getByText('Restore purchases'));
+  await waitFor(() => expect(mockRestore).toHaveBeenCalled());
 });

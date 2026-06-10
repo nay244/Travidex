@@ -11,11 +11,20 @@ import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
+import { useEntitlement } from '../../context/EntitlementProvider';
 import { useCityCatalog } from '../../hooks/useCityCatalog';
 import { useActiveCity } from '../../hooks/useActiveCity';
 import { getUserPhotos } from '../../lib/data/photos';
 import type { UserPhoto } from '../../lib/data/photos';
 import { Flag } from '../../components/Flag';
+
+// Highlight-card frames. Add a frame: copy a line, rename, pick tokens. premium: true gates it behind Travidex+.
+type Frame = { id: string; label: string; premium: boolean; borderColor: string | null; footerColor: string };
+const FRAMES: Frame[] = [
+  { id: 'classic', label: 'Classic', premium: false, borderColor: null,        footerColor: '#f3f6fb' },
+  { id: 'gold',    label: 'Gold',    premium: true,  borderColor: 'amber',     footerColor: 'amber'  },
+  { id: 'forest',  label: 'Forest',  premium: true,  borderColor: 'green',     footerColor: 'green'  },
+];
 
 // "Share to friends" deferred until the friends feed supports posts (see plan 7.6)
 
@@ -32,6 +41,7 @@ export default function RegionHighlights() {
   const { cityId } = useLocalSearchParams<{ cityId: string }>();
   const { session } = useAuth();
   const uid = session?.user?.id ?? '';
+  const { isPremium } = useEntitlement();
 
   const { sights, completion } = useCityCatalog(cityId!);
   const { city } = useActiveCity(cityId!);
@@ -39,6 +49,22 @@ export default function RegionHighlights() {
   const [allPhotos, setAllPhotos] = useState<PhotoWithDex[]>([]);
   const [excluded, setExcluded] = useState<Record<string, boolean>>({});
   const [shareError, setShareError] = useState<string | null>(null);
+  const [frameId, setFrameId] = useState('classic');
+
+  function chooseFrame(f: Frame) {
+    // premium gate — copy this pattern for new Travidex+ features
+    if (f.premium && !isPremium) { router.push('/paywall'); return; }
+    setFrameId(f.id);
+  }
+
+  const activeFrame = FRAMES.find(f => f.id === frameId) ?? FRAMES[0];
+  // Resolve token names to actual color values at render time
+  const frameBorderColor = activeFrame.borderColor
+    ? t.colors[activeFrame.borderColor as keyof typeof t.colors] as string
+    : null;
+  const frameFooterColor = activeFrame.footerColor.startsWith('#')
+    ? activeFrame.footerColor
+    : t.colors[activeFrame.footerColor as keyof typeof t.colors] as string;
 
   const viewShotRef = useRef<View>(null);
 
@@ -161,6 +187,8 @@ export default function RegionHighlights() {
               borderRadius: t.radii.lg,
               overflow: 'hidden',
               backgroundColor: t.colors.surface1,
+              borderWidth: frameBorderColor ? 2 : 0,
+              borderColor: frameBorderColor ?? undefined,
             }}
           >
             {shareDisabled ? (
@@ -297,17 +325,17 @@ export default function RegionHighlights() {
               <Text
                 style={[
                   t.type.h3,
-                  { color: '#f3f6fb' },
+                  { color: frameFooterColor },
                 ]}
               >
                 {'Travi'}
-                <Text style={{ color: t.colors.green }}>{'dex'}</Text>
+                <Text style={{ color: frameFooterColor }}>{'dex'}</Text>
               </Text>
               <Text
                 style={[
                   t.type.label,
                   {
-                    color: 'rgba(243,246,251,0.8)',
+                    color: frameFooterColor,
                     fontSize: 9,
                     marginLeft: 'auto',
                     letterSpacing: 1,
@@ -319,6 +347,44 @@ export default function RegionHighlights() {
             </View>
           </View>
         </ViewShot>
+
+        {/* ── Frame selector ── */}
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: t.spacing.s2,
+            marginTop: t.spacing.s4,
+          }}
+        >
+          {FRAMES.map(f => {
+            const isActive = f.id === frameId;
+            return (
+              <Pressable
+                key={f.id}
+                testID={`frame-${f.id}`}
+                accessibilityState={{ selected: isActive }}
+                onPress={() => chooseFrame(f)}
+                style={{
+                  paddingHorizontal: t.spacing.s4,
+                  paddingVertical: t.spacing.s2,
+                  borderRadius: t.radii.sm,
+                  backgroundColor: isActive ? t.colors.amber : t.colors.surface2,
+                  borderWidth: 1,
+                  borderColor: isActive ? t.colors.amber : t.colors.borderSubtle,
+                }}
+              >
+                <Text style={[t.type.label, { color: isActive ? t.colors.textOnAccent : t.colors.text1 }]}>
+                  {f.label}
+                </Text>
+                {f.premium && !isPremium && (
+                  <Text style={[t.type.label, { color: isActive ? t.colors.textOnAccent : t.colors.text3, fontSize: 8 }]}>
+                    Travidex+
+                  </Text>
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
 
         {/* ── Photo selection grid ── */}
         <View

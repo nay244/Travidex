@@ -4,10 +4,12 @@ import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { supabase } from '../../lib/supabase';
+import { useEntitlement } from '../../context/EntitlementProvider';
 
 export default function Settings() {
   const t = useTheme();
   const router = useRouter();
+  const { restore } = useEntitlement();
   const [locationOn, setLocationOn] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -16,6 +18,15 @@ export default function Settings() {
       .then(({ status }) => setLocationOn(status === 'granted'))
       .catch(() => {});
   }, []);
+
+  async function restorePurchases() {
+    try {
+      await restore();
+      Alert.alert('Purchases restored', 'Your Travidex+ access is up to date.');
+    } catch {
+      Alert.alert('Restore failed', 'Try again later.');
+    }
+  }
 
   async function toggleLocation(next: boolean) {
     if (next) {
@@ -56,8 +67,14 @@ export default function Settings() {
         <Text style={[t.type.body, { color: t.colors.text1 }]}>Use location</Text>
         <Switch value={locationOn} onValueChange={toggleLocation} />
       </View>
+      <Pressable onPress={() => router.push('/profile/appearance')}>
+        <Text style={[t.type.body, { color: t.colors.text1 }]}>Appearance</Text>
+      </Pressable>
       <Pressable onPress={() => supabase.auth.signOut()}>
         <Text style={[t.type.body, { color: t.colors.info }]}>Sign out</Text>
+      </Pressable>
+      <Pressable onPress={restorePurchases}>
+        <Text style={[t.type.body, { color: t.colors.info }]}>Restore purchases</Text>
       </Pressable>
       <Pressable onPress={deleteAccount} disabled={busy}>
         <Text style={[t.type.body, { color: t.colors.danger }]}>Delete account</Text>

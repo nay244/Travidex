@@ -436,8 +436,8 @@ git add -A && git commit -m "feat: add restore purchases to settings"
 
 > Decision task — no code beyond what Tasks 1–6 added until confirmed.
 
-- [ ] **Step 1:** Confirm with the product owner the final list of Travidex+ entitlements before submission. Candidates surfaced so far: **dark theme/Appearance** (implemented), and others TBD (e.g., extended photo storage, advanced stats, exclusive badges). For each additional premium feature, add an `isPremium` check at its single entry point + a `/paywall` route, mirroring Task 5. Keep one `premium` entitlement.
-- [ ] **Step 2:** Document the final list in `design/Travidex/` or this plan, and verify App Store Connect subscription metadata matches.
+- [x] **Step 1:** Confirmed with the product owner (2026-06-10): the Travidex+ v1 feature set is **dark theme/Appearance** + **premium highlight-card frames** (gold + forest, in Region Highlights). Both gated via the standard 4-line pattern (`// premium gate — copy this pattern for new Travidex+ features`). One `premium` entitlement.
+- [x] **Step 2:** Documented here; paywall BENEFITS list matches. At submission, verify App Store Connect subscription metadata lists the same two perks.
 
 ---
 
