@@ -6,7 +6,7 @@ import { useProfile } from '../../hooks/useProfile';
 export default function Profile() {
   const t = useTheme();
   const router = useRouter();
-  const { stats, earnedBadges } = useProfile();
+  const { stats } = useProfile();
 
   const Stat = ({ value, label }: { value: number; label: string }) => (
     <View style={{ alignItems: 'center' }}>
@@ -26,7 +26,6 @@ export default function Profile() {
         <Stat value={stats.totalFinds} label="Sights found" />
         <Stat value={stats.citiesClaimed} label="Cities claimed" />
         <Stat value={stats.countriesExplored} label="Countries" />
-        <Stat value={earnedBadges.length} label="Badges" />
       </View>
       <Link label="Badges" to="/profile/badges" />
       <Link label="Photo journal" to="/profile/journal" />

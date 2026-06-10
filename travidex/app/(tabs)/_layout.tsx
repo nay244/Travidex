@@ -1,10 +1,13 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { CityProvider } from '../../context/CityProvider';
+import { useAuth } from '../../context/AuthProvider';
 
 export default function TabsLayout() {
   const t = useTheme();
+  const { session, loading } = useAuth();
+  if (!loading && !session) return <Redirect href="/(auth)/welcome" />;
   return (
     <CityProvider>
       <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: t.colors.green, tabBarInactiveTintColor: t.colors.text3, tabBarStyle: { backgroundColor: t.colors.surface1, borderTopColor: t.colors.divider } }}>

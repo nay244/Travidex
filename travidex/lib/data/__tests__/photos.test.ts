@@ -35,3 +35,11 @@ it('uploadUserPhoto uploads then inserts a row with the public url', async () =>
   expect(mockUploadFn).toHaveBeenCalledWith('u1/s1/123.jpg', blob, { contentType: 'image/jpeg' });
   expect(mockInsert).toHaveBeenCalledWith({ user_id: 'u1', sight_id: 's1', photo_url: 'https://cdn/x.jpg' });
 });
+
+it('uploadUserPhoto uses image/png content type for a .png file', async () => {
+  mockUploadFn.mockResolvedValue({ data: { path: 'u1/s1/photo.png' }, error: null });
+  mockInsert.mockResolvedValue({ error: null });
+  const blob = {} as any;
+  await uploadUserPhoto('u1', 's1', blob, 'photo.png');
+  expect(mockUploadFn).toHaveBeenCalledWith('u1/s1/photo.png', blob, { contentType: 'image/png' });
+});

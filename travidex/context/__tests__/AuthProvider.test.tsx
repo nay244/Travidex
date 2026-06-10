@@ -38,3 +38,10 @@ it('resolves to signed-in when a session exists', async () => {
   render(<AuthProvider><Probe /></AuthProvider>);
   await waitFor(() => expect(screen.getByText('in')).toBeOnTheScreen());
 });
+
+it('clears loading even when getSession rejects', async () => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+  mockAuth.getSession.mockRejectedValue(new Error('storage failure'));
+  render(<AuthProvider><Probe /></AuthProvider>);
+  await waitFor(() => expect(screen.getByText('out')).toBeOnTheScreen());
+});

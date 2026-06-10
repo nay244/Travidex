@@ -19,7 +19,12 @@ export function LogFindSheet({ sightId, onLogged }: { sightId: string; onLogged:
       await logFind(session.user.id, sightId, comment.trim() || 'Found!');
       onLogged();
     } catch (e: any) {
-      setError(e.message);
+      console.warn('logFind error:', e.message);
+      if (e.message?.includes('duplicate key') || e.message?.includes('23505')) {
+        setError('Already in your dex.');
+      } else {
+        setError('Could not log this find. Try again.');
+      }
     } finally {
       setBusy(false);
     }

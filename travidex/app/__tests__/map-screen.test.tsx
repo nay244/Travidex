@@ -1,7 +1,23 @@
+const mockPush = jest.fn();
 const mockSetCityId = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+const mockReload = jest.fn();
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush }),
+  useFocusEffect: (cb: () => void) => { cb(); },
+}));
 jest.mock('../../context/CityProvider', () => ({ useCity: () => ({ cityId: 'c1', setCityId: mockSetCityId }) }));
-jest.mock('../../hooks/useCityCatalog', () => ({ useCityCatalog: () => ({ sights: [], completion: { found: 0, total: 0 }, loading: false, reload: jest.fn() }) }));
+jest.mock('../../hooks/useCityCatalog', () => ({
+  useCityCatalog: () => ({
+    sights: [
+      { id: 's1', dex_no: 1, name: 'Eiffel Tower', found: false, lat: 48.85, lng: 2.29 },
+      { id: 's2', dex_no: 2, name: 'Louvre',        found: true,  lat: 48.86, lng: 2.33 },
+    ],
+    completion: { found: 1, total: 2 },
+    loading: false,
+    reload: mockReload,
+  }),
+}));
 jest.mock('../../hooks/useActiveCity', () => ({
   useActiveCity: () => ({ city: { id: 'c1', country_id: 'k1', name: 'Paris', region: null, lat: 48.85, lng: 2.35, country_code: 'FR', country_name: 'France' } }),
 }));
@@ -11,6 +27,13 @@ jest.mock('../../components/LocationPicker', () => ({
   LocationPicker: ({ visible, onPick }: any) => {
     const { Text } = require('react-native');
     return visible ? <Text onPress={() => onPick('c9')}>PICKER-OPEN</Text> : null;
+  },
+}));
+// Stub LogFindSheet so modal tests don't need auth/data wiring
+jest.mock('../../components/LogFindSheet', () => ({
+  LogFindSheet: ({ sightId, onLogged }: any) => {
+    const { Text } = require('react-native');
+    return <Text testID={`log-sheet-${sightId}`} onPress={onLogged}>LOG-FIND-STUB</Text>;
   },
 }));
 
@@ -41,4 +64,52 @@ it('picking a city updates the provider and closes the picker', async () => {
   });
   expect(mockSetCityId).toHaveBeenCalledWith('c9');
   expect(screen.queryByText('PICKER-OPEN')).toBeNull();        // picker closed
+});
+
+it('row press selects the sight and shows banner with sight name', async () => {
+  await renderWithTheme(<MapScreen />);
+  // No banner initially
+  expect(screen.queryByTestId('selection-banner')).toBeNull();
+  await act(async () => {
+    fireEvent.press(screen.getByText('Eiffel Tower'));
+  });
+  expect(screen.getByTestId('selection-banner')).toBeOnTheScreen();
+  expect(screen.getByText('Selected Eiffel Tower')).toBeOnTheScreen();
+  // Should not have navigated
+  expect(mockPush).not.toHaveBeenCalled();
+});
+
+it('chevron (seemore) press navigates to /sight/<id> without selecting', async () => {
+  await renderWithTheme(<MapScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByTestId('seemore-s1'));
+  });
+  expect(mockPush).toHaveBeenCalledWith('/sight/s1');
+  // No selection banner should appear from see-more
+  expect(screen.queryByTestId('selection-banner')).toBeNull();
+});
+
+it('banner for unfound sight shows TAP TO LOG and opens log modal', async () => {
+  await renderWithTheme(<MapScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByText('Eiffel Tower'));
+  });
+  expect(screen.getByTestId('banner-tap-to-log')).toBeOnTheScreen();
+  await act(async () => {
+    fireEvent.press(screen.getByTestId('selection-banner'));
+  });
+  // Log sheet stub is rendered in the modal
+  expect(screen.getByTestId('log-sheet-s1')).toBeOnTheScreen();
+});
+
+it('banner for found sight shows "Already in your dex" and routes to success with already:1', async () => {
+  await renderWithTheme(<MapScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByText('Louvre'));
+  });
+  expect(screen.getByText('Already in your dex')).toBeOnTheScreen();
+  await act(async () => {
+    fireEvent.press(screen.getByTestId('selection-banner'));
+  });
+  expect(mockPush).toHaveBeenCalledWith({ pathname: '/find/success', params: { sightId: 's2', already: '1' } });
 });

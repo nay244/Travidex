@@ -1,12 +1,21 @@
-import { useState } from 'react';
-import { Pressable, Switch, Text, View } from 'react-native';
+import { useState, useEffect } from 'react';
+import { Alert, Pressable, Switch, Text, View } from 'react-native';
 import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { supabase } from '../../lib/supabase';
 
 export default function Settings() {
   const t = useTheme();
+  const router = useRouter();
   const [locationOn, setLocationOn] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    Location.getForegroundPermissionsAsync()
+      .then(({ status }) => setLocationOn(status === 'granted'))
+      .catch(() => {});
+  }, []);
 
   async function toggleLocation(next: boolean) {
     if (next) {
@@ -15,6 +24,30 @@ export default function Settings() {
     } else {
       setLocationOn(false); // OS-level revoke happens in Settings app; we just stop using it
     }
+  }
+
+  function deleteAccount() {
+    Alert.alert(
+      'Delete account?',
+      'This permanently deletes your account, finds, photos, and badges.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: doDelete },
+      ],
+    );
+  }
+
+  async function doDelete() {
+    if (busy) return;
+    setBusy(true);
+    const { error } = await supabase.functions.invoke('delete-account');
+    if (error) {
+      setBusy(false);
+      Alert.alert('Could not delete account', 'Try again later.');
+      return;
+    }
+    await supabase.auth.signOut();
+    router.replace('/(auth)/welcome');
   }
 
   return (
@@ -26,7 +59,7 @@ export default function Settings() {
       <Pressable onPress={() => supabase.auth.signOut()}>
         <Text style={[t.type.body, { color: t.colors.info }]}>Sign out</Text>
       </Pressable>
-      <Pressable onPress={() => supabase.functions.invoke('delete-account')}>
+      <Pressable onPress={deleteAccount} disabled={busy}>
         <Text style={[t.type.body, { color: t.colors.danger }]}>Delete account</Text>
       </Pressable>
     </View>

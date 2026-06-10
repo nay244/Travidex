@@ -1,18 +1,29 @@
 import { useRouter } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { useTheme } from '@/theme';
 import { signInWithApple } from '../../lib/auth';
 
 export default function Welcome() {
   const t = useTheme();
   const router = useRouter();
+
+  async function handleAppleSignIn() {
+    try {
+      await signInWithApple();
+    } catch (e: any) {
+      if (e?.code !== 'ERR_REQUEST_CANCELED') {
+        Alert.alert('Sign in failed', 'Please try again.');
+      }
+    }
+  }
+
   return (
     <View style={{ flex: 1, justifyContent: 'flex-end', padding: t.spacing.s7, gap: t.spacing.s4, backgroundColor: t.colors.bg }}>
       <Text style={[t.type.display, { color: t.colors.text1 }]}>Travidex</Text>
-      <Text style={[t.type.body, { color: t.colors.text2, marginBottom: t.spacing.s5 }]}>Find the world, one sight at a time.</Text>
+      <Text style={[t.type.body, { color: t.colors.text2, marginBottom: t.spacing.s5 }]}>Collect the world, one sight at a time.</Text>
 
       {/* Apple button: text1-on-bg adapts (black on light, white on dark) per Apple's HIG */}
-      <Pressable onPress={() => signInWithApple()} style={{ backgroundColor: t.colors.text1, padding: t.spacing.s5, borderRadius: t.radii.md }}>
+      <Pressable onPress={handleAppleSignIn} style={{ backgroundColor: t.colors.text1, padding: t.spacing.s5, borderRadius: t.radii.md }}>
         <Text style={[t.type.h3, { textAlign: 'center', color: t.colors.bg }]}>Sign in with Apple</Text>
       </Pressable>
       <Pressable onPress={() => router.push('/(auth)/sign-up')} style={{ backgroundColor: t.colors.actionPositive, padding: t.spacing.s5, borderRadius: t.radii.md }}>
