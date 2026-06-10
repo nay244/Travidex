@@ -33,7 +33,7 @@ export default function Community() {
     getFriendsOverview(userId)
       .then(f => setFriendsCount(f.length))
       .catch((e: any) => console.warn(e));
-  }, [session]);
+  }, [session?.user?.id]);
 
   const tabStyle = (tab: Tab) => ({
     flex: 1,

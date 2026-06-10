@@ -10,10 +10,11 @@ export async function getFriendsOverview(userId: string): Promise<FriendOverview
 }
 
 export async function searchProfiles(query: string, selfId: string): Promise<ProfileHit[]> {
+  const escaped = query.replace(/[\\%_]/g, m => `\\${m}`); // treat LIKE wildcards as literals
   const { data, error } = await supabase
     .from('profiles')
     .select('user_id, username')
-    .ilike('username', `%${query}%`)
+    .ilike('username', `%${escaped}%`)
     .neq('user_id', selfId)
     .limit(10);
   if (error) throw new Error(error.message);
