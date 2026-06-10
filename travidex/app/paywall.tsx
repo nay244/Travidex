@@ -8,6 +8,7 @@ import { useEntitlement } from '../context/EntitlementProvider';
 // add a benefit: copy a line
 const BENEFITS = [
   'Dark theme (Travidex+ Appearance)',
+  'Premium highlight-card frames',
   'More premium perks coming before launch',
 ];
 
