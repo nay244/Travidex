@@ -7,13 +7,14 @@ jest.mock('expo-router', () => ({
 jest.mock('../../context/CityProvider', () => ({ useCity: () => ({ cityId: 'city-1' }) }));
 jest.mock('../../hooks/useCityCatalog', () => ({ useCityCatalog: jest.fn() }));
 jest.mock('../../lib/data/catalog', () => ({ getSightById: jest.fn() }));
-jest.mock('../../lib/data/finds', () => ({ getFoundSightIds: jest.fn() }));
+jest.mock('../../lib/data/finds', () => ({ getFoundSightIds: jest.fn(), getUserFindCount: jest.fn() }));
 jest.mock('../../context/AuthProvider', () => ({ useAuth: () => ({ session: { user: { id: 'u1' } } }) }));
 
 import { screen, waitFor } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test-utils';
 import { useCityCatalog } from '../../hooks/useCityCatalog';
 import { getSightById } from '../../lib/data/catalog';
+import { getUserFindCount } from '../../lib/data/finds';
 import Success from '../find/success';
 
 const mockSight = { id: 's1', city_id: 'city-1', name: 'Eiffel Tower', dex_no: 1, type_tags: [], reference_photo: null, about: null, hint: null, access: null, size: null, busyness: null, lat: 0, lng: 0, source: 'curated', created_at: '' };
@@ -27,6 +28,7 @@ beforeEach(() => {
     reload: jest.fn(),
   });
   (getSightById as jest.Mock).mockResolvedValue(mockSight);
+  (getUserFindCount as jest.Mock).mockResolvedValue(1); // first-ever find by default
 });
 
 describe('new-find variant', () => {
@@ -54,9 +56,16 @@ describe('new-find variant', () => {
     await waitFor(() => expect(screen.getByText('This city · 1 of 8')).toBeTruthy());
   });
 
-  it('shows "First find!" badge card when found === 1', async () => {
+  it('shows "First find!" badge card on the user\'s first-ever find', async () => {
     await renderWithTheme(<Success />);
     await waitFor(() => expect(screen.getByText('First find!')).toBeTruthy());
+  });
+
+  it('does NOT show "First find!" when the user has prior finds in other cities', async () => {
+    (getUserFindCount as jest.Mock).mockResolvedValue(5);
+    await renderWithTheme(<Success />);
+    await waitFor(() => expect(screen.getByText('Added to your dex!')).toBeTruthy());
+    expect(screen.queryByText('First find!')).toBeNull();
   });
 
   it('shows "City claimed!" badge when all sights found', async () => {
@@ -71,6 +80,7 @@ describe('new-find variant', () => {
   });
 
   it('shows no badge card for a middle-of-list find', async () => {
+    (getUserFindCount as jest.Mock).mockResolvedValue(4);
     (useCityCatalog as jest.Mock).mockReturnValue({
       sights: [],
       completion: { found: 4, total: 8 },

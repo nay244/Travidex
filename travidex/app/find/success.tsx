@@ -5,6 +5,8 @@ import { useTheme } from '@/theme';
 import { useCity } from '../../context/CityProvider';
 import { useCityCatalog } from '../../hooks/useCityCatalog';
 import { getSightById } from '../../lib/data/catalog';
+import { getUserFindCount } from '../../lib/data/finds';
+import { useAuth } from '../../context/AuthProvider';
 import { isClaimed } from '../../lib/claim';
 import { CompletionBar } from '../../components/CompletionBar';
 import type { Sight } from '../../lib/types';
@@ -14,8 +16,10 @@ export default function Success() {
   const router = useRouter();
   const { sightId, already } = useLocalSearchParams<{ sightId?: string; already?: string }>();
   const { cityId } = useCity();
+  const { session } = useAuth();
   const { completion } = useCityCatalog(cityId);
   const [sight, setSight] = useState<Sight | null>(null);
+  const [totalFinds, setTotalFinds] = useState<number | null>(null);
 
   useEffect(() => {
     if (sightId) {
@@ -23,14 +27,20 @@ export default function Success() {
     }
   }, [sightId]);
 
+  useEffect(() => {
+    if (session?.user) {
+      getUserFindCount(session.user.id).then(setTotalFinds).catch(() => setTotalFinds(null));
+    }
+  }, [session?.user?.id]);
+
   const isAlready = already === '1';
 
-  // Badge logic for new-find variant
+  // Badge logic for new-find variant ("First find!" is the user's first EVER find)
   let badgeText: string | null = null;
-  if (!isAlready && completion.total > 0) {
-    if (isClaimed(completion.found, completion.total)) {
+  if (!isAlready) {
+    if (completion.total > 0 && isClaimed(completion.found, completion.total)) {
       badgeText = 'City claimed!';
-    } else if (completion.found === 1) {
+    } else if (totalFinds === 1) {
       badgeText = 'First find!';
     }
   }

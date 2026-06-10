@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useRouter } from 'expo-router';
@@ -29,11 +29,15 @@ export default function Submit() {
 
   const [coord, setCoord] = useState(cityCenter);
 
-  // Re-seed coord when city changes
+  // Sync the pin to the city center whenever the city record (re)loads —
+  // covers the initial async load and city switches; user drags then override.
+  useEffect(() => {
+    if (city) setCoord({ latitude: city.lat, longitude: city.lng });
+  }, [city?.id, city?.lat, city?.lng]);
+
   const handlePickCity = (newCityId: string) => {
     setSubmitCityId(newCityId);
     setPickerVisible(false);
-    // coord will update via the key-based MapView remount
   };
 
   // When city loads, sync coord to city center (covers initial load + city change)
