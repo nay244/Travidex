@@ -9,7 +9,6 @@ import { useEntitlement } from '../context/EntitlementProvider';
 const BENEFITS = [
   'Dark theme (Travidex+ Appearance)',
   'Premium highlight-card frames',
-  'More premium perks coming before launch',
 ];
 
 export default function Paywall() {
