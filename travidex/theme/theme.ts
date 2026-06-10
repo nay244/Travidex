@@ -4,7 +4,7 @@
  * design/Travidex/tokens/elevation.css.
  */
 import type { ViewStyle } from 'react-native';
-import { ColorTokens, lightColors, darkColors } from './palette';
+import { ColorTokens, lightColors, darkColors, shadowInk } from './palette';
 import { spacing, layout, radii, size, fontFamily, fontSize, duration, easing, interaction, blur } from './tokens';
 import { textStyles } from './typography';
 
@@ -28,7 +28,7 @@ function makeShadows(scheme: Scheme, c: ColorTokens): Shadows {
   const inkLg = scheme === 'dark' ? 0.55 : 0.14;
   const inkSheet = scheme === 'dark' ? 0.55 : 0.12;
   const inkFab = scheme === 'dark' ? 0.55 : 0.18;
-  const inkColor = scheme === 'dark' ? '#000000' : '#161e30'; // rgba(22,30,48)
+  const inkColor = scheme === 'dark' ? '#000000' : shadowInk; // rgba(22,30,48)
 
   return {
     sm:    { shadowColor: inkColor, shadowOffset: { width: 0, height: 1 },  shadowOpacity: inkSm,    shadowRadius: 2,  elevation: 1 },

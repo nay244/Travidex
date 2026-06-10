@@ -8,6 +8,9 @@
  *   blue  = personal/info · locked = unseen/disabled
  */
 
+/** Shadow ink for light-scheme shadows — rgba(22,30,48) */
+export const shadowInk = '#161e30';
+
 export type ColorTokens = {
   // Surfaces
   bg: string; surface1: string; surface2: string; surface3: string; surface4: string;
