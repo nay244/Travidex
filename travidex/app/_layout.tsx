@@ -10,6 +10,7 @@ import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/spac
 import Purchases from 'react-native-purchases';
 import { ThemeProvider } from '@/theme';
 import { AuthProvider, useAuth } from '../context/AuthProvider';
+import { EntitlementProvider } from '../context/EntitlementProvider';
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const { loading } = useAuth();
@@ -38,11 +39,13 @@ export default function RootLayout() {
   if (!loaded) return null;
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <AuthGate>
-          <Slot />
-        </AuthGate>
-      </AuthProvider>
+      <EntitlementProvider>
+        <AuthProvider>
+          <AuthGate>
+            <Slot />
+          </AuthGate>
+        </AuthProvider>
+      </EntitlementProvider>
     </ThemeProvider>
   );
 }
