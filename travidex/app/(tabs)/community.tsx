@@ -3,6 +3,7 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { getFeed, FeedItem } from '../../lib/data/feed';
+import { relativeTime } from '../../lib/relativeTime';
 
 export default function Community() {
   const t = useTheme();
@@ -52,8 +53,9 @@ export default function Community() {
         renderItem={({ item }) => (
           <View style={{ padding: t.spacing.s5, borderBottomColor: t.colors.divider, borderBottomWidth: 1 }}>
             <Text style={[t.type.body, { color: t.colors.text1 }]}>
-              {`${item.username ?? 'Someone'} found ${item.sight_name}`}
+              {`${item.username ?? 'Someone'} found ${item.sight_name}${item.city_name ? ` in ${item.city_name}` : ''}`}
             </Text>
+            <Text style={[t.type.caption, { color: t.colors.text3 }]}>{relativeTime(item.found_at)}</Text>
             {item.comment && (
               <Text style={[t.type.caption, { color: t.colors.text2 }]}>{item.comment}</Text>
             )}

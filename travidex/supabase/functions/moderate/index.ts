@@ -14,7 +14,12 @@ Deno.serve(async (req) => {
     return new Response('forbidden', { status: 403 });
   }
 
-  const { submissionId, action, reason } = await req.json(); // action: 'approve' | 'reject'
+  const { submissionId, action, reason, moderator } = await req.json();
+
+  if (action !== 'approve' && action !== 'reject') {
+    return new Response('bad action', { status: 400 });
+  }
+
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey);
 
   const { data: sub, error: e1 } = await admin
@@ -26,14 +31,21 @@ Deno.serve(async (req) => {
       .from('sights').select('dex_no').eq('city_id', sub.city_id)
       .order('dex_no', { ascending: false }).limit(1).maybeSingle();
     const nextDex = (maxRow?.dex_no ?? 0) + 1;
-    await admin.from('sights').insert({
+    const { error: insertError } = await admin.from('sights').insert({
       city_id: sub.city_id, dex_no: nextDex, name: sub.name, type_tags: sub.type_tags,
       about: sub.about, hint: sub.hint, access: sub.access, size: sub.size, busyness: sub.busyness,
       reference_photo: sub.reference_photo, location: sub.location, source: 'community',
     });
-    await admin.from('community_submissions').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', submissionId);
+    if (insertError) return new Response('failed to insert sight', { status: 500 });
+    const { error: updateError } = await admin.from('community_submissions')
+      .update({ status: 'approved', reviewed_at: new Date().toISOString(), moderated_by: moderator ?? null })
+      .eq('id', submissionId);
+    if (updateError) return new Response('failed to update submission', { status: 500 });
   } else {
-    await admin.from('community_submissions').update({ status: 'rejected', reject_reason: reason ?? null, reviewed_at: new Date().toISOString() }).eq('id', submissionId);
+    const { error: updateError } = await admin.from('community_submissions')
+      .update({ status: 'rejected', reject_reason: reason ?? null, reviewed_at: new Date().toISOString(), moderated_by: moderator ?? null })
+      .eq('id', submissionId);
+    if (updateError) return new Response('failed to update submission', { status: 500 });
   }
   return new Response('ok');
 });
