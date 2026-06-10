@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
 import MapView from 'react-native-maps';
 import { useRouter } from 'expo-router';
@@ -27,11 +27,8 @@ export default function MapScreen() {
   // Finding 1: reload on focus so pins/rows refresh after logging elsewhere
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
-  // Clear selection when city changes
-  const handleSetCityId = useCallback((id: string) => {
-    setSelected(null);
-    setCityId(id);
-  }, [setCityId]);
+  // Clear selection on any city change (picker, Explore's "Open map", etc.)
+  useEffect(() => { setSelected(null); setLogModalOpen(false); }, [cityId]);
 
   const handleSelect = useCallback((id: string) => {
     const sight = sights.find(s => s.id === id) ?? null;
@@ -128,7 +125,7 @@ export default function MapScreen() {
         visible={pickerOpen}
         currentCityId={cityId}
         initialCountryId={city?.country_id ?? null}
-        onPick={(id) => { handleSetCityId(id); setPickerOpen(false); }}
+        onPick={(id) => { setCityId(id); setPickerOpen(false); }}
         onClose={() => setPickerOpen(false)}
       />
 
