@@ -18,6 +18,7 @@ function dimOf(t) { return ({ green: "var(--green-dim)", amber: "var(--amber-dim
 function RegionDex({ city, entries, onBack, onSight }) {
   const [q, setQ] = useStateRD("");
   const [favs, setFavs] = useStateRD({});
+  const [hlOpen, setHlOpen] = useStateRD(false);
   const list = entries.filter((e) => e.name.toLowerCase().includes(q.toLowerCase()));
   const found = entries.filter((e) => e.found).length;
 
@@ -42,6 +43,9 @@ function RegionDex({ city, entries, onBack, onSight }) {
           </div>
           <span style={iconBtn}><Icon name="arrow-up-down" size={17} color="var(--text-2)" /></span>
           <span style={iconBtn}><Icon name="sliders-horizontal" size={17} color="var(--text-2)" /></span>
+          <Press scale={0.92} onClick={() => setHlOpen(true)} aria-label="Region highlights" style={{ ...iconBtn, border: "none", background: "var(--amber-dim)", boxShadow: "inset 0 0 0 1px var(--amber-line)" }}>
+            <Icon name="sparkles" size={17} color="var(--amber)" />
+          </Press>
         </div>
       </header>
 
@@ -96,6 +100,8 @@ function RegionDex({ city, entries, onBack, onSight }) {
           <p style={{ textAlign: "center", fontFamily: "var(--font-sans)", fontSize: 14, color: "var(--text-3)", padding: "30px 0" }}>No sights match “{q}”.</p>
         )}
       </div>
+
+      {hlOpen && <RegionHighlights city={city} entries={entries} onClose={() => setHlOpen(false)} />}
     </div>
   );
 }

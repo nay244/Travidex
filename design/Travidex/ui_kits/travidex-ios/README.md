@@ -25,8 +25,10 @@ Profile: Badges/Achievements rails → full pages; Customize → Appearance / Pr
 | `SightDetail.jsx` | Sight Detail | Hero photo, #dex + found badges, type tags, Access/Size/Busyness, **inline** Navigate + Log find (no duplicate bottom bar), hint, about, your photos, recent finds |
 | `FindSuccess.jsx` | Find Success | New find: stamp + confetti + completion bar + badge. **`already` mode**: "Already in your dex" notice (no bar/badge), Map / View entry |
 | `ChunkMap.jsx` | Explore Chunk-Map | Country switcher (**flag + code**) + Country picker; `tier:"cities"` → city tiles; `tier:"states"` → **state tiles → drill into cities**; gradient completion fill |
-| `RegionDex.jsx` | Region Dex | Pokédex-style list of a city's sights: search + sort/filter, type chips, **favorite top-right**, **dex # bottom-right**, found = full image / unfound = hollow |
-| `Community.jsx` | Community | Friends/Global/Nearby finds feed |
+| `RegionDex.jsx` | Region Dex | Pokédex-style list of a city's sights: search + sort/filter, type chips, **favorite top-right**, **dex # bottom-right**, found = full image / unfound = hollow. **Sparkles button → Region highlights** |
+| `RegionHighlights.jsx` | Region highlights | Shareable 4:5 recap card from the user's photos across the region's found sights (Sight Detail → "Your photos"): photo selection grid, flag+city header, Travidex-branded footer, Share to friends / Share elsewhere (Save · Messages · Stories · Copy link) |
+| `Community.jsx` | Community | **Friends** (feed + searchable friends list w/ Add a friend) · **Hidden gems** (region-specific user-shared off-dex sights: star favorites, Most favorited/Newest/Nearest sort, Report action) |
+| `ShareGem.jsx` | Share a hidden gem | Submission sheet: required photo + name + note + auto location, guidelines card; submit → "Submitted for review" + amber IN REVIEW badge on the new card |
 | `Profile.jsx` | Profile | **Profile-art background**, identity, Sights/Cities/Countries, World completion, **Badges & Achievements rails** (4 + `>`), Customize rows |
 | `ProfilePages.jsx` | Monthly Badges · Achievements (+ detail) | Per-year month grids; leveled awards grid w/ hollow locked icons → how-to-unlock detail |
 | `ProfileArt.jsx` | Profile Art picker | Progress-unlocked background designs (locked show criteria + progress) |
@@ -49,4 +51,4 @@ Profile: Badges/Achievements rails → full pages; Customize → Appearance / Pr
 - **Sample data:** US states (6) and non-Kyoto region-dex entries are representative samples to demonstrate the layout/hierarchy.
 
 ## Files
-`index.html` · `overview.html` · `app.jsx` · `data.jsx` · `primitives.jsx` · `chrome.jsx` · `art.jsx` · `flags.jsx` · `Welcome.jsx` · `MapHome.jsx` · `LocationPicker.jsx` · `SightDetail.jsx` · `FindSuccess.jsx` · `ChunkMap.jsx` · `RegionDex.jsx` · `Community.jsx` · `Profile.jsx` · `ProfilePages.jsx` · `ProfileArt.jsx` · `Appearance.jsx` · `ios-frame.jsx` · `design-canvas.jsx`
+`index.html` · `overview.html` · `app.jsx` · `data.jsx` · `primitives.jsx` · `chrome.jsx` · `art.jsx` · `flags.jsx` · `Welcome.jsx` · `MapHome.jsx` · `LocationPicker.jsx` · `SightDetail.jsx` · `FindSuccess.jsx` · `ChunkMap.jsx` · `RegionDex.jsx` · `RegionHighlights.jsx` · `Community.jsx` · `ShareGem.jsx` · `Profile.jsx` · `ProfilePages.jsx` · `ProfileArt.jsx` · `Appearance.jsx` · `ios-frame.jsx` · `design-canvas.jsx`

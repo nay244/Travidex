@@ -101,8 +101,50 @@ A **Pokédex-style list of every sight in a region** (opened from a city tile on
 - subtle type-tinted background for found entries.
 Search filters by name; tapping a row → **Sight Detail**. Works at the city level for both country tiers (incl. US state→city→region-dex).
 
-### 3.7 Community — `Community.jsx`
-The finds feed. Segmented filter (Friends / Global / Nearby) + a list of `FindFeedItem`-style cards: "{user} found {sight} in {city}", relative time, photo, like + comment counts (like toggles locally).
+### 3.6.1 Region highlights — `RegionHighlights.jsx`
+Opened from the amber **sparkles button** in the Region Dex header. Lets the user **capture a shareable recap of the region** composed of their own photos — the same photos that live under each found sight's **Sight Detail → "Your photos"** (2 per found sight in the prototype).
+- **Highlight card:** a share-ready 4:5 collage — photo mosaic (first photo spans 2×2), header strip (country flag + city + "MY HIGHLIGHTS"), footer strip (Travidex mark + wordmark + `found/total sights · month year`). Top/bottom scrims keep text legible.
+- **Photo selection:** a 4-col grid of all eligible photos (labeled with their dex #), all selected by default; tapping toggles inclusion (green ring + check = in). The card preview updates live; zero selected disables sharing.
+- **Share actions (pinned bottom):** **"Share to friends"** (green → posts to the in-app friends feed) and **"Share elsewhere"** (reveals a destinations row: Save image · Messages · Stories · Copy link — the off-app system-share path). Confirmations show as a toast.
+- **Empty state:** if the region has no found sights, a nudge ("Find a sight in {city} and add photos…") replaces the card.
+- **Implementation note:** photos come from the user's photo records per (sight, user); the card is rendered server- or client-side to a real image for the system share sheet. Country code is threaded through `ChunkMap.onCity({...city, code})` so the card's flag is correct.
+
+### 3.7 Community — `Community.jsx` (+ `ShareGem.jsx`)
+Two tabs: **Friends** and **Hidden gems**.
+- **Friends** — a "Your friends" entry (stacked avatars + count) opens the **Friends list** page (search, green "Add a friend" row, friend rows w/ avatar, @handle, most-recent find, green sights count). Below it, the finds feed: "{user} found {sight} in {city}" cards with photo + heart-like + comment counts (like toggles locally).
+- **Hidden gems** — **region-specific** user-shared sights that are NOT in the dex, scoped to the Map's current city via `hiddenGems(code, city)` (Kyoto = authored set; other cities synthesize deterministically; the tab remounts on city change). Subtitle names the city. Cards: photo, name, "by · distance · date" meta, note, and a **star favorite chip** with live count. Sort control: **Most favorited / Newest / Nearest**. Each card has a small **Report** action (flag → "Reported · under review", card dims).
+- **Share flow (`ShareGem.jsx`)** — the amber "Share a hidden gem" button opens a submission sheet: **photo (required)** → name → note → auto location chip (flag + city from the Map), plus a blue **guidelines card** ("Reviewed before it appears": no private property/exact home addresses, unsafe or restricted areas, ads, off-topic). Submit is disabled until photo + name. On submit → "Submitted for review" state (automated checks → moderator queue → ~24h notice), and the gem appears at the top of the list with an amber **IN REVIEW** badge (no favoriting until approved).
+- **Moderation model (for implementation):** required photo + auto-attached location → automated checks at submit (image safety classification, text profanity/PII filter, geo sanity vs. claimed city) → human/moderator review queue (reuse the submission statuses: Pending=amber, Approved=green, Rejected=red) → post-publication **report threshold auto-hides** a gem pending re-review; favorites surface quality.
+
+#### 3.7.1 Hidden gems — backend pipeline (Supabase)
+How a submission becomes content in the three tabs. The tabs are **three sorts/queries over ONE collection** of approved gems, scoped to the user's current region.
+
+**Tables**
+```
+gems            id · author_id · name · note · photo_url (Storage) · lat · lng · city_id · country_code
+                · status enum: pending | approved | rejected | hidden
+                · favs_count int (denormalized) · report_count int
+                · created_at · reviewed_by · reviewed_at · approved_at · rejection_reason
+gem_favorites   (user_id, gem_id) UNIQUE — insert/delete; trigger maintains gems.favs_count
+gem_reports     (user_id, gem_id, reason) — trigger increments report_count; at threshold (e.g. 3)
+                sets status='hidden' and re-enqueues for review
+moderators      user_id · role ('owner' | 'moderator') — only these accounts may change status
+moderation_log  gem_id · actor · action · reason · at  (audit trail)
+```
+
+**Submission flow**
+1. Client uploads the photo to Storage, inserts a `gems` row with `status='pending'`, `lat/lng` + `city_id` auto-attached from the Map location (client never sets status).
+2. **Edge Function on insert** runs automated checks: image-safety classification, text profanity/PII filter, geo sanity (point must fall inside the claimed city's bounds). Hard fail → `status='rejected'` + `rejection_reason`, author notified. Pass → stays `pending` in the **moderation queue**.
+3. **You / an authorized moderator** (row in `moderators`) approve or reject from a review dashboard. Approve → `status='approved'`, `approved_at=now()`, author notified — the gem **enters the app in the Newest tab** (sorted by `approved_at desc`, NOT `created_at`, so review time doesn't bury it).
+4. **RLS policies:** `pending`/`rejected` rows readable only by author + moderators (author sees their own IN REVIEW card); `approved` readable by everyone; `hidden` readable by moderators only. Status column writable only by moderators.
+
+**The three tabs (all `WHERE status='approved'`, scoped to region)**
+- **Newest** — `ORDER BY approved_at DESC`. The entry point for fresh content.
+- **Most favorited** — `ORDER BY favs_count DESC`. Populated organically as users star gems they encounter (a star = upsert into `gem_favorites`; trigger updates the count live).
+- **Nearest** — `ORDER BY ST_Distance(location, user_point)` (PostGIS). `user_point` = the user's geolocation when permission is granted; **fallback when location is off** = the Map's current city center (the app is location-optional everywhere).
+- Region scope: `city_id` (or a radius around the user/city) keeps all three tabs local, matching the "gems near {city}" framing.
+
+**Post-publication:** reports auto-hide at threshold pending re-review; `favs_count` milestones can notify the author. (Future hook: a highly-favorited, moderator-picked gem can be **promoted into the official dex** — not yet designed.)
 
 ### 3.8 Profile — `Profile.jsx`
 Duolingo-inspired, top to bottom, with the selected **Profile Art as a full-screen background** (veiled for legibility via `--art-veil`):
@@ -227,7 +269,7 @@ ui_kits/travidex-ios/
   chrome.jsx       ← TabBar (5-tab + stamp FAB) + SAFE_TOP/TAB_H
   art.jsx          ← PROFILE_ART presets + ArtLayer + unlock eval
   flags.jsx        ← CSS country flags (FLAGS, Flag) — Welcome board, Explore + Map location pickers
-  Welcome · MapHome · LocationPicker · SightDetail · FindSuccess · ChunkMap · RegionDex · Community ·
+  Welcome · MapHome · LocationPicker · SightDetail · FindSuccess · ChunkMap · RegionDex · RegionHighlights · Community · ShareGem ·
   Profile · ProfilePages (Badges/Achievements/Detail) · ProfileArt · Appearance .jsx
   ios-frame.jsx · design-canvas.jsx   ← starter scaffolds (device bezel; overview canvas)
 ```
