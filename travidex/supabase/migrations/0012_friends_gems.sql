@@ -184,3 +184,14 @@ as $$
   order by f.found_at desc
   limit p_limit;
 $$;
+
+-- Geo sanity helper for the gems-check function: is the gem within p_max_m of its city center?
+create or replace function gem_geo_sane(p_gem uuid, p_max_m double precision)
+returns boolean
+language sql stable
+set search_path = public, extensions
+as $$
+  select st_dwithin(g.location, c.center, p_max_m)
+  from gems g join cities c on c.id = g.city_id
+  where g.id = p_gem
+$$;
