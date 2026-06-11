@@ -7,6 +7,11 @@ jest.mock('../../lib/data/friends', () => ({
   addFriend: jest.fn(),
 }));
 
+// relativeTime is deterministic — mock it so tests don't depend on wall-clock
+jest.mock('../../lib/relativeTime', () => ({
+  relativeTime: (_iso: string) => '2h ago',
+}));
+
 const mockUseAuth = jest.fn<{ session: { user: { id: string } } | null }, []>(
   () => ({ session: { user: { id: 'u1' } } })
 );
@@ -18,8 +23,8 @@ import { getFriendsOverview, searchProfiles, addFriend } from '../../lib/data/fr
 import FriendsScreen from '../community/friends';
 
 const FRIENDS = [
-  { friend_id: 'f1', username: 'alice', sights_count: 7, last_find: 'Tower' },
-  { friend_id: 'f2', username: 'bob', sights_count: 3, last_find: null },
+  { friend_id: 'f1', username: 'alice', sights_count: 7, last_find: 'Tower', last_find_at: '2024-01-01T10:00:00Z' },
+  { friend_id: 'f2', username: 'bob', sights_count: 3, last_find: null, last_find_at: null },
 ];
 
 beforeEach(() => {
@@ -35,49 +40,97 @@ it('renders friend rows with username, count, and last find', async () => {
   await waitFor(() => expect(screen.getByTestId('friend-f1')).toBeOnTheScreen());
   expect(screen.getByTestId('friend-f2')).toBeOnTheScreen();
   // Usernames
-  expect(screen.getByText('alice')).toBeOnTheScreen();
-  expect(screen.getByText('bob')).toBeOnTheScreen();
+  expect(screen.getAllByText('alice').length).toBeGreaterThan(0);
+  expect(screen.getAllByText('bob').length).toBeGreaterThan(0);
   // Sights counts
   expect(screen.getByText('7')).toBeOnTheScreen();
   expect(screen.getByText('3')).toBeOnTheScreen();
-  // Last find
-  expect(screen.getByText('Tower')).toBeOnTheScreen();
+  // Last find with relative time (mocked to '2h ago')
+  expect(screen.getByText('TOWER · 2h ago')).toBeOnTheScreen();
   expect(screen.getByText('No finds yet')).toBeOnTheScreen();
 });
 
-it('search >= 2 chars surfaces a non-friend profile with Add button', async () => {
+it('N FRIENDS label shows correct count', async () => {
+  renderWithTheme(<FriendsScreen />);
+  await waitFor(() => expect(screen.getByTestId('friend-f1')).toBeOnTheScreen());
+  expect(screen.getByText('2 FRIENDS')).toBeOnTheScreen();
+});
+
+it('main search filters existing friends only — non-friend does not appear', async () => {
+  // Even if searchProfiles returns 'charlie', the main search field must NOT surface them
   (searchProfiles as jest.Mock).mockResolvedValue([
     { user_id: 'u99', username: 'charlie' },
   ]);
   renderWithTheme(<FriendsScreen />);
   await waitFor(() => screen.getByTestId('friend-f1'));
 
+  // Type in the MAIN search (not the add-panel search)
   fireEvent.changeText(screen.getByPlaceholderText('Search friends'), 'ch');
+
+  // charlie is not a friend — must NOT appear as add-u99 in the main list
+  await waitFor(() => expect(screen.queryByTestId('add-u99')).toBeNull());
+  // alice + bob don't match 'ch' so filtered list is empty
+  await waitFor(() => {
+    expect(screen.queryByTestId('friend-f1')).toBeNull();
+    expect(screen.queryByTestId('friend-f2')).toBeNull();
+  });
+});
+
+it('add-friend-row toggles the add panel', async () => {
+  renderWithTheme(<FriendsScreen />);
+  await waitFor(() => screen.getByTestId('add-friend-row'));
+
+  // Panel not visible yet
+  expect(screen.queryByTestId('add-search-input')).toBeNull();
+
+  // Toggle open
+  fireEvent.press(screen.getByTestId('add-friend-row'));
+  await waitFor(() => expect(screen.getByTestId('add-search-input')).toBeOnTheScreen());
+
+  // Toggle closed
+  fireEvent.press(screen.getByTestId('add-friend-row'));
+  await waitFor(() => expect(screen.queryByTestId('add-search-input')).toBeNull());
+});
+
+it('add panel search returns profiles and Add buttons', async () => {
+  (searchProfiles as jest.Mock).mockResolvedValue([
+    { user_id: 'u99', username: 'charlie' },
+  ]);
+  renderWithTheme(<FriendsScreen />);
+  await waitFor(() => screen.getByTestId('add-friend-row'));
+
+  // Open panel
+  fireEvent.press(screen.getByTestId('add-friend-row'));
+  await waitFor(() => screen.getByTestId('add-search-input'));
+  fireEvent.changeText(screen.getByTestId('add-search-input'), 'ch');
 
   await waitFor(() => expect(screen.getByTestId('add-u99')).toBeOnTheScreen());
   expect(screen.getByText('charlie')).toBeOnTheScreen();
-  expect(screen.getByText('Add a friend')).toBeOnTheScreen();
 });
 
-it('pressing Add calls addFriend with uid and friend id', async () => {
+it('pressing Add in panel calls addFriend and closes panel', async () => {
   (searchProfiles as jest.Mock).mockResolvedValue([
     { user_id: 'u99', username: 'charlie' },
   ]);
   renderWithTheme(<FriendsScreen />);
-  await waitFor(() => screen.getByTestId('friend-f1'));
+  await waitFor(() => screen.getByTestId('add-friend-row'));
 
-  fireEvent.changeText(screen.getByPlaceholderText('Search friends'), 'ch');
+  fireEvent.press(screen.getByTestId('add-friend-row'));
+  await waitFor(() => screen.getByTestId('add-search-input'));
+  fireEvent.changeText(screen.getByTestId('add-search-input'), 'ch');
   await waitFor(() => screen.getByTestId('add-u99'));
 
   fireEvent.press(screen.getByTestId('add-u99'));
   await waitFor(() => expect(addFriend).toHaveBeenCalledWith('u1', 'u99'));
+  // Panel collapses after successful add
+  await waitFor(() => expect(screen.queryByTestId('add-search-input')).toBeNull());
 });
 
-it('shows empty state when no friends', async () => {
+it('shows updated empty copy when no friends', async () => {
   (getFriendsOverview as jest.Mock).mockResolvedValue([]);
   renderWithTheme(<FriendsScreen />);
   await waitFor(() =>
-    expect(screen.getByText('No friends yet — search to add one.')).toBeOnTheScreen()
+    expect(screen.getByText('No friends yet — add one to compare dexes.')).toBeOnTheScreen()
   );
 });
 
@@ -89,8 +142,7 @@ it('back-btn calls router.back()', async () => {
   expect(mockBack).toHaveBeenCalled();
 });
 
-it('already-friend users do not appear in add results', async () => {
-  // alice is already a friend; search returns alice + charlie
+it('already-friend users do not appear in add panel results', async () => {
   (searchProfiles as jest.Mock).mockResolvedValue([
     { user_id: 'f1', username: 'alice' },
     { user_id: 'u99', username: 'charlie' },
@@ -98,11 +150,13 @@ it('already-friend users do not appear in add results', async () => {
   renderWithTheme(<FriendsScreen />);
   await waitFor(() => screen.getByTestId('friend-f1'));
 
-  fireEvent.changeText(screen.getByPlaceholderText('Search friends'), 'al');
+  fireEvent.press(screen.getByTestId('add-friend-row'));
+  await waitFor(() => screen.getByTestId('add-search-input'));
+  fireEvent.changeText(screen.getByTestId('add-search-input'), 'al');
+
   await waitFor(() => screen.getByTestId('add-u99'));
 
-  // alice should NOT appear as an add row (she's already a friend by user_id 'f1')
-  // but charlie should
+  // alice is already a friend — must NOT appear as an add row
   expect(screen.queryByTestId('add-f1')).toBeNull();
   expect(screen.getByTestId('add-u99')).toBeOnTheScreen();
 });

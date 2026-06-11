@@ -1,6 +1,6 @@
 import { supabase } from '../supabase';
 
-export type FriendOverview = { friend_id: string; username: string; sights_count: number; last_find: string | null };
+export type FriendOverview = { friend_id: string; username: string; sights_count: number; last_find: string | null; last_find_at: string | null };
 export type ProfileHit = { user_id: string; username: string };
 
 export async function getFriendsOverview(userId: string): Promise<FriendOverview[]> {
