@@ -298,15 +298,15 @@ export default function FriendsScreen() {
               </Text>
             </View>
 
-            {/* Username + @handle + last find line */}
+            {/* Username + last find line. The design shows "name + @handle" but
+                profiles store a single username — showing it twice is noise
+                (registered in docs/DEVIATIONS.md). */}
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text
                 style={[t.type.body, { color: t.colors.text1 }]}
                 numberOfLines={1}
               >
                 <Text style={{ fontFamily: t.fontFamily.sansSemibold }}>{item.username}</Text>
-                {'  '}
-                <Text style={{ color: t.colors.text3, fontSize: 13 }}>@{item.username}</Text>
               </Text>
               <Text
                 style={[

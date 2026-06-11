@@ -39,6 +39,7 @@ Updated every build round. Each entry: what differs, why, and what would close i
 | Sight Detail unlog §3.4 | Unlogging a find does not revoke previously-awarded badges or stats | Lazy award model; acceptable for accidental-log fixes (badges are commemorative, not a live reflection of current finds) | Badge-revocation pipeline if product demands it | STANDING |
 | Profile §3.8 header | `@handle · SINCE {current year}` — join year is not the real account creation date | `profiles` has created_at but isn't fetched here yet | Read created_at with the profile | STANDING (small) |
 | Region Dex §3.6 | Full-width green "Open map" button replaced by a compact glass chip (`open-map-chip`, Ionicons `map-outline`) in the header row | Spec has no map link; full-width button removed per build notes 2.3; chip preserves the capability without dominating the layout | Remove if product decides map access belongs elsewhere | STANDING |
+| Friends list §3.7 | Friend rows show the username once — no separate `@handle` line | `profiles` stores a single `username`; rendering it twice as name + @handle is duplicate noise | Add a display-name column to `profiles` if names and handles should diverge | STANDING |
 
 ## Resolved (was a deviation, now closed)
 

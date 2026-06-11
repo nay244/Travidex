@@ -25,6 +25,7 @@ import FriendsScreen from '../community/friends';
 const FRIENDS = [
   { friend_id: 'f1', username: 'alice', sights_count: 7, last_find: 'Tower', last_find_at: '2024-01-01T10:00:00Z' },
   { friend_id: 'f2', username: 'bob', sights_count: 3, last_find: null, last_find_at: null },
+  { friend_id: 'f3', username: 'cara', sights_count: 5, last_find: 'Louvre', last_find_at: null },
 ];
 
 beforeEach(() => {
@@ -48,12 +49,14 @@ it('renders friend rows with username, count, and last find', async () => {
   // Last find with relative time (mocked to '2h ago')
   expect(screen.getByText('TOWER · 2h ago')).toBeOnTheScreen();
   expect(screen.getByText('No finds yet')).toBeOnTheScreen();
+  // Last find present but no timestamp → bare name, no separator
+  expect(screen.getByText('LOUVRE')).toBeOnTheScreen();
 });
 
 it('N FRIENDS label shows correct count', async () => {
   renderWithTheme(<FriendsScreen />);
   await waitFor(() => expect(screen.getByTestId('friend-f1')).toBeOnTheScreen());
-  expect(screen.getByText('2 FRIENDS')).toBeOnTheScreen();
+  expect(screen.getByText('3 FRIENDS')).toBeOnTheScreen();
 });
 
 it('main search filters existing friends only — non-friend does not appear', async () => {
