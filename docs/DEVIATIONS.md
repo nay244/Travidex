@@ -15,6 +15,7 @@ Updated every build round. Each entry: what differs, why, and what would close i
 | Area (§) | Deviation | Why | Closes with | Status |
 |---|---|---|---|---|
 | Profile §3.8 world card | Completion ring is a bordered circle + mono fraction, not a true progress arc | Arc needs `react-native-svg` (native module → breaks OTA fingerprint) | Add react-native-svg in the next planned native build | PENDING-DEP |
+| Explore §3.5 chunk tile fill | Gradient fill approximated with 3 stacked translucent `amberDim` Views (opacities 1 / 0.66 / 0.33, heights pct / pct×1.15 / pct×1.3) rather than a true `linear-gradient` | `expo-linear-gradient` is a native module; OTA constraint prohibits new native deps | Add expo-linear-gradient in the next planned native build | PENDING-DEP |
 | Profile art §3.11 | Picker is a pushed page, not a bottom sheet over dimmed Profile | Build notes 4.3 explicitly allow page on small screens | Sheet variant if requested | STANDING |
 | Tab bar §4 | Stamp icon is MaterialCommunityIcons `stamper`, not Lucide `stamp` | No Lucide pack; closest glyph in the bundled icon set | Custom SVG asset in a native build | STANDING |
 | Monthly badges §3.9 | Some month icons are Ionicons stand-ins for the kit's Lucide icons (e.g. footprints → `trail-sign-outline`) | Glyph availability | Custom icon set | STANDING |
