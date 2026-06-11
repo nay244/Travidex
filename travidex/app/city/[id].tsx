@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useCity } from '../../context/CityProvider';
@@ -184,6 +185,25 @@ export default function City() {
             <Text style={{ color: t.colors.text2, fontSize: 15 }}>{'≡'}</Text>
           </View>
 
+          {/* Open map chip */}
+          <Pressable
+            testID="open-map-chip"
+            onPress={openMap}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: t.radii.md,
+              backgroundColor: t.colors.surface2,
+              borderWidth: 1,
+              borderColor: t.colors.borderSubtle,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="map-outline" size={18} color={t.colors.text2} />
+          </Pressable>
+
           {/* Sparkles / highlights button */}
           <Pressable
             testID="highlights-btn"
@@ -204,21 +224,6 @@ export default function City() {
           </Pressable>
         </View>
       </View>
-
-      {/* ── Open map button ── */}
-      <Pressable
-        onPress={openMap}
-        style={{
-          backgroundColor: t.colors.actionPositive,
-          marginHorizontal: t.spacing.s4,
-          marginTop: t.spacing.s3,
-          marginBottom: t.spacing.s2,
-          padding: t.spacing.s4,
-          borderRadius: t.radii.sm,
-        }}
-      >
-        <Text style={[t.type.h3, { textAlign: 'center', color: t.colors.textOnAccent }]}>Open map</Text>
-      </Pressable>
 
       <FlatList
         data={displayed}

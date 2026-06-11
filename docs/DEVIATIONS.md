@@ -15,6 +15,7 @@ Updated every build round. Each entry: what differs, why, and what would close i
 | Area (§) | Deviation | Why | Closes with | Status |
 |---|---|---|---|---|
 | Profile §3.8 world card | Completion ring is a bordered circle + mono fraction, not a true progress arc | Arc needs `react-native-svg` (native module → breaks OTA fingerprint) | Add react-native-svg in the next planned native build | PENDING-DEP |
+| Explore §3.5 chunk tile fill | Gradient fill approximated with 3 stacked translucent `amberDim` Views (opacities 1 / 0.66 / 0.33, heights pct / pct×1.15 / pct×1.3) rather than a true `linear-gradient` | `expo-linear-gradient` is a native module; OTA constraint prohibits new native deps | Add expo-linear-gradient in the next planned native build | PENDING-DEP |
 | Profile art §3.11 | Picker is a pushed page, not a bottom sheet over dimmed Profile | Build notes 4.3 explicitly allow page on small screens | Sheet variant if requested | STANDING |
 | Tab bar §4 | Stamp icon is MaterialCommunityIcons `stamper`, not Lucide `stamp` | No Lucide pack; closest glyph in the bundled icon set | Custom SVG asset in a native build | STANDING |
 | Monthly badges §3.9 | Some month icons are Ionicons stand-ins for the kit's Lucide icons (e.g. footprints → `trail-sign-outline`) | Glyph availability | Custom icon set | STANDING |
@@ -28,11 +29,15 @@ Updated every build round. Each entry: what differs, why, and what would close i
 | Area (§) | Deviation | Why | Closes with | Status |
 |---|---|---|---|---|
 | Highlights §3.6.1 | "Share to friends" (in-app feed post) disabled; only system-share ships | The feed has no post entity (finds only) | Feed `posts` table + card type | DEFERRED-FEATURE |
+| Highlights §3.6.1 | Save image / Messages / Stories all route via the system share sheet (`expo-sharing`); no direct Photos/Messages/Stories API integrations | Direct integrations require native modules (MediaLibrary, MessageUI, etc.) beyond OTA constraint | Add native integrations in a planned native build | PENDING-DEP |
+| Highlights §3.6.1 | "Copy link" chip disabled; no deep-link URL generated | Requires `expo-clipboard` (native module) and a deep-link resolver service | Add expo-clipboard + link service | PENDING-DEP |
 | Community §3.7 | Feed cards have no like/comment counts | Prototype-local interaction; no backend tables | `find_likes`/`find_comments` pipeline | DEFERRED-FEATURE |
 | Hidden gems §3.7.1 | "Nearby" sorts by distance from the active city's center, not device GPS | Spec's own location-off fallback; geolocation unwired | Use position when location toggle on | DEFERRED-FEATURE |
 | gems-check §3.7.1 | Automated checks = profanity wordlist + 50 km geo sanity; no image-safety classification | Needs an external classifier service | Vision-moderation API in the edge function | DEFERRED-FEATURE |
 | Monthly badges §3.9 | A month is "earned" by ≥1 find that month (local time) — the kit's per-month *challenges* are not modeled | No challenge system in the data model | Challenge definitions + tracking | DEFERRED-FEATURE |
+| Sight Detail unlog §3.4 | Unlogging a find does not revoke previously-awarded badges or stats | Lazy award model; acceptable for accidental-log fixes (badges are commemorative, not a live reflection of current finds) | Badge-revocation pipeline if product demands it | STANDING |
 | Profile §3.8 header | `@handle · SINCE {current year}` — join year is not the real account creation date | `profiles` has created_at but isn't fetched here yet | Read created_at with the profile | STANDING (small) |
+| Region Dex §3.6 | Full-width green "Open map" button replaced by a compact glass chip (`open-map-chip`, Ionicons `map-outline`) in the header row | Spec has no map link; full-width button removed per build notes 2.3; chip preserves the capability without dominating the layout | Remove if product decides map access belongs elsewhere | STANDING |
 
 ## Resolved (was a deviation, now closed)
 

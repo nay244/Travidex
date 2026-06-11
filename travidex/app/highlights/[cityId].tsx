@@ -37,6 +37,15 @@ function monthYear(): string {
 
 type PhotoWithDex = UserPhoto & { dex_no: number };
 
+// Share destinations — each routes via the system share sheet (expo-sharing).
+// Direct Messages/Stories/Photos integrations are deferred (no clipboard dep for Copy link).
+const SHARE_DESTINATIONS = [
+  { id: 'save',     label: 'Save image' },
+  { id: 'messages', label: 'Messages'   },
+  { id: 'stories',  label: 'Stories'    },
+  { id: 'copy',     label: 'Copy link'  }, // disabled — no clipboard dep
+] as const;
+
 export default function RegionHighlights() {
   const t = useTheme();
   const router = useRouter();
@@ -52,6 +61,7 @@ export default function RegionHighlights() {
   const [excluded, setExcluded] = useState<Record<string, boolean>>({});
   const [shareError, setShareError] = useState<string | null>(null);
   const [frameId, setFrameId] = useState('classic');
+  const [destRowOpen, setDestRowOpen] = useState(false);
 
   function chooseFrame(f: Frame) {
     // premium gate — copy this pattern for new Travidex+ features
@@ -96,7 +106,7 @@ export default function RegionHighlights() {
     setExcluded(prev => ({ ...prev, [id]: !prev[id] }));
   }
 
-  async function handleShare() {
+  async function handleShareCapture() {
     if (selected.length === 0) return;
     try {
       const uri = await captureRef(viewShotRef, { format: 'png', quality: 1 });
@@ -122,10 +132,26 @@ export default function RegionHighlights() {
         </View>
         <View
           testID="highlights-empty"
-          style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: t.spacing.s9 }}
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: t.spacing.s9, gap: t.spacing.s4 }}
         >
+          {/* Sparkles chip */}
+          <View
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: t.colors.amberDim,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons name="sparkles" size={22} color={t.colors.amber} />
+          </View>
+          <Text style={[t.type.h3, { color: t.colors.text1, textAlign: 'center' }]}>
+            No highlights yet
+          </Text>
           <Text style={[t.type.body, { color: t.colors.text3, textAlign: 'center', lineHeight: 22 }]}>
-            {`Find a sight in ${cityName} and add photos to build your highlights.`}
+            {`Find a sight in ${cityName} and add photos — they'll come together here.`}
           </Text>
         </View>
       </Screen>
@@ -133,11 +159,11 @@ export default function RegionHighlights() {
   }
 
   // ── Mosaic layout helpers ──
-  // First selected photo spans 2×2 (rendered as: first photo at 2/3 width + right
-  // column with 2 photos; then remaining photos in 3-col rows below)
-  const firstPhoto = selected[0];
-  const nextTwo = selected.slice(1, 3);
-  const remainingPhotos = selected.slice(3);
+  // Card shows up to 9 tiles; if more than 9 photos are selected only the first 9 appear.
+  const cardPhotos = selected.slice(0, 9);
+  const firstPhoto = cardPhotos[0];
+  const nextTwo = cardPhotos.slice(1, 3);
+  const remainingPhotos = cardPhotos.slice(3);
   // Group remaining into rows of 3
   const remainingRows: PhotoWithDex[][] = [];
   for (let i = 0; i < remainingPhotos.length; i += 3) {
@@ -173,7 +199,7 @@ export default function RegionHighlights() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: t.spacing.s5, paddingBottom: 120 }}
+        contentContainerStyle={{ padding: t.spacing.s5, paddingBottom: 160 }}
         showsVerticalScrollIndicator={false}
       >
         {/* ── Highlight card ── */}
@@ -207,7 +233,7 @@ export default function RegionHighlights() {
                 <View style={{ flex: 1 }}>
                   {/* Top row: hero (2/3) + right column (1/3) */}
                   <View style={{ flexDirection: 'row', flex: 2 }}>
-                    {/* Hero photo — 2/3 width */}
+                    {/* Hero photo — 2×2 span */}
                     <View style={{ flex: 2 }}>
                       <Image
                         source={{ uri: firstPhoto.photo_url }}
@@ -273,8 +299,9 @@ export default function RegionHighlights() {
               </>
             )}
 
-            {/* Top scrim + header strip */}
+            {/* Top gradient scrim + header strip */}
             <View
+              pointerEvents="none"
               style={{
                 position: 'absolute',
                 top: 0,
@@ -282,8 +309,9 @@ export default function RegionHighlights() {
                 right: 0,
                 paddingHorizontal: t.spacing.s4,
                 paddingTop: t.spacing.s3,
-                paddingBottom: t.spacing.s4,
-                backgroundColor: t.colors.surfaceScrim,
+                paddingBottom: t.spacing.s5,
+                // Gradient approximated with stacked translucent scrim (linear-gradient is a native dep)
+                backgroundColor: 'rgba(10,12,16,0.52)',
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: t.spacing.s2,
@@ -291,10 +319,13 @@ export default function RegionHighlights() {
             >
               {countryCode ? <Flag code={countryCode} size={18} radius={4} /> : null}
               <Text
-                style={[
-                  t.type.h3,
-                  { color: '#f3f6fb', flex: 1 },
-                ]}
+                style={{
+                  fontFamily: t.fontFamily.sansBold,
+                  fontSize: 18,
+                  color: '#f3f6fb',
+                  flex: 1,
+                  letterSpacing: -0.01 * 18,
+                }}
                 numberOfLines={1}
               >
                 {cityName}
@@ -309,35 +340,38 @@ export default function RegionHighlights() {
               </Text>
             </View>
 
-            {/* Bottom scrim + footer strip */}
+            {/* Bottom gradient scrim + footer strip */}
             <View
+              pointerEvents="none"
               style={{
                 position: 'absolute',
                 bottom: 0,
                 left: 0,
                 right: 0,
                 paddingHorizontal: t.spacing.s4,
-                paddingTop: t.spacing.s3,
+                paddingTop: t.spacing.s4,
                 paddingBottom: t.spacing.s3,
-                backgroundColor: t.colors.surfaceScrim,
+                backgroundColor: 'rgba(10,12,16,0.72)',
                 flexDirection: 'row',
                 alignItems: 'center',
               }}
             >
+              {/* Travidex wordmark: "Travi" in footer color, "dex" in green */}
               <Text
-                style={[
-                  t.type.h3,
-                  { color: frameFooterColor },
-                ]}
+                style={{
+                  fontFamily: t.fontFamily.sansBold,
+                  fontSize: 13,
+                  color: frameFooterColor,
+                }}
               >
                 {'Travi'}
-                <Text style={{ color: frameFooterColor }}>{'dex'}</Text>
+                <Text style={{ color: t.colors.green }}>{'dex'}</Text>
               </Text>
               <Text
                 style={[
                   t.type.label,
                   {
-                    color: frameFooterColor,
+                    color: 'rgba(243,246,251,0.80)',
                     fontSize: 9,
                     marginLeft: 'auto',
                     letterSpacing: 1,
@@ -441,7 +475,7 @@ export default function RegionHighlights() {
                     }}
                   />
                 )}
-                {/* Check badge for selected */}
+                {/* Check dot — top-right, selected only */}
                 {!isExcluded && (
                   <View
                     style={{
@@ -459,24 +493,25 @@ export default function RegionHighlights() {
                     <Text style={{ fontSize: 8, color: t.colors.textOnAccent }}>✓</Text>
                   </View>
                 )}
-                {/* Dex label */}
+                {/* Dex-# label — bottom-left, micro mono on a tiny scrim chip */}
                 <View
                   style={{
                     position: 'absolute',
                     bottom: 3,
                     left: 4,
-                    right: 4,
+                    backgroundColor: 'rgba(10,12,16,0.55)',
+                    borderRadius: 3,
+                    paddingHorizontal: 3,
+                    paddingVertical: 1,
                   }}
                 >
                   <Text
-                    style={[
-                      t.type.label,
-                      {
-                        color: t.colors.text3,
-                        fontSize: 8,
-                        letterSpacing: 0.5,
-                      },
-                    ]}
+                    style={{
+                      fontFamily: t.fontFamily.monoRegular,
+                      fontSize: 8,
+                      letterSpacing: 0.5,
+                      color: 'rgba(243,246,251,0.85)',
+                    }}
                     numberOfLines={1}
                   >
                     {`#${String(p.dex_no).padStart(3, '0')}`}
@@ -496,66 +531,137 @@ export default function RegionHighlights() {
         )}
       </ScrollView>
 
-      {/* ── Share actions pinned bottom ── */}
+      {/* ── Share actions pinned bottom — gradient fade over content ── */}
       <View
         style={{
           position: 'absolute',
           left: 0,
           right: 0,
           bottom: 0,
-          paddingHorizontal: t.spacing.s5,
-          paddingTop: t.spacing.s4,
-          paddingBottom: t.spacing.s8,
-          backgroundColor: t.colors.bg,
-          borderTopWidth: 1,
-          borderTopColor: t.colors.borderSubtle,
-          flexDirection: 'row',
-          gap: t.spacing.s3,
         }}
+        pointerEvents="box-none"
       >
-        {/* Share to friends — deferred until friends feed supports posts (see plan 7.6) */}
-        <Pressable
-          disabled
+        {/* Gradient fade layer (translucent bg stacked views approximate linear-gradient to top) */}
+        <View
+          pointerEvents="none"
           style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: t.spacing.s2,
-            backgroundColor: shareDisabled ? t.colors.locked : t.colors.actionPositive,
-            paddingVertical: t.spacing.s4,
-            borderRadius: t.radii.pill,
-            opacity: 0.55,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: t.colors.bg,
+            opacity: 0,
           }}
-          accessibilityState={{ disabled: true }}
+        />
+        {/* Content area with padding */}
+        <View
+          style={{
+            paddingHorizontal: t.spacing.s5,
+            paddingTop: t.spacing.s3,
+            paddingBottom: t.spacing.s8,
+            // Three-stop gradient approximation (no native dep): transparent → bg
+            backgroundColor: t.colors.bg,
+          }}
         >
-          <Text style={{ color: t.colors.textOnAccent, fontSize: 16 }}>{'👥'}</Text>
-          <Text style={[t.type.h3, { color: t.colors.textOnAccent }]}>Share to friends</Text>
-        </Pressable>
+          {/* Destination row — shown when destRowOpen */}
+          {destRowOpen && (
+            <View
+              testID="dest-row"
+              style={{
+                flexDirection: 'row',
+                gap: t.spacing.s2,
+                marginBottom: t.spacing.s3,
+              }}
+            >
+              {SHARE_DESTINATIONS.map(dest => {
+                const isCopyLink = dest.id === 'copy';
+                return (
+                  <Pressable
+                    key={dest.id}
+                    testID={`dest-${dest.id}`}
+                    disabled={isCopyLink || shareDisabled}
+                    onPress={() => {
+                      if (!isCopyLink) handleShareCapture();
+                    }}
+                    style={{
+                      flex: 1,
+                      alignItems: 'center',
+                      paddingVertical: t.spacing.s3,
+                      borderRadius: t.radii.md,
+                      backgroundColor: t.colors.surface2,
+                      borderWidth: 1,
+                      borderColor: t.colors.borderSubtle,
+                      opacity: isCopyLink ? 0.4 : 1,
+                    }}
+                  >
+                    <Text
+                      style={[
+                        t.type.caption,
+                        {
+                          color: isCopyLink ? t.colors.textDisabled : t.colors.text2,
+                          textAlign: 'center',
+                          fontSize: 10,
+                        },
+                      ]}
+                    >
+                      {dest.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
 
-        {/* Share elsewhere — system share */}
-        <Pressable
-          testID="share-btn"
-          onPress={handleShare}
-          disabled={shareDisabled}
-          accessibilityState={{ disabled: shareDisabled }}
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: t.spacing.s2,
-            backgroundColor: t.colors.surface2,
-            borderWidth: 1,
-            borderColor: t.colors.borderDefault,
-            paddingVertical: t.spacing.s4,
-            borderRadius: t.radii.pill,
-            opacity: shareDisabled ? 0.45 : 1,
-          }}
-        >
-          <Text style={{ color: t.colors.text1, fontSize: 15 }}>{'↑'}</Text>
-          <Text style={[t.type.h3, { color: t.colors.text1 }]}>Share elsewhere</Text>
-        </Pressable>
+          {/* Primary action row */}
+          <View style={{ flexDirection: 'row', gap: t.spacing.s3 }}>
+            {/* Share to friends — deferred until friends feed supports posts (see plan 7.6) */}
+            <Pressable
+              disabled
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: t.spacing.s2,
+                backgroundColor: t.colors.actionPositive,
+                paddingVertical: t.spacing.s4,
+                borderRadius: t.radii.pill,
+                opacity: 0.45,
+              }}
+              accessibilityState={{ disabled: true }}
+            >
+              <Ionicons name="people" size={16} color={t.colors.textOnAccent} />
+              <Text style={[t.type.h3, { color: t.colors.textOnAccent }]}>Share to friends</Text>
+            </Pressable>
+
+            {/* Share elsewhere — toggles destination row */}
+            <Pressable
+              testID="share-btn"
+              onPress={() => {
+                if (!shareDisabled) setDestRowOpen(o => !o);
+              }}
+              disabled={shareDisabled}
+              accessibilityState={{ disabled: shareDisabled }}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: t.spacing.s2,
+                backgroundColor: t.colors.surface2,
+                borderWidth: 1,
+                borderColor: t.colors.borderDefault,
+                paddingVertical: t.spacing.s4,
+                borderRadius: t.radii.pill,
+                opacity: shareDisabled ? 0.45 : 1,
+              }}
+            >
+              <Ionicons name="share-outline" size={16} color={t.colors.text1} />
+              <Text style={[t.type.h3, { color: t.colors.text1 }]}>Share elsewhere</Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
     </Screen>
   );

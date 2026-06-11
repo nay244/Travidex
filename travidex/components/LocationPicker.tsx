@@ -1,3 +1,4 @@
+// Modal twin of app/location.tsx (screen) — keep semantics in sync.
 import { useEffect, useRef, useState } from 'react';
 import { Animated, FlatList, Modal, PanResponder, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

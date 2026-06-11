@@ -9,20 +9,22 @@ import { getCitiesForCountry } from '../../lib/data/citiesByCountry';
 import { getCountryProgress, getCityProgress, Progress } from '../../lib/data/progress';
 import { CountryPicker } from '../../components/CountryPicker';
 import { ChunkTile } from '../../components/ChunkTile';
+import { CompletionBar } from '../../components/CompletionBar';
 import { Flag } from '../../components/Flag';
 import { Screen } from '../../components/Screen';
+import { progressState } from '../../lib/claim';
 import type { City, Country } from '../../lib/types';
 
-// ── Small completion ring (SVG-free approximation using a circle border) ──
-// Renders a thin ring border in green/amber/locked depending on pct,
-// with mono "found/total" text inside.
-function MiniRing({
+// ── Header ring: ~44px circle with 3px greenLine border + country flag inside ──
+function HeaderRing({
   found,
   total,
-  size = 52,
+  children,
+  size = 44,
 }: {
   found: number;
   total: number;
+  children?: React.ReactNode;
   size?: number;
 }) {
   const t = useTheme();
@@ -41,18 +43,10 @@ function MiniRing({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: t.colors.surface2,
+        flexShrink: 0,
       }}
     >
-      <Text
-        style={[
-          t.type.label,
-          { color: t.colors.text1, fontSize: 9, textAlign: 'center', lineHeight: 12 },
-        ]}
-      >
-        {`${found}`}
-        {'\n'}
-        <Text style={{ color: t.colors.text3 }}>{`/${total}`}</Text>
-      </Text>
+      {children}
     </View>
   );
 }
@@ -89,6 +83,103 @@ function LegendDot({ color, label }: { color: string; label: string }) {
   );
 }
 
+// ── List row (list-view mode) ──
+function ListRow({
+  id,
+  name,
+  region,
+  found,
+  total,
+  onPress,
+}: {
+  id: string;
+  name: string;
+  region?: string;
+  found: number;
+  total: number;
+  onPress: () => void;
+}) {
+  const t = useTheme();
+  const state = progressState(found, total);
+  return (
+    <Pressable
+      testID={`list-row-${id}`}
+      onPress={onPress}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: t.spacing.s4,
+        paddingVertical: t.spacing.s3,
+        borderBottomWidth: 1,
+        borderBottomColor: t.colors.divider,
+        gap: t.spacing.s3,
+      }}
+    >
+      <View style={{ flex: 1, minWidth: 0 }}>
+        {region ? (
+          <Text
+            style={[
+              t.type.label,
+              {
+                color: t.colors.text3,
+                fontSize: 9,
+                letterSpacing: 0.8,
+                textTransform: 'uppercase',
+                marginBottom: 2,
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {region}
+          </Text>
+        ) : null}
+        <Text
+          style={[t.type.body, { color: t.colors.text1, fontWeight: '600' }]}
+          numberOfLines={1}
+        >
+          {name}
+        </Text>
+      </View>
+      <Text
+        style={[
+          t.type.label,
+          { color: t.colors.text3, fontSize: 11, fontWeight: '700', letterSpacing: 0 },
+        ]}
+      >
+        {`${found}`}
+        <Text style={{ color: t.colors.text3, fontWeight: '400' }}>{`/${total}`}</Text>
+      </Text>
+      {/* State marker */}
+      {state === 'claimed' ? (
+        <View
+          style={{
+            width: 18,
+            height: 18,
+            borderRadius: 9,
+            backgroundColor: t.colors.chunkClaimed,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ color: t.colors.textOnAccent, fontSize: 9, lineHeight: 11 }}>✓</Text>
+        </View>
+      ) : (
+        <View
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: state === 'in-progress' ? t.colors.chunkProgress : 'transparent',
+            borderWidth: 2,
+            borderColor:
+              state === 'in-progress' ? t.colors.chunkProgress : t.colors.chunkUntouched,
+          }}
+        />
+      )}
+    </Pressable>
+  );
+}
+
 export default function Explore() {
   const t = useTheme();
   const router = useRouter();
@@ -101,6 +192,7 @@ export default function Explore() {
   const [cities, setCities] = useState<City[]>([]);
   const [stateFilter, setStateFilter] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Load countries + both progress maps on mount / user change
   useEffect(() => {
@@ -133,8 +225,6 @@ export default function Explore() {
   const selectedCountry = countries.find(c => c.id === selectedCountryId) ?? null;
 
   // ── Derived header stats ──
-  // For cities-tier: claimed = cities where found >= total > 0
-  // For states-tier: claimed = states where sum-found >= sum-total > 0
   function getHeaderStats(): {
     ringFound: number;
     ringTotal: number;
@@ -215,6 +305,26 @@ export default function Explore() {
     if (!selectedCountry) return null;
 
     if (selectedCountry.tier === 'cities') {
+      if (viewMode === 'list') {
+        return (
+          <View>
+            {cities.map(city => {
+              const p = cityProg.get(city.id) ?? { found: 0, total: 0 };
+              return (
+                <ListRow
+                  key={city.id}
+                  id={city.id}
+                  name={city.name}
+                  region={city.region ?? undefined}
+                  found={p.found}
+                  total={p.total}
+                  onPress={() => router.push(`/city/${city.id}`)}
+                />
+              );
+            })}
+          </View>
+        );
+      }
       return (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: t.spacing.s3, gap: t.spacing.s3 }}>
           {cities.map(city => {
@@ -222,6 +332,7 @@ export default function Explore() {
             return (
               <View key={city.id} style={{ width: '30%' }}>
                 <ChunkTile
+                  testID={`chunk-tile-${city.id}`}
                   name={city.name}
                   found={p.found}
                   total={p.total}
@@ -238,6 +349,51 @@ export default function Explore() {
     // tier === 'states'
     if (stateFilter !== null) {
       const stateCities = cities.filter(c => (c.region ?? 'Other') === stateFilter);
+      const cityList =
+        viewMode === 'list' ? (
+          <View>
+            {stateCities.map(city => {
+              const p = cityProg.get(city.id) ?? { found: 0, total: 0 };
+              return (
+                <ListRow
+                  key={city.id}
+                  id={city.id}
+                  name={city.name}
+                  region={city.region ?? undefined}
+                  found={p.found}
+                  total={p.total}
+                  onPress={() => router.push(`/city/${city.id}`)}
+                />
+              );
+            })}
+          </View>
+        ) : (
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              paddingHorizontal: t.spacing.s3,
+              gap: t.spacing.s3,
+            }}
+          >
+            {stateCities.map(city => {
+              const p = cityProg.get(city.id) ?? { found: 0, total: 0 };
+              return (
+                <View key={city.id} style={{ width: '30%' }}>
+                  <ChunkTile
+                    testID={`chunk-tile-${city.id}`}
+                    name={city.name}
+                    found={p.found}
+                    total={p.total}
+                    region={city.region ?? undefined}
+                    onPress={() => router.push(`/city/${city.id}`)}
+                  />
+                </View>
+              );
+            })}
+          </View>
+        );
+
       return (
         <View>
           <Pressable
@@ -272,29 +428,7 @@ export default function Explore() {
               {`‹ ${selectedCountry.name} · all states`}
             </Text>
           </Pressable>
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              paddingHorizontal: t.spacing.s3,
-              gap: t.spacing.s3,
-            }}
-          >
-            {stateCities.map(city => {
-              const p = cityProg.get(city.id) ?? { found: 0, total: 0 };
-              return (
-                <View key={city.id} style={{ width: '30%' }}>
-                  <ChunkTile
-                    name={city.name}
-                    found={p.found}
-                    total={p.total}
-                    region={city.region ?? undefined}
-                    onPress={() => router.push(`/city/${city.id}`)}
-                  />
-                </View>
-              );
-            })}
-          </View>
+          {cityList}
         </View>
       );
     }
@@ -312,6 +446,23 @@ export default function Explore() {
       });
     }
 
+    if (viewMode === 'list') {
+      return (
+        <View>
+          {Array.from(stateMap.entries()).map(([region, agg]) => (
+            <ListRow
+              key={region}
+              id={region}
+              name={region}
+              found={agg.found}
+              total={agg.total}
+              onPress={() => setStateFilter(region)}
+            />
+          ))}
+        </View>
+      );
+    }
+
     return (
       <View
         style={{
@@ -324,6 +475,7 @@ export default function Explore() {
         {Array.from(stateMap.entries()).map(([region, agg]) => (
           <View key={region} style={{ width: '30%' }}>
             <ChunkTile
+              testID={`chunk-tile-${region}`}
               name={region}
               found={agg.found}
               total={agg.total}
@@ -337,7 +489,7 @@ export default function Explore() {
 
   return (
     <Screen>
-      {/* ── Top control bar: country pill + ring summary ── */}
+      {/* ── Top control bar: country pill + list/grid toggle ── */}
       <View
         style={{
           flexDirection: 'row',
@@ -375,20 +527,32 @@ export default function Explore() {
           >
             {selectedCountry?.code ?? '—'}
           </Text>
-          {/* chevron — Ionicons for correct rendering, no glyph clip */}
           <Ionicons name="chevron-down" size={14} color={t.colors.text3} />
         </Pressable>
 
         <View style={{ flex: 1 }} />
 
-        {/* Right: mini ring + caption */}
-        <View style={{ alignItems: 'flex-end', gap: 2 }}>
-          <MiniRing
-            found={headerStats.ringFound}
-            total={headerStats.ringTotal}
-            size={44}
+        {/* Right: list/grid toggle chip */}
+        <Pressable
+          testID="view-toggle"
+          onPress={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: t.radii.md,
+            backgroundColor: t.colors.surface2,
+            borderWidth: 1,
+            borderColor: t.colors.borderDefault,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Ionicons
+            name={viewMode === 'grid' ? 'list-outline' : 'grid-outline'}
+            size={18}
+            color={t.colors.text1}
           />
-        </View>
+        </Pressable>
       </View>
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: t.spacing.s8 }}>
@@ -403,9 +567,19 @@ export default function Explore() {
             gap: t.spacing.s3,
           }}
         >
-          {selectedCountry && stateFilter === null && (
+          {/* Ring with flag inside (country level) or just flag (state drilldown) */}
+          {selectedCountry && stateFilter === null ? (
+            <HeaderRing
+              found={headerStats.ringFound}
+              total={headerStats.ringTotal}
+              size={44}
+            >
+              <Flag code={selectedCountry.code} size={28} radius={5} />
+            </HeaderRing>
+          ) : selectedCountry && stateFilter !== null ? (
             <Flag code={selectedCountry.code} size={36} radius={6} />
-          )}
+          ) : null}
+
           <View style={{ flex: 1 }}>
             <Text style={[t.type.h2 ?? t.type.h3, { color: t.colors.text1 }]}>
               {stateFilter ?? selectedCountry?.name ?? ''}
@@ -436,6 +610,16 @@ export default function Explore() {
             )}
           </View>
         </View>
+
+        {/* ── 1.2: Full-width CompletionBar between header and legend ── */}
+        {selectedCountry && (
+          <View style={{ paddingHorizontal: t.spacing.s4, paddingBottom: t.spacing.s2 }}>
+            <CompletionBar
+              found={headerStats.totalSightsFound}
+              total={headerStats.totalSightsTotal}
+            />
+          </View>
+        )}
 
         {/* ── Legend ── */}
         <View

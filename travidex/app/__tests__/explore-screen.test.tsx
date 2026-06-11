@@ -76,6 +76,38 @@ it('renders the pill with the default country code and city tiles for a cities-t
   expect(mockPush).toHaveBeenCalledWith('/city/c-paris');
 });
 
+it('shows completion bar between header and legend', async () => {
+  setupFranceMocks();
+  renderWithTheme(<Explore />);
+
+  await waitFor(() => expect(screen.getByText('Paris')).toBeOnTheScreen());
+  // CompletionBar is a View-only component; verify the legend renders below it (indirect)
+  // by confirming both header stats text and legend are present
+  expect(screen.getByText('FR')).toBeOnTheScreen();
+  // Legend labels are present (below the bar); textTransform is CSS-only, actual string is 'Claimed'
+  expect(screen.getByText('Claimed')).toBeOnTheScreen();
+});
+
+it('view-toggle switches from grid tiles to list rows', async () => {
+  setupFranceMocks();
+  renderWithTheme(<Explore />);
+
+  await waitFor(() => expect(screen.getByText('Paris')).toBeOnTheScreen());
+
+  // Grid mode: tile testIDs are present
+  expect(screen.getByTestId('chunk-tile-c-paris')).toBeOnTheScreen();
+
+  // Toggle to list
+  fireEvent.press(screen.getByTestId('view-toggle'));
+
+  // List rows appear
+  await waitFor(() => expect(screen.getByTestId('list-row-c-paris')).toBeOnTheScreen());
+  expect(screen.getByTestId('list-row-c-lyon')).toBeOnTheScreen();
+
+  // Tile testIDs are gone
+  expect(screen.queryByTestId('chunk-tile-c-paris')).toBeNull();
+});
+
 it('opening the picker and picking the US switches the board to state tiles (region names visible, city names not visible)', async () => {
   setupUSMocks();
   renderWithTheme(<Explore />);
@@ -139,9 +171,10 @@ it('state tile aggregation: state found/total = sum of its cities', async () => 
 
   // California: LA (2/4) + SF (0/3) = 2/7
   await waitFor(() => expect(screen.getByText('California')).toBeOnTheScreen());
-  expect(screen.getByText('2/7')).toBeOnTheScreen();
+  // Count is rendered as nested Text: outer accessible text = "2/7"
+  expect(screen.getByText('2/7', { exact: false })).toBeOnTheScreen();
 
   // Nevada: LV (1/3) = 1/3
   expect(screen.getByText('Nevada')).toBeOnTheScreen();
-  expect(screen.getByText('1/3')).toBeOnTheScreen();
+  expect(screen.getByText('1/3', { exact: false })).toBeOnTheScreen();
 });

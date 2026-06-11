@@ -5,11 +5,19 @@ import { SightRow } from '../SightRow';
 const sight = { id: 's1', dex_no: 1, name: 'Eiffel Tower', found: true, type_tags: [] } as any;
 const sightWithTags = { id: 's2', dex_no: 2, name: 'Louvre', found: false, type_tags: ['Historic', 'Scenic', 'Food', 'Modern'] } as any;
 
-it('shows name and dex number and a found indicator', async () => {
+it('shows name and dex number and a found thumbnail', async () => {
   await renderWithTheme(<SightRow sight={sight} onPress={() => {}} />);
   expect(screen.getByText('Eiffel Tower')).toBeOnTheScreen();
   expect(screen.getByText('#001')).toBeOnTheScreen();
-  expect(screen.getByTestId('found-check')).toBeOnTheScreen();
+  expect(screen.getByTestId('thumb-found')).toBeOnTheScreen();
+  expect(screen.queryByTestId('thumb-unfound')).toBeNull();
+});
+
+it('shows thumb-unfound for unfound sights', async () => {
+  const unfound = { ...sight, found: false } as any;
+  await renderWithTheme(<SightRow sight={unfound} onPress={() => {}} />);
+  expect(screen.getByTestId('thumb-unfound')).toBeOnTheScreen();
+  expect(screen.queryByTestId('thumb-found')).toBeNull();
 });
 
 it('fires onPress with the sight id', async () => {
