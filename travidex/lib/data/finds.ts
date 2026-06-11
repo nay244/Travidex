@@ -50,6 +50,16 @@ export async function getUserFindCount(userId: string): Promise<number> {
   return count ?? 0;
 }
 
+// Remove a logged find (accidental log) — deletes the user's find row for the sight.
+export async function unlogFind(userId: string, sightId: string): Promise<void> {
+  const { error } = await supabase
+    .from('finds')
+    .delete()
+    .eq('user_id', userId)
+    .eq('sight_id', sightId);
+  if (error) throw new Error(error.message);
+}
+
 // Months (as 'YYYY-MM', in the device's local time) in which the user logged at
 // least one find — drives the monthly badges page.
 export async function getFindMonths(userId: string): Promise<Set<string>> {

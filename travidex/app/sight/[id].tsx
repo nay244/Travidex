@@ -1,4 +1,4 @@
-import { Image, ScrollView, Share, Text, View, Pressable } from 'react-native';
+import { Alert, Image, ScrollView, Share, Text, View, Pressable } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -10,6 +10,7 @@ import { YourPhotos } from '../../components/YourPhotos';
 import { Glass } from '../../components/Glass';
 import { getCityWithCountry } from '../../lib/data/citiesByCountry';
 import { getFavoriteSightIds, setFavorite } from '../../lib/data/favorites';
+import { unlogFind } from '../../lib/data/finds';
 import { relativeTime } from '../../lib/relativeTime';
 import { useAuth } from '../../context/AuthProvider';
 
@@ -24,6 +25,7 @@ export default function SightDetail() {
   const [logOpen, setLogOpen] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [locationLabel, setLocationLabel] = useState<string | null>(null);
+  const [unlogBusy, setUnlogBusy] = useState(false);
 
   // Load favorite state
   useEffect(() => {
@@ -63,6 +65,31 @@ export default function SightDetail() {
       console.warn('share failed', err);
     }
   }, [sight, locationLabel]);
+
+  const doUnlog = useCallback(async () => {
+    if (!session?.user || !sight || unlogBusy) return;
+    setUnlogBusy(true);
+    try {
+      await unlogFind(session.user.id, sight.id);
+      reload();
+    } catch {
+      Alert.alert('Could not remove', 'Try again later.');
+    } finally {
+      setUnlogBusy(false);
+    }
+  }, [session?.user?.id, sight?.id, unlogBusy, reload]);
+
+  const handleUnlog = useCallback(() => {
+    if (!sight) return;
+    Alert.alert(
+      'Remove this find?',
+      `This removes ${sight.name} from your dex. Your photos stay in your journal.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Remove', style: 'destructive', onPress: doUnlog },
+      ]
+    );
+  }, [sight, doUnlog]);
 
   if (loading || !sight) return <Screen><View style={{ flex: 1 }} /></Screen>;
 
@@ -458,6 +485,16 @@ export default function SightDetail() {
               })
             )}
           </View>
+
+          {/* Unlog row — found sights only */}
+          {found && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: t.spacing.s2, paddingVertical: t.spacing.s3 }}>
+              <Text style={[t.type.caption, { color: t.colors.text3 }]}>Logged by accident?</Text>
+              <Pressable testID="unlog-btn" onPress={handleUnlog} disabled={unlogBusy}>
+                <Text style={[t.type.caption, { color: t.colors.danger }]}>Remove from your dex</Text>
+              </Pressable>
+            </View>
+          )}
 
         </View>
       </ScrollView>

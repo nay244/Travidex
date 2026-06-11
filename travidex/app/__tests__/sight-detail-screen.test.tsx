@@ -4,17 +4,19 @@ jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack, push: mock
 jest.mock('../../hooks/useSight', () => ({ useSight: jest.fn() }));
 jest.mock('../../lib/data/citiesByCountry', () => ({ getCityWithCountry: jest.fn() }));
 jest.mock('../../lib/data/favorites', () => ({ getFavoriteSightIds: jest.fn(), setFavorite: jest.fn() }));
+jest.mock('../../lib/data/finds', () => ({ unlogFind: jest.fn() }));
 jest.mock('../../context/AuthProvider', () => ({
   useAuth: () => ({ session: { user: { id: 'test-user-id' } }, loading: false }),
 }));
 jest.mock('../../lib/data/photos', () => ({ getUserPhotos: jest.fn().mockResolvedValue([]), uploadUserPhoto: jest.fn() }));
 
-import { Share } from 'react-native';
+import { Alert, Share } from 'react-native';
 import { screen, fireEvent, act, waitFor } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test-utils';
 import { useSight } from '../../hooks/useSight';
 import { getCityWithCountry } from '../../lib/data/citiesByCountry';
 import { getFavoriteSightIds, setFavorite } from '../../lib/data/favorites';
+import { unlogFind } from '../../lib/data/finds';
 import SightDetail from '../sight/[id]';
 
 const baseSight = {
@@ -144,4 +146,59 @@ it('renders recent find rows and this-week count', async () => {
   const rows = screen.getAllByTestId('recent-find-row');
   expect(rows.length).toBe(2);
   expect(screen.getByTestId('this-week-count')).toBeOnTheScreen();
+});
+
+it('unlog-btn renders for found sights', async () => {
+  (useSight as jest.Mock).mockReturnValue({
+    sight: baseSight,
+    found: true, recentFinds: [], loading: false, reload: jest.fn(),
+  });
+  await renderWithTheme(<SightDetail />);
+  expect(screen.getByTestId('unlog-btn')).toBeOnTheScreen();
+});
+
+it('unlog-btn is absent for unfound sights', async () => {
+  (useSight as jest.Mock).mockReturnValue({
+    sight: baseSight,
+    found: false, recentFinds: [], loading: false, reload: jest.fn(),
+  });
+  await renderWithTheme(<SightDetail />);
+  expect(screen.queryByTestId('unlog-btn')).toBeNull();
+});
+
+it('pressing unlog-btn fires Alert.alert', async () => {
+  const alertSpy = jest.spyOn(Alert, 'alert');
+  (useSight as jest.Mock).mockReturnValue({
+    sight: baseSight,
+    found: true, recentFinds: [], loading: false, reload: jest.fn(),
+  });
+  await renderWithTheme(<SightDetail />);
+  await act(async () => { fireEvent.press(screen.getByTestId('unlog-btn')); });
+  expect(alertSpy).toHaveBeenCalledWith(
+    'Remove this find?',
+    expect.stringContaining('Eiffel Tower'),
+    expect.arrayContaining([
+      expect.objectContaining({ text: 'Cancel' }),
+      expect.objectContaining({ text: 'Remove', style: 'destructive' }),
+    ])
+  );
+  alertSpy.mockRestore();
+});
+
+it('confirming unlog calls unlogFind and flips screen to unfound', async () => {
+  const mockReload = jest.fn();
+  (unlogFind as jest.Mock).mockResolvedValue(undefined);
+  (useSight as jest.Mock).mockReturnValue({
+    sight: baseSight,
+    found: true, recentFinds: [], loading: false, reload: mockReload,
+  });
+  jest.spyOn(Alert, 'alert').mockImplementation((_title, _msg, buttons) => {
+    const destructive = (buttons as any[]).find(b => b.style === 'destructive');
+    destructive?.onPress?.();
+  });
+  await renderWithTheme(<SightDetail />);
+  await act(async () => { fireEvent.press(screen.getByTestId('unlog-btn')); });
+  await waitFor(() => expect(unlogFind).toHaveBeenCalledWith('test-user-id', 's1'));
+  await waitFor(() => expect(mockReload).toHaveBeenCalled());
+  jest.restoreAllMocks();
 });
