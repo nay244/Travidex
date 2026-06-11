@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useTheme, useThemeMode } from '@/theme';
 import { useEntitlement } from '../../context/EntitlementProvider';
 import { Screen } from '../../components/Screen';
+import { Glass } from '../../components/Glass';
 import type { Scheme } from '@/theme';
 
 // Hard-coded preview palettes so the mock always reads correctly regardless of active theme
@@ -72,11 +73,10 @@ function ThemeCard({ mode, label, active, locked, testID, onPress }: CardProps) 
         )}
       </View>
 
-      {/* Label row */}
-      <View style={{
+      {/* Label row — Glass footer per ref 20 */}
+      <Glass style={{
         flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
         paddingHorizontal: 12, paddingVertical: 10,
-        backgroundColor: t.colors.surface2,
       }}>
         <Text style={[t.type.body, { color: t.colors.text1, fontWeight: '600' }]}>{label}</Text>
         {active ? (
@@ -103,7 +103,7 @@ function ThemeCard({ mode, label, active, locked, testID, onPress }: CardProps) 
             borderWidth: 2, borderColor: t.colors.borderStrong,
           }} />
         )}
-      </View>
+      </Glass>
     </Pressable>
   );
 }
@@ -180,17 +180,17 @@ export default function Appearance() {
           <Pressable
             onPress={() => router.push('/paywall')}
             style={({ pressed }) => ({
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: t.spacing.s4,
-              padding: t.spacing.s5,
               borderRadius: t.radii.lg,
-              backgroundColor: t.colors.amberDim,
-              borderWidth: 1,
-              borderColor: t.colors.amberLine,
               opacity: pressed ? 0.85 : 1,
             })}
           >
+          <Glass style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: t.spacing.s4,
+            padding: t.spacing.s5,
+            borderRadius: t.radii.lg,
+          }}>
             <View style={{
               width: 40, height: 40, borderRadius: 20,
               backgroundColor: t.colors.amber,
@@ -203,6 +203,7 @@ export default function Appearance() {
               <Text style={[t.type.label, { color: t.colors.amber, marginTop: 2 }]}>TRAVIDEX+ · PREVIEW IT HERE</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={t.colors.amber} />
+          </Glass>
           </Pressable>
         )}
 

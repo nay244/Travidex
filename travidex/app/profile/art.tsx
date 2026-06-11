@@ -6,6 +6,7 @@ import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
 import { useProfile } from '../../hooks/useProfile';
 import { Screen } from '../../components/Screen';
+import { Glass } from '../../components/Glass';
 import { PROFILE_ART, ArtSwatch } from '../../lib/profileArt';
 import { getArtId, setArtId } from '../../lib/data/profile';
 
@@ -113,11 +114,8 @@ export default function ArtPicker() {
                   )}
                 </View>
 
-                {/* Label area */}
-                <View style={{
-                  padding: t.spacing.s3,
-                  backgroundColor: t.colors.surface2,
-                }}>
+                {/* Label area — Glass info footer per ref 19 */}
+                <Glass style={{ padding: t.spacing.s3 }}>
                   <Text style={[t.type.h3, { color: unlocked ? t.colors.text1 : t.colors.text3 }]}>
                     {art.label}
                   </Text>
@@ -132,7 +130,7 @@ export default function ArtPicker() {
                       <Ionicons name="lock-closed-outline" size={10} color={t.colors.amber} />{' '}{art.unlock}
                     </Text>
                   )}
-                </View>
+                </Glass>
               </Pressable>
             );
           })}
