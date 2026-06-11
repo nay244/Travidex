@@ -6,7 +6,7 @@ import { awardBadges, getUserBadges } from '../lib/data/badges';
 import { computeStats, Stats } from '../lib/stats';
 import { evaluateBadges } from '../lib/badges';
 
-const EMPTY: Stats = { totalFinds: 0, citiesClaimed: 0, countriesExplored: 0 };
+const EMPTY: Stats = { totalFinds: 0, citiesClaimed: 0, countriesExplored: 0, worldFound: 0, worldTotal: 0 };
 
 export function useProfile() {
   const { session } = useAuth();

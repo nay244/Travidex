@@ -114,13 +114,23 @@ export default function Settings() {
         <View style={{ width: 40 }} />
       </View>
       <View style={{ flex: 1, padding: t.spacing.s5 }}>
-        {/* Section 1: Location + Appearance */}
+        {/* Section 1: Location + Photo journal + Appearance */}
         <View style={cardStyle}>
           <View style={rowStyle}>
             <Ionicons name="location-outline" size={20} color={t.colors.text2} style={{ marginRight: t.spacing.s4 }} />
             <Text style={[t.type.body, { color: t.colors.text1, flex: 1 }]}>Use location</Text>
             <Switch value={locationOn} onValueChange={toggleLocation} />
           </View>
+          <View style={divider} />
+          <Pressable
+            testID="nav-journal"
+            onPress={() => router.push('/profile/journal')}
+            style={({ pressed }) => [rowStyle, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <Ionicons name="images-outline" size={20} color={t.colors.text2} style={{ marginRight: t.spacing.s4 }} />
+            <Text style={[t.type.body, { color: t.colors.text1, flex: 1 }]}>Photo journal</Text>
+            <Ionicons name="chevron-forward" size={16} color={t.colors.text3} />
+          </Pressable>
           <View style={divider} />
           <Pressable
             onPress={() => router.push('/profile/appearance')}

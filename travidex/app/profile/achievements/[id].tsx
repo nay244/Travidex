@@ -5,6 +5,7 @@ import { useTheme } from '@/theme';
 import { useProfile } from '../../../hooks/useProfile';
 import { ACHIEVEMENTS, achievementProgress } from '../../../lib/achievements';
 import { Screen } from '../../../components/Screen';
+import { Medallion } from '../../../components/Medallion';
 
 export default function AchievementDetail() {
   const t = useTheme();
@@ -25,6 +26,7 @@ export default function AchievementDetail() {
   }
 
   const { value, done } = achievementProgress(achievement, stats);
+  const earned = value > 0;
 
   return (
     <Screen>
@@ -50,32 +52,18 @@ export default function AchievementDetail() {
           gap: t.spacing.s5,
         }}
       >
-        {/* Big icon disc */}
-        <View style={{
-          width: 96,
-          height: 96,
-          borderRadius: 48,
-          backgroundColor: done ? t.colors.foundBg : 'transparent',
-          borderWidth: done ? 0 : 1,
-          borderColor: t.colors.locked,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <Ionicons
-            name={achievement.icon as any}
-            size={40}
-            color={done ? t.colors.green : t.colors.text3}
-          />
-        </View>
+        {/* Big medallion */}
+        <Medallion
+          icon={achievement.icon}
+          tone={achievement.tone}
+          earned={earned}
+          size={96}
+          badge={earned ? String(value) : undefined}
+        />
 
         {/* Label */}
         <Text style={[t.type.h1, { color: t.colors.text1, textAlign: 'center' }]}>
           {achievement.label}
-        </Text>
-
-        {/* Description */}
-        <Text style={[t.type.body, { color: t.colors.text2, textAlign: 'center' }]}>
-          {achievement.description}
         </Text>
 
         {/* Progress block */}
@@ -91,13 +79,18 @@ export default function AchievementDetail() {
             overflow: 'hidden',
           }}>
             <View style={{
-              width: `${(value / achievement.goal) * 100}%`,
+              width: `${Math.min(100, (value / achievement.goal) * 100)}%`,
               height: '100%',
               backgroundColor: done ? t.colors.green : t.colors.amber,
               borderRadius: 4,
             }} />
           </View>
         </View>
+
+        {/* Description */}
+        <Text style={[t.type.body, { color: t.colors.text2, textAlign: 'center' }]}>
+          {achievement.description}
+        </Text>
 
         {/* Status line */}
         {done ? (

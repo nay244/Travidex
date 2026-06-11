@@ -18,7 +18,13 @@ jest.mock('../../hooks/useActiveCity', () => ({
 }));
 jest.mock('../../components/LocationPicker', () => ({ LocationPicker: () => null }));
 jest.mock('../../hooks/useProfile', () => ({
-  useProfile: () => ({ stats: { totalFinds: 0, citiesClaimed: 0, countriesExplored: 0 }, earnedBadges: [], loading: false }),
+  useProfile: () => ({ stats: { totalFinds: 0, citiesClaimed: 0, countriesExplored: 0, worldFound: 0, worldTotal: 400 }, earnedBadges: [], loading: false }),
+}));
+jest.mock('../../context/EntitlementProvider', () => ({
+  useEntitlement: () => ({ isPremium: false }),
+}));
+jest.mock('../../lib/data/profile', () => ({
+  getArtId: jest.fn(() => Promise.resolve('trailhead')),
 }));
 
 it('renders the Map screen', async () => {

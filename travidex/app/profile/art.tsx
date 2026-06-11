@@ -56,8 +56,9 @@ export default function ArtPicker() {
           </Text>
         </View>
 
+        {/* Subtitle — §6.1 corrected copy */}
         <Text style={[t.type.body, { color: t.colors.text3, marginBottom: t.spacing.s5 }]}>
-          Unlock new banners as you find sights, claim cities, and explore countries.
+          Unlock new <Text style={{ fontWeight: '700' }}>backgrounds</Text> as you find sights, claim cities, and explore countries.
         </Text>
 
         {/* 2-col grid */}
@@ -65,6 +66,7 @@ export default function ArtPicker() {
           {PROFILE_ART.map(art => {
             const unlocked = art.test(stats);
             const selected = selectedId === art.id;
+            const prog = art.progress(stats);
             return (
               <Pressable
                 key={art.id}
@@ -78,16 +80,17 @@ export default function ArtPicker() {
                   borderColor: selected ? t.colors.green : t.colors.borderSubtle,
                 }}
               >
-                {/* Art preview */}
+                {/* Art preview — real artwork fills the tile */}
                 <View style={{ height: 74, position: 'relative' }}>
                   <ArtSwatch
                     art={art}
-                    style={{ position: 'absolute', inset: 0, borderRadius: 0 }}
+                    style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
                   />
+                  {/* Locked: scrim overlay + lock icon */}
                   {!unlocked && (
                     <View style={{
-                      position: 'absolute', inset: 0,
-                      backgroundColor: 'rgba(8,10,14,0.5)',
+                      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                      backgroundColor: t.colors.surfaceScrim,
                       alignItems: 'center', justifyContent: 'center',
                     }}>
                       <View style={{
@@ -99,6 +102,7 @@ export default function ArtPicker() {
                       </View>
                     </View>
                   )}
+                  {/* Selected checkmark disc */}
                   {selected && (
                     <View
                       testID={`art-selected-${art.id}`}
@@ -114,7 +118,7 @@ export default function ArtPicker() {
                   )}
                 </View>
 
-                {/* Label area — Glass info footer per ref 19 */}
+                {/* Glass info footer */}
                 <Glass style={{ padding: t.spacing.s3 }}>
                   <Text style={[t.type.h3, { color: unlocked ? t.colors.text1 : t.colors.text3 }]}>
                     {art.label}
@@ -126,9 +130,35 @@ export default function ArtPicker() {
                       <Text style={[t.type.label, { color: t.colors.green }]}>UNLOCKED</Text>
                     )
                   ) : (
-                    <Text style={[t.type.label, { color: t.colors.amber, marginTop: t.spacing.s1 }]} numberOfLines={2}>
-                      <Ionicons name="lock-closed-outline" size={10} color={t.colors.amber} />{' '}{art.unlock}
-                    </Text>
+                    <View style={{ marginTop: t.spacing.s1 }}>
+                      {/* Criteria + progress fraction */}
+                      <Text
+                        style={[t.type.label, { color: t.colors.amber }]}
+                        numberOfLines={1}
+                      >
+                        <Ionicons name="lock-closed-outline" size={10} color={t.colors.amber} />{' '}
+                        {art.unlock} · {prog.value}/{prog.goal}
+                      </Text>
+                      {/* Progress bar */}
+                      <View
+                        style={{
+                          marginTop: t.spacing.s1 + 2,
+                          height: 4,
+                          borderRadius: 999,
+                          backgroundColor: t.colors.progressBg,
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <View
+                          style={{
+                            width: `${Math.min(100, (prog.value / prog.goal) * 100)}%`,
+                            height: '100%',
+                            borderRadius: 999,
+                            backgroundColor: t.colors.amber,
+                          }}
+                        />
+                      </View>
+                    </View>
                   )}
                 </Glass>
               </Pressable>

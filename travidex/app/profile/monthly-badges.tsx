@@ -6,27 +6,23 @@ import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
 import { getFindMonths } from '../../lib/data/finds';
 import { Screen } from '../../components/Screen';
+import { Medallion, type MedallionTone } from '../../components/Medallion';
 
-// Flat month catalog — copy a line to add/rename (index 0 = January).
-const MONTHS = [
-  'January',   // 0 — Jan
-  'February',  // 1 — Feb
-  'March',     // 2 — Mar
-  'April',     // 3 — Apr
-  'May',       // 4 — May
-  'June',      // 5 — Jun
-  'July',      // 6 — Jul
-  'August',    // 7 — Aug
-  'September', // 8 — Sep
-  'October',   // 9 — Oct
-  'November',  // 10 — Nov
-  'December',  // 11 — Dec
-];
-
-// Flat short-label catalog used in the cell caption (matches MONTHS by index).
-const MONTH_SHORT = [
-  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-  'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+// Month badge designs — add/adjust a month: copy a line and rename.
+// Icons are Ionicons; tones tint the earned medallion. Derived from kit BADGE_YEARS.
+const MONTH_BADGES: { month: string; icon: string; tone: MedallionTone }[] = [
+  { month: 'January',   icon: 'trail-sign-outline', tone: 'green' }, // footprints → trail
+  { month: 'February',  icon: 'camera-outline',     tone: 'blue'  }, // camera
+  { month: 'March',     icon: 'map-outline',         tone: 'amber' }, // map
+  { month: 'April',     icon: 'flag-outline',        tone: 'green' }, // flag
+  { month: 'May',       icon: 'compass-outline',     tone: 'blue'  }, // compass
+  { month: 'June',      icon: 'triangle-outline',    tone: 'amber' }, // mountain
+  { month: 'July',      icon: 'water-outline',       tone: 'blue'  }, // waves
+  { month: 'August',    icon: 'bonfire-outline',     tone: 'amber' }, // tent/outdoors
+  { month: 'September', icon: 'leaf-outline',        tone: 'green' }, // leaf
+  { month: 'October',   icon: 'skull-outline',       tone: 'amber' }, // ghost/Halloween
+  { month: 'November',  icon: 'rainy-outline',       tone: 'blue'  }, // wind/rain
+  { month: 'December',  icon: 'snow-outline',        tone: 'blue'  }, // snowflake
 ];
 
 export default function MonthlyBadges({ now = new Date() }: { now?: Date }) {
@@ -91,7 +87,7 @@ export default function MonthlyBadges({ now = new Date() }: { now?: Date }) {
         </Text>
 
         {years.map(year => {
-          const earnedCount = MONTHS.filter((_name, m) => {
+          const earnedCount = MONTH_BADGES.filter((_badge, m) => {
             const key = `${year}-${String(m + 1).padStart(2, '0')}`;
             return findMonths.has(key);
           }).length;
@@ -111,43 +107,36 @@ export default function MonthlyBadges({ now = new Date() }: { now?: Date }) {
 
               {/* 3-col month grid */}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.s4 }}>
-                {MONTHS.map((name, m) => {
+                {MONTH_BADGES.map(({ month, icon, tone }, m) => {
                   const key = `${year}-${String(m + 1).padStart(2, '0')}`;
                   const earned = findMonths.has(key);
                   return (
                     <View
                       key={key}
-                      testID={earned ? `month-${key}-earned` : `month-${key}-locked`}
                       style={{
-                        // 3-col layout: (100% - 2 gaps) / 3 — use fixed fraction
-                        width: '30%',
+                        // 3-col layout: guarantee 3-up on narrow screens
+                        // (30% + gaps could wrap the 3rd column)
+                        flexBasis: '28%',
+                        flexGrow: 1,
                         alignItems: 'center',
                         gap: t.spacing.s2,
                       }}
                     >
-                      {/* Circular disc */}
-                      <View style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 32,
-                        backgroundColor: earned ? t.colors.foundBg : 'transparent',
-                        borderWidth: 1.5,
-                        borderColor: earned ? t.colors.greenLine : t.colors.locked,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                        {earned ? (
-                          <Ionicons name="checkmark" size={26} color={t.colors.green} />
-                        ) : (
-                          <Ionicons name="lock-closed-outline" size={20} color={t.colors.text3} />
-                        )}
-                      </View>
-                      {/* Month caption */}
-                      <Text style={[t.type.monoSm, {
+                      <Medallion
+                        icon={earned ? icon : 'lock-closed-outline'}
+                        tone={tone}
+                        earned={earned}
+                        size={64}
+                        testID={earned ? `month-${key}-earned` : `month-${key}-locked`}
+                      />
+                      {/* Month label — full name, sans 600 */}
+                      <Text style={{
+                        fontFamily: t.fontFamily.sansSemibold,
+                        fontSize: t.fontSize.caption,
                         color: earned ? t.colors.green : t.colors.textDisabled,
                         textAlign: 'center',
-                      }]}>
-                        {MONTH_SHORT[m]}
+                      }}>
+                        {month}
                       </Text>
                     </View>
                   );

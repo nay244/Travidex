@@ -93,3 +93,9 @@ it('back-btn calls router.back()', async () => {
   fireEvent.press(screen.getByTestId('back-btn'));
   expect(mockBack).toHaveBeenCalled();
 });
+
+it('navigates to Photo journal screen', async () => {
+  await renderWithTheme(<Settings />);
+  fireEvent.press(screen.getByTestId('nav-journal'));
+  expect(mockPush).toHaveBeenCalledWith('/profile/journal');
+});
