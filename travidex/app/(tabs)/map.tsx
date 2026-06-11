@@ -12,7 +12,6 @@ import { useCityCatalog } from '../../hooks/useCityCatalog';
 import { useActiveCity } from '../../hooks/useActiveCity';
 import { SightPin } from '../../components/SightPin';
 import { DexSheet } from '../../components/DexSheet';
-import { LocationPicker } from '../../components/LocationPicker';
 import { LogFindSheet } from '../../components/LogFindSheet';
 import { Flag } from '../../components/Flag';
 import { filterSights } from '../../lib/sightList';
@@ -23,11 +22,10 @@ export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const router = useRouter();
-  const { cityId, setCityId } = useCity();
+  const { cityId } = useCity();
   const { selected, setSelected, logRequested, clearLogRequest } = useSelection();
   const { sights, reload } = useCityCatalog(cityId);
   const { city } = useActiveCity(cityId);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -139,7 +137,7 @@ export default function MapScreen() {
   // Reload on focus so pins/rows refresh after logging elsewhere
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
-  // Clear selection on any city change (picker, Explore's "Open map", etc.)
+  // Clear selection on any city change (location screen, Explore's "Open map", etc.)
   useEffect(() => { setSelected(null); setLogModalOpen(false); setSearchQuery(''); }, [cityId]);
 
   // Handle stamp FAB log request from the tab bar
@@ -285,7 +283,7 @@ export default function MapScreen() {
         {/* Location pill */}
         <Pressable
           testID="location-pill"
-          onPress={() => setPickerOpen(true)}
+          onPress={() => router.push('/location')}
           style={[glassStyle, {
             alignSelf: 'flex-start',
             flexDirection: 'row', alignItems: 'center',
@@ -360,14 +358,6 @@ export default function MapScreen() {
           dragHandleProps={panResponder.panHandlers}
         />
       </Animated.View>
-
-      <LocationPicker
-        visible={pickerOpen}
-        currentCityId={cityId}
-        initialCountryId={city?.country_id ?? null}
-        onPick={(id) => { setCityId(id); setPickerOpen(false); }}
-        onClose={() => setPickerOpen(false)}
-      />
 
       {/* Log modal for unfound selection */}
       <Modal transparent visible={logModalOpen} onRequestClose={() => setLogModalOpen(false)}>

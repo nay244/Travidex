@@ -21,14 +21,8 @@ jest.mock('../../hooks/useCityCatalog', () => ({
 jest.mock('../../hooks/useActiveCity', () => ({
   useActiveCity: () => ({ city: { id: 'c1', country_id: 'k1', name: 'Paris', region: null, lat: 48.85, lng: 2.35, country_code: 'FR', country_name: 'France' } }),
 }));
-// Stub the picker — its own behavior is covered by LocationPicker.test.tsx.
-// When visible it renders a probe that exercises the onPick wiring.
-jest.mock('../../components/LocationPicker', () => ({
-  LocationPicker: ({ visible, onPick }: any) => {
-    const { Text } = require('react-native');
-    return visible ? <Text onPress={() => onPick('c9')}>PICKER-OPEN</Text> : null;
-  },
-}));
+// LocationPicker is no longer used by map (modal stays for submit). Stub harmlessly.
+jest.mock('../../components/LocationPicker', () => ({ LocationPicker: () => null }));
 // Stub LogFindSheet so modal tests don't need auth/data wiring
 jest.mock('../../components/LogFindSheet', () => ({
   LogFindSheet: ({ sightId, onLogged }: any) => {
@@ -63,7 +57,7 @@ function WrappedMapScreen() {
 
 beforeEach(() => jest.clearAllMocks());
 
-it('shows the location pill and opens the picker', async () => {
+it('shows the location pill and pressing it pushes /location', async () => {
   await renderWithTheme(<WrappedMapScreen />);
   const allParis = screen.getAllByText('Paris');
   expect(allParis.length).toBeGreaterThanOrEqual(1);          // pill city name
@@ -71,19 +65,7 @@ it('shows the location pill and opens the picker', async () => {
   await act(async () => {
     fireEvent.press(screen.getByTestId('location-pill'));
   });
-  expect(screen.getByText('PICKER-OPEN')).toBeOnTheScreen();
-});
-
-it('picking a city updates the provider and closes the picker', async () => {
-  await renderWithTheme(<WrappedMapScreen />);
-  await act(async () => {
-    fireEvent.press(screen.getByTestId('location-pill'));
-  });
-  await act(async () => {
-    fireEvent.press(screen.getByText('PICKER-OPEN'));         // stub calls onPick('c9')
-  });
-  expect(mockSetCityId).toHaveBeenCalledWith('c9');
-  expect(screen.queryByText('PICKER-OPEN')).toBeNull();        // picker closed
+  expect(mockPush).toHaveBeenCalledWith('/location');
 });
 
 it('row press selects the sight and shows banner with sight name', async () => {
