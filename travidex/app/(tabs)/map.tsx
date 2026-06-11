@@ -7,6 +7,7 @@ import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme';
 import { useCity } from '../../context/CityProvider';
+import { useSelection } from '../../context/SelectionProvider';
 import { useCityCatalog } from '../../hooks/useCityCatalog';
 import { useActiveCity } from '../../hooks/useActiveCity';
 import { SightPin } from '../../components/SightPin';
@@ -23,10 +24,10 @@ export default function MapScreen() {
   const { width, height } = useWindowDimensions();
   const router = useRouter();
   const { cityId, setCityId } = useCity();
+  const { selected, setSelected, logRequested, clearLogRequest } = useSelection();
   const { sights, reload } = useCityCatalog(cityId);
   const { city } = useActiveCity(cityId);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [selected, setSelected] = useState<SightWithFind | null>(null);
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -140,6 +141,18 @@ export default function MapScreen() {
 
   // Clear selection on any city change (picker, Explore's "Open map", etc.)
   useEffect(() => { setSelected(null); setLogModalOpen(false); setSearchQuery(''); }, [cityId]);
+
+  // Handle stamp FAB log request from the tab bar
+  useEffect(() => {
+    if (!logRequested) return;
+    clearLogRequest();
+    if (!selected) return;
+    if (selected.found) {
+      router.push({ pathname: '/find/success', params: { sightId: selected.id, already: '1' } });
+    } else {
+      setLogModalOpen(true);
+    }
+  }, [logRequested]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset to half snap on city change
   useEffect(() => { snapTo('half'); }, [cityId, snapTo]);

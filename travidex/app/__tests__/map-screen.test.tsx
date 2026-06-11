@@ -37,15 +37,34 @@ jest.mock('../../components/LogFindSheet', () => ({
   },
 }));
 
+import React from 'react';
+import { Pressable, Text } from 'react-native';
 import { screen, fireEvent, act } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test-utils';
 import MapScreen from '../(tabs)/map';
+import { SelectionProvider, useSelection } from '../../context/SelectionProvider';
 import { mockAnimateToRegion } from '../../__mocks__/react-native-maps';
+
+// Expose a requestLog button accessible in tests
+function RequestLogButton() {
+  const { requestLog } = useSelection();
+  return <Pressable testID="log-request-probe" onPress={requestLog}><Text>trigger-log</Text></Pressable>;
+}
+
+// Wrap MapScreen with the real SelectionProvider + probe button
+function WrappedMapScreen() {
+  return (
+    <SelectionProvider>
+      <RequestLogButton />
+      <MapScreen />
+    </SelectionProvider>
+  );
+}
 
 beforeEach(() => jest.clearAllMocks());
 
 it('shows the location pill and opens the picker', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   const allParis = screen.getAllByText('Paris');
   expect(allParis.length).toBeGreaterThanOrEqual(1);          // pill city name
   expect(screen.getByLabelText('France')).toBeOnTheScreen();  // pill flag
@@ -56,7 +75,7 @@ it('shows the location pill and opens the picker', async () => {
 });
 
 it('picking a city updates the provider and closes the picker', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent.press(screen.getByTestId('location-pill'));
   });
@@ -68,7 +87,7 @@ it('picking a city updates the provider and closes the picker', async () => {
 });
 
 it('row press selects the sight and shows banner with sight name', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   // No banner initially
   expect(screen.queryByTestId('selection-banner')).toBeNull();
   await act(async () => {
@@ -81,7 +100,7 @@ it('row press selects the sight and shows banner with sight name', async () => {
 });
 
 it('chevron (seemore) press navigates to /sight/<id> without selecting', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent.press(screen.getByTestId('seemore-s1'));
   });
@@ -91,7 +110,7 @@ it('chevron (seemore) press navigates to /sight/<id> without selecting', async (
 });
 
 it('banner for unfound sight shows TAP TO LOG and opens log modal', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent.press(screen.getByText('Eiffel Tower'));
   });
@@ -104,7 +123,7 @@ it('banner for unfound sight shows TAP TO LOG and opens log modal', async () => 
 });
 
 it('banner for found sight shows "Already in your dex" and routes to success with already:1', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent.press(screen.getByText('Louvre'));
   });
@@ -118,7 +137,7 @@ it('banner for found sight shows "Already in your dex" and routes to success wit
 // --- Map focus -----------------------------------------------------------
 
 it('selecting a sight calls animateToRegion with the sight coords', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent.press(screen.getByText('Eiffel Tower'));
   });
@@ -136,7 +155,7 @@ it('selecting a sight calls animateToRegion with the sight coords', async () => 
 });
 
 it('selecting a found sight also calls animateToRegion with correct coords', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent.press(screen.getByText('Louvre'));
   });
@@ -154,7 +173,7 @@ it('selecting a found sight also calls animateToRegion with correct coords', asy
 // --- Search suggestions --------------------------------------------------
 
 it('no suggestion card shown before typing', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent(screen.getByTestId('map-search'), 'focus');
   });
@@ -162,7 +181,7 @@ it('no suggestion card shown before typing', async () => {
 });
 
 it('typing a query while focused shows matching suggestions', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent(screen.getByTestId('map-search'), 'focus');
     fireEvent.changeText(screen.getByTestId('map-search'), 'eiff');
@@ -172,7 +191,7 @@ it('typing a query while focused shows matching suggestions', async () => {
 });
 
 it('typing a query shows no-match row when nothing matches', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent(screen.getByTestId('map-search'), 'focus');
     fireEvent.changeText(screen.getByTestId('map-search'), 'zzz');
@@ -181,7 +200,7 @@ it('typing a query shows no-match row when nothing matches', async () => {
 });
 
 it('pressing a suggestion selects the sight, shows banner, clears query, and calls animateToRegion', async () => {
-  await renderWithTheme(<MapScreen />);
+  await renderWithTheme(<WrappedMapScreen />);
   await act(async () => {
     fireEvent(screen.getByTestId('map-search'), 'focus');
     fireEvent.changeText(screen.getByTestId('map-search'), 'eiff');
@@ -203,4 +222,33 @@ it('pressing a suggestion selects the sight, shows banner, clears query, and cal
   );
   // Query cleared — suggestion card gone
   expect(screen.queryByTestId('suggestion-s1')).toBeNull();
+});
+
+// --- logRequested (stamp FAB) flow --------------------------------------
+// Drive context state via user interactions on the DexSheet rows then trigger
+// requestLog directly via a probe button — this is cleaner than mount-time effects
+// and avoids batching ordering issues.
+
+it('logRequested=true with unfound selection opens the log modal', async () => {
+  await renderWithTheme(<WrappedMapScreen />);
+  // First select an unfound sight via row press (same as other tests)
+  await act(async () => { fireEvent.press(screen.getByText('Eiffel Tower')); });
+  // Then simulate the stamp FAB calling requestLog
+  await act(async () => { fireEvent.press(screen.getByTestId('log-request-probe')); });
+  expect(screen.getByTestId('log-sheet-s1')).toBeOnTheScreen();
+});
+
+it('logRequested=true with found selection navigates to success with already:1', async () => {
+  await renderWithTheme(<WrappedMapScreen />);
+  await act(async () => { fireEvent.press(screen.getByText('Louvre')); });
+  await act(async () => { fireEvent.press(screen.getByTestId('log-request-probe')); });
+  expect(mockPush).toHaveBeenCalledWith({ pathname: '/find/success', params: { sightId: 's2', already: '1' } });
+});
+
+it('logRequested=true with no selection does nothing', async () => {
+  await renderWithTheme(<WrappedMapScreen />);
+  // No selection — just trigger requestLog
+  await act(async () => { fireEvent.press(screen.getByTestId('log-request-probe')); });
+  expect(mockPush).not.toHaveBeenCalled();
+  expect(screen.queryByTestId('log-sheet-s1')).toBeNull();
 });
