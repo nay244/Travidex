@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
 import { BADGES } from '../../lib/badges';
@@ -9,6 +10,7 @@ import { Screen } from '../../components/Screen';
 
 export default function Badges() {
   const t = useTheme();
+  const router = useRouter();
   const { session } = useAuth();
   const [earned, setEarned] = useState<string[]>([]);
 
@@ -22,6 +24,26 @@ export default function Badges() {
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: t.spacing.s5, gap: t.spacing.s3 }}
       >
+        {/* Monthly badges entry — links to the calendar-grid view (§3.9) */}
+        <Pressable
+          testID="monthly-badges-link"
+          onPress={() => router.push('/profile/monthly-badges')}
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: t.spacing.s5,
+            borderRadius: t.radii.lg,
+            backgroundColor: t.colors.surface1,
+            borderWidth: 1,
+            borderColor: t.colors.borderSubtle,
+            opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          <Ionicons name="calendar-outline" size={20} color={t.colors.green} style={{ marginRight: t.spacing.s4 }} />
+          <Text style={[t.type.body, { color: t.colors.text1, flex: 1 }]}>Monthly badges</Text>
+          <Ionicons name="chevron-forward" size={16} color={t.colors.text3} />
+        </Pressable>
+
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.s3 }}>
           {BADGES.map(b => {
             const has = earned.includes(b.code);
