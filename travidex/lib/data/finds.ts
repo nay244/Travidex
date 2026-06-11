@@ -39,12 +39,16 @@ export async function getUserFindCount(userId: string): Promise<number> {
   return count ?? 0;
 }
 
-// Months (as 'YYYY-MM') in which the user logged at least one find — drives the monthly badges page.
+// Months (as 'YYYY-MM', in the device's local time) in which the user logged at
+// least one find — drives the monthly badges page.
 export async function getFindMonths(userId: string): Promise<Set<string>> {
   const { data, error } = await supabase
     .from('finds')
     .select('found_at')
     .eq('user_id', userId);
   if (error) throw new Error(error.message);
-  return new Set((data ?? []).map((r: { found_at: string }) => r.found_at.slice(0, 7)));
+  return new Set((data ?? []).map((r: { found_at: string }) => {
+    const d = new Date(r.found_at);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  }));
 }

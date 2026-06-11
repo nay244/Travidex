@@ -24,7 +24,7 @@ export function DexSheet({ cityName, sights, onSelect, selectedId, onSeeMore, qu
   onSeeMore?: (id: string) => void;
   /** Controlled search query. When provided the DexSheet's own input is hidden. */
   query?: string;
-  /** Called when the user types in the DexSheet's internal input (uncontrolled mode only). */
+  /** Fires as the user types in the internal input; never fires in controlled mode (the input is hidden). */
   onQueryChange?: (q: string) => void;
 }) {
   const t = useTheme();
