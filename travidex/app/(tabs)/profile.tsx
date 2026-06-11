@@ -42,12 +42,21 @@ export default function Profile() {
 
   // Stat cell: equal flex, centered, never overlaps on 390pt device
   const StatCell = ({ value, label }: { value: number; label: string }) => (
-    <View style={{ flex: 1, alignItems: 'center', paddingVertical: t.spacing.s5 }}>
+    <View style={{ flex: 1, alignItems: 'center', paddingVertical: t.spacing.s5, paddingHorizontal: t.spacing.s2 }}>
       <Text style={[t.type.statXl, { color: t.colors.text1 }]}>{value}</Text>
       <Text
-        style={[t.type.label, { color: t.colors.text3, textAlign: 'center', marginTop: t.spacing.s1 }]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
+        style={[
+          t.type.label,
+          {
+            color: t.colors.text3,
+            textAlign: 'center',
+            marginTop: t.spacing.s1,
+            fontSize: 9,
+            letterSpacing: 0.5,
+            lineHeight: 12,
+          },
+        ]}
+        numberOfLines={2}
       >
         {label}
       </Text>

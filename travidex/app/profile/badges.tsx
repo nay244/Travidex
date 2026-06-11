@@ -78,8 +78,8 @@ export default function Badges() {
                 key={b.code}
                 testID={`badge-${b.code}-${has ? 'earned' : 'locked'}`}
                 style={{
-                  width: '47%',
-                  padding: t.spacing.s5,
+                  width: '48%',
+                  padding: t.spacing.s3,
                   borderRadius: t.radii.lg,
                   backgroundColor: has ? t.colors.foundBg : 'transparent',
                   borderWidth: 1,
@@ -103,10 +103,25 @@ export default function Badges() {
                     color={has ? t.colors.textOnAccent : t.colors.text3}
                   />
                 </View>
-                <Text style={[t.type.h3, { color: has ? t.colors.text1 : t.colors.text3, textAlign: 'center' }]}>
+                <Text
+                  style={[t.type.h3, { color: has ? t.colors.text1 : t.colors.text3, textAlign: 'center' }]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}
+                >
                   {b.label}
                 </Text>
-                <Text style={[t.type.label, { color: has ? t.colors.green : t.colors.text3 }]}>
+                <Text
+                  style={[
+                    t.type.label,
+                    {
+                      color: has ? t.colors.green : t.colors.text3,
+                      fontSize: 9,
+                      letterSpacing: 0.5,
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
                   {has ? 'Earned' : 'Locked'}
                 </Text>
               </View>

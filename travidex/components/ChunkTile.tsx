@@ -79,22 +79,42 @@ export function ChunkTile({
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
+          zIndex: 1,
         }}
       >
-        <Text
-          style={[
-            t.type.label,
-            {
-              color: t.colors.text3,
-              fontSize: t.fontSize.micro,
-              letterSpacing: 0.8,
-              textTransform: 'uppercase',
-            },
-          ]}
-          numberOfLines={1}
-        >
-          {region ?? ''}
-        </Text>
+        {/* Left: region label + count below it */}
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text
+            style={[
+              t.type.label,
+              {
+                color: t.colors.text3,
+                fontSize: t.fontSize.micro,
+                letterSpacing: 0.8,
+                textTransform: 'uppercase',
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {region ?? ''}
+          </Text>
+          <Text
+            style={[
+              t.type.label,
+              {
+                color: t.colors.text1,
+                fontSize: 10,
+                letterSpacing: 0,
+                textTransform: 'none',
+                fontWeight: '700',
+                marginTop: 2,
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {`${found}/${total}`}
+          </Text>
+        </View>
 
         {state === 'claimed' ? (
           /* Claimed: green ✓ disc */
@@ -126,7 +146,7 @@ export function ChunkTile({
         )}
       </View>
 
-      {/* Bottom: name + count */}
+      {/* Bottom: name only */}
       <View>
         <Text
           style={[
@@ -136,18 +156,6 @@ export function ChunkTile({
           numberOfLines={1}
         >
           {name}
-        </Text>
-        <Text
-          style={[
-            t.type.label,
-            {
-              color: state === 'claimed' ? t.colors.chunkClaimed : t.colors.text3,
-              fontWeight: '700',
-              marginTop: 2,
-            },
-          ]}
-        >
-          {`${found}/${total}`}
         </Text>
       </View>
     </Pressable>

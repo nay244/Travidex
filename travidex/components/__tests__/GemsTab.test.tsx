@@ -69,7 +69,7 @@ it('pending own gem pins to top with IN REVIEW badge and no star chip', async ()
   expect(queryByTestId('star-g3')).toBeNull();
 });
 
-it('default sort (Most favorited) shows higher-favs gem first', async () => {
+it('default sort (Favorites) shows higher-favs gem first', async () => {
   const { findAllByText } = await renderWithTheme(<GemsTab />);
   const cards = await findAllByText(/Secret Passage|Rooftop Garden/);
   // GEM_A (favs=10) should come before GEM_B (favs=3)
@@ -86,7 +86,7 @@ it('sort-newest reorders to newest approved_at first', async () => {
   });
 });
 
-it('sort-nearest reorders to closest distance first', async () => {
+it('sort-nearest (Nearby) reorders to closest distance first', async () => {
   const { findByTestId, findAllByText } = await renderWithTheme(<GemsTab />);
   fireEvent.press(await findByTestId('sort-nearest'));
   // GEM_B distance=200 < GEM_A distance=500
