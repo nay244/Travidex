@@ -57,6 +57,7 @@ export default function MapScreen() {
   const sheetTop = useRef(new Animated.Value(usableHeight * 0.55)).current;
   // Track the committed snap so we know the base position on each new drag.
   const currentSnap = useRef<'peek' | 'half' | 'full'>('half');
+  const dragStart = useRef(0); // sheet position when a drag begins, for clamping
 
   const snapTo = useCallback((target: 'peek' | 'half' | 'full') => {
     currentSnap.current = target;
@@ -75,15 +76,16 @@ export default function MapScreen() {
       onPanResponderGrant: () => {
         // Stop any in-flight spring so drag starts from current rendered position.
         sheetTop.stopAnimation();
+        dragStart.current = (sheetTop as any)._value;
         // Flatten so getAnimatedValue reads correctly from here.
-        (sheetTop as any).setOffset((sheetTop as any)._value);
+        (sheetTop as any).setOffset(dragStart.current);
         (sheetTop as any).setValue(0);
       },
       onPanResponderMove: (_, gs) => {
         const pts = snapPoints.current;
-        // Clamp: don't go above full or below peek.
-        const clamped = Math.max(pts.full, Math.min(pts.peek, gs.dy));
-        sheetTop.setValue(clamped);
+        // Clamp the RESULTING position (offset + delta) between full and peek.
+        const next = Math.max(pts.full, Math.min(pts.peek, dragStart.current + gs.dy));
+        sheetTop.setValue(next - dragStart.current);
       },
       onPanResponderRelease: (_, gs) => {
         (sheetTop as any).flattenOffset();
