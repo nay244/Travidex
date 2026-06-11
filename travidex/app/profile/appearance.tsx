@@ -2,6 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme, useThemeMode } from '@/theme';
 import { useEntitlement } from '../../context/EntitlementProvider';
+import { Screen } from '../../components/Screen';
 import type { Scheme } from '@/theme';
 
 export default function Appearance() {
@@ -20,7 +21,8 @@ export default function Appearance() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg, padding: t.spacing.s7, gap: t.spacing.s5 }}>
+    <Screen>
+    <View style={{ flex: 1, padding: t.spacing.s7, gap: t.spacing.s5 }}>
       <Text style={[t.type.h2, { color: t.colors.text1 }]}>Appearance</Text>
 
       <Pressable
@@ -53,5 +55,6 @@ export default function Appearance() {
         </Text>
       </Pressable>
     </View>
+    </Screen>
   );
 }

@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import Purchases, { PurchasesPackage } from 'react-native-purchases';
 import { useTheme } from '@/theme';
 import { useEntitlement } from '../context/EntitlementProvider';
+import { Screen } from '../components/Screen';
 
 // add a benefit: copy a line
 const BENEFITS = [
@@ -52,8 +53,9 @@ export default function Paywall() {
   }
 
   return (
+    <Screen>
     <ScrollView
-      style={{ flex: 1, backgroundColor: t.colors.bg }}
+      style={{ flex: 1 }}
       contentContainerStyle={{ padding: t.spacing.s7, gap: t.spacing.s5 }}
     >
       <Text style={[t.type.h1, { color: t.colors.text1 }]}>Travidex+</Text>
@@ -102,5 +104,6 @@ export default function Paywall() {
         </Pressable>
       </View>
     </ScrollView>
+    </Screen>
   );
 }

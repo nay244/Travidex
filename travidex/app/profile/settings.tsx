@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { supabase } from '../../lib/supabase';
 import { useEntitlement } from '../../context/EntitlementProvider';
+import { Screen } from '../../components/Screen';
 
 export default function Settings() {
   const t = useTheme();
@@ -62,7 +63,8 @@ export default function Settings() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg, padding: t.spacing.s5, gap: t.spacing.s5 }}>
+    <Screen>
+    <View style={{ flex: 1, padding: t.spacing.s5, gap: t.spacing.s5 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text style={[t.type.body, { color: t.colors.text1 }]}>Use location</Text>
         <Switch value={locationOn} onValueChange={toggleLocation} />
@@ -80,5 +82,6 @@ export default function Settings() {
         <Text style={[t.type.body, { color: t.colors.danger }]}>Delete account</Text>
       </Pressable>
     </View>
+    </Screen>
   );
 }

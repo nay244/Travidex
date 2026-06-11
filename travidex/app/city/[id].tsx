@@ -8,6 +8,7 @@ import { SightRow } from '../../components/SightRow';
 import { filterSights, sortSights } from '../../lib/sightList';
 import { getFavoriteSightIds, setFavorite } from '../../lib/data/favorites';
 import { useAuth } from '../../context/AuthProvider';
+import { Screen } from '../../components/Screen';
 
 export default function City() {
   const t = useTheme();
@@ -60,7 +61,7 @@ export default function City() {
   const displayed = sortSights(filterSights(sights, query), 'dex');
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
       <View style={{ padding: t.spacing.s5, gap: t.spacing.s3 }}>
         {/* Header row: completion + sparkles */}
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -117,6 +118,6 @@ export default function City() {
           />
         )}
       />
-    </View>
+    </Screen>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/theme';
+import { Screen } from '../../components/Screen';
 import { useCity } from '../../context/CityProvider';
 import { useCityCatalog } from '../../hooks/useCityCatalog';
 import { getSightById } from '../../lib/data/catalog';
@@ -46,7 +47,8 @@ export default function Success() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg, alignItems: 'center', justifyContent: 'center', gap: t.spacing.s4, padding: t.spacing.s5 }}>
+    <Screen>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: t.spacing.s4, padding: t.spacing.s5 }}>
       {isAlready ? (
         <>
           {sight && (
@@ -80,5 +82,6 @@ export default function Success() {
         <Text style={[t.type.h3, { color: t.colors.textOnAccent }]}>Done</Text>
       </Pressable>
     </View>
+    </Screen>
   );
 }

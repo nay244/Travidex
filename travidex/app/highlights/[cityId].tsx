@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Screen } from '../../components/Screen';
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { useTheme } from '@/theme';
@@ -112,7 +113,7 @@ export default function RegionHighlights() {
   // ── Empty state ──
   if (!hasContent) {
     return (
-      <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+      <Screen>
         <View style={{ padding: t.spacing.s4 }}>
           <Pressable onPress={() => router.back()} hitSlop={8}>
             <Text style={[t.type.body, { color: t.colors.text2 }]}>← Back</Text>
@@ -126,7 +127,7 @@ export default function RegionHighlights() {
             {`Find a sight in ${cityName} and add photos to build your highlights.`}
           </Text>
         </View>
-      </View>
+      </Screen>
     );
   }
 
@@ -145,7 +146,7 @@ export default function RegionHighlights() {
   const shareDisabled = selected.length === 0;
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
       {/* Header */}
       <View
         style={{
@@ -532,6 +533,6 @@ export default function RegionHighlights() {
           </Text>
         </Pressable>
       </View>
-    </View>
+    </Screen>
   );
 }

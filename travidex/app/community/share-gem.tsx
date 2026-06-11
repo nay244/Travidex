@@ -3,6 +3,7 @@ import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from 'reac
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
+import { Screen } from '../../components/Screen';
 import { useAuth } from '../../context/AuthProvider';
 import { useCity } from '../../context/CityProvider';
 import { useActiveCity } from '../../hooks/useActiveCity';
@@ -60,7 +61,8 @@ export default function ShareGem() {
 
   if (submitted) {
     return (
-      <View style={{ flex: 1, backgroundColor: t.colors.bg, justifyContent: 'center', alignItems: 'center', padding: t.spacing.s6 }}>
+      <Screen>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: t.spacing.s6 }}>
         <Text style={[t.type.h3, { color: t.colors.amber, marginBottom: t.spacing.s3, textAlign: 'center' }]}>
           Submitted for review
         </Text>
@@ -74,11 +76,13 @@ export default function ShareGem() {
           <Text style={[t.type.body, { color: '#fff' }]}>Done</Text>
         </Pressable>
       </View>
+      </Screen>
     );
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: t.colors.bg }} contentContainerStyle={{ padding: t.spacing.s4 }}>
+    <Screen>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: t.spacing.s4 }}>
       {/* Auto location chip */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2, marginBottom: t.spacing.s4 }}>
         {city ? <Flag code={city.country_code} size={18} radius={2} /> : null}
@@ -198,5 +202,6 @@ export default function ShareGem() {
         </Text>
       </Pressable>
     </ScrollView>
+    </Screen>
   );
 }

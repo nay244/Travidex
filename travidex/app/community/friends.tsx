@@ -3,6 +3,7 @@ import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
+import { Screen } from '../../components/Screen';
 import {
   getFriendsOverview,
   searchProfiles,
@@ -56,7 +57,7 @@ export default function FriendsScreen() {
     : friends;
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
       {/* Header */}
       <View
         style={{
@@ -185,6 +186,6 @@ export default function FriendsScreen() {
           </View>
         )}
       />
-    </View>
+    </Screen>
   );
 }

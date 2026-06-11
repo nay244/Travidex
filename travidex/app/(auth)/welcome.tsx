@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { Alert, Pressable, Text, View } from 'react-native';
 import { useTheme } from '@/theme';
 import { signInWithApple } from '../../lib/auth';
+import { Screen } from '../../components/Screen';
 
 export default function Welcome() {
   const t = useTheme();
@@ -18,7 +19,8 @@ export default function Welcome() {
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: 'flex-end', padding: t.spacing.s7, gap: t.spacing.s4, backgroundColor: t.colors.bg }}>
+    <Screen>
+    <View style={{ flex: 1, justifyContent: 'flex-end', padding: t.spacing.s7, gap: t.spacing.s4 }}>
       <Text style={[t.type.display, { color: t.colors.text1 }]}>Travidex</Text>
       <Text style={[t.type.body, { color: t.colors.text2, marginBottom: t.spacing.s5 }]}>Collect the world, one sight at a time.</Text>
 
@@ -33,5 +35,6 @@ export default function Welcome() {
         <Text style={[t.type.body, { textAlign: 'center', color: t.colors.text2 }]}>Log in</Text>
       </Pressable>
     </View>
+    </Screen>
   );
 }

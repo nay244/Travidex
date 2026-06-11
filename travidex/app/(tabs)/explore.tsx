@@ -9,6 +9,7 @@ import { getCountryProgress, getCityProgress, Progress } from '../../lib/data/pr
 import { CountryPicker } from '../../components/CountryPicker';
 import { ChunkTile } from '../../components/ChunkTile';
 import { Flag } from '../../components/Flag';
+import { Screen } from '../../components/Screen';
 import type { City, Country } from '../../lib/types';
 
 export default function Explore() {
@@ -145,7 +146,7 @@ export default function Explore() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
       {/* Header */}
       <View
         style={{
@@ -204,6 +205,6 @@ export default function Explore() {
         }}
         onClose={() => setPickerOpen(false)}
       />
-    </View>
+    </Screen>
   );
 }

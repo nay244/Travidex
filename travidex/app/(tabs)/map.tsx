@@ -3,6 +3,7 @@ import { Modal, Pressable, Text, View } from 'react-native';
 import MapView from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme';
 import { useCity } from '../../context/CityProvider';
 import { useCityCatalog } from '../../hooks/useCityCatalog';
@@ -16,6 +17,7 @@ import type { SightWithFind } from '../../lib/types';
 
 export default function MapScreen() {
   const t = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { cityId, setCityId } = useCity();
   const { sights, reload } = useCityCatalog(cityId);
@@ -73,7 +75,7 @@ export default function MapScreen() {
         <Pressable
           testID="location-pill"
           onPress={() => setPickerOpen(true)}
-          style={{ position: 'absolute', top: t.spacing.s5, left: t.spacing.s4, flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2, paddingVertical: t.spacing.s2, paddingHorizontal: t.spacing.s3, borderRadius: 999, backgroundColor: t.colors.surfaceOverlay, borderWidth: 1, borderColor: t.colors.borderSubtle }}
+          style={{ position: 'absolute', top: insets.top + t.spacing.s2, left: t.spacing.s4, flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2, paddingVertical: t.spacing.s2, paddingHorizontal: t.spacing.s3, borderRadius: 999, backgroundColor: t.colors.surfaceOverlay, borderWidth: 1, borderColor: t.colors.borderSubtle }}
         >
           <Flag code={city?.country_code ?? ''} size={22} radius={5} />
           <Text style={[t.type.body, { color: t.colors.text1 }]}>{city?.name ?? ''}</Text>

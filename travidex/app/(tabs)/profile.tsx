@@ -2,6 +2,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useProfile } from '../../hooks/useProfile';
+import { Screen } from '../../components/Screen';
 
 export default function Profile() {
   const t = useTheme();
@@ -21,7 +22,8 @@ export default function Profile() {
   );
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
+      <ScrollView style={{ flex: 1 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-around', padding: t.spacing.s7 }}>
         <Stat value={stats.totalFinds} label="Sights found" />
         <Stat value={stats.citiesClaimed} label="Cities claimed" />
@@ -30,6 +32,7 @@ export default function Profile() {
       <Link label="Badges" to="/profile/badges" />
       <Link label="Photo journal" to="/profile/journal" />
       <Link label="Settings" to="/profile/settings" />
-    </ScrollView>
+      </ScrollView>
+    </Screen>
   );
 }

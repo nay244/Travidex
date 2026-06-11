@@ -2,6 +2,7 @@ import { ScrollView, Text, View, Pressable } from 'react-native';
 import { useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/theme';
+import { Screen } from '../../components/Screen';
 import { useSight } from '../../hooks/useSight';
 import { LogFindSheet } from '../../components/LogFindSheet';
 import { YourPhotos } from '../../components/YourPhotos';
@@ -14,7 +15,7 @@ export default function SightDetail() {
 
   const [hintOpen, setHintOpen] = useState(false);
 
-  if (loading || !sight) return <View style={{ flex: 1, backgroundColor: t.colors.bg }} />;
+  if (loading || !sight) return <Screen><View style={{ flex: 1 }} /></Screen>;
 
   const Stat = ({ label, value }: { label: string; value: string | null }) => (
     <View style={{ alignItems: 'center' }}>
@@ -24,7 +25,8 @@ export default function SightDetail() {
   );
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
+    <ScrollView style={{ flex: 1 }}>
       {found ? (
         <View testID="hero-found" style={{ height: 160, backgroundColor: t.colors.foundBg, borderWidth: 1, borderColor: t.colors.green, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={[t.type.dexNo, { color: t.colors.green }]}>#{sight.dex_no}</Text>
@@ -70,5 +72,6 @@ export default function SightDetail() {
         ))}
       </View>
     </ScrollView>
+    </Screen>
   );
 }

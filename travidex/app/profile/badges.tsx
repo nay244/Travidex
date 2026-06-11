@@ -4,6 +4,7 @@ import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
 import { BADGES } from '../../lib/badges';
 import { getUserBadges } from '../../lib/data/badges';
+import { Screen } from '../../components/Screen';
 
 export default function Badges() {
   const t = useTheme();
@@ -15,7 +16,8 @@ export default function Badges() {
   }, [session?.user?.id]);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: t.colors.bg }} contentContainerStyle={{ padding: t.spacing.s5, gap: t.spacing.s3 }}>
+    <Screen>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: t.spacing.s5, gap: t.spacing.s3 }}>
       {BADGES.map(b => {
         const has = earned.includes(b.code);
         // earned = full color; locked = HOLLOW (transparent fill + outline), never opacity-dim
@@ -30,5 +32,6 @@ export default function Badges() {
         );
       })}
     </ScrollView>
+    </Screen>
   );
 }

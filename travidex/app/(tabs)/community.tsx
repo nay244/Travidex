@@ -7,6 +7,7 @@ import { getFeed, FeedItem } from '../../lib/data/feed';
 import { getFriendsOverview } from '../../lib/data/friends';
 import { relativeTime } from '../../lib/relativeTime';
 import { GemsTab } from '../../components/GemsTab';
+import { Screen } from '../../components/Screen';
 
 type Tab = 'friends' | 'gems';
 
@@ -51,7 +52,7 @@ export default function Community() {
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
       {/* Segmented control */}
       <View style={{ flexDirection: 'row', gap: t.spacing.s2, padding: t.spacing.s4 }}>
         <Pressable
@@ -127,6 +128,6 @@ export default function Community() {
           <GemsTab />
         </View>
       )}
-    </View>
+    </Screen>
   );
 }

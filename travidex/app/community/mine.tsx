@@ -3,6 +3,7 @@ import { FlatList, Text, View } from 'react-native';
 import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
 import { getMySubmissions, Submission } from '../../lib/data/community';
+import { Screen } from '../../components/Screen';
 
 export default function Mine() {
   const t = useTheme();
@@ -23,8 +24,9 @@ export default function Mine() {
     s === 'approved' ? t.colors.green : s === 'rejected' ? t.colors.danger : t.colors.progress;
 
   return (
+    <Screen>
     <FlatList
-      style={{ flex: 1, backgroundColor: t.colors.bg }}
+      style={{ flex: 1 }}
       data={rows}
       keyExtractor={s => s.id}
       ListHeaderComponent={error ? <Text style={[t.type.caption, { color: t.colors.danger, padding: t.spacing.s5 }]}>{error}</Text> : null}
@@ -37,5 +39,6 @@ export default function Mine() {
         </View>
       )}
     />
+    </Screen>
   );
 }
