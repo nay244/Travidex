@@ -8,6 +8,12 @@ import { getFriendsOverview, FriendOverview } from '../../lib/data/friends';
 import { relativeTime } from '../../lib/relativeTime';
 import { GemsTab } from '../../components/GemsTab';
 import { Screen } from '../../components/Screen';
+import { SegmentedControl } from '../../components/SegmentedControl';
+
+const TAB_OPTIONS = [
+  { key: 'friends', label: 'Friends', testID: 'tab-friends' },
+  { key: 'gems',    label: 'Hidden gems', testID: 'tab-gems' },
+] as const;
 
 type Tab = 'friends' | 'gems';
 
@@ -38,21 +44,6 @@ export default function Community() {
 
   const friendsCount = friendsList.length;
 
-  const tabStyle = (tab: Tab) => ({
-    flex: 1,
-    paddingVertical: t.spacing.s3,
-    alignItems: 'center' as const,
-    borderRadius: t.radii.sm,
-    backgroundColor: activeTab === tab ? t.colors.amberDim : t.colors.surface2,
-    borderWidth: 1,
-    borderColor: activeTab === tab ? t.colors.amberLine : 'transparent',
-  });
-
-  const tabTextStyle = (tab: Tab) => [
-    t.type.body,
-    { color: activeTab === tab ? t.colors.amber : t.colors.text3 },
-  ];
-
   return (
     <Screen>
       {/* Screen title */}
@@ -66,21 +57,12 @@ export default function Community() {
       </Text>
 
       {/* Segmented control */}
-      <View style={{ flexDirection: 'row', gap: t.spacing.s2, paddingHorizontal: t.spacing.s4, paddingBottom: t.spacing.s2 }}>
-        <Pressable
-          testID="tab-friends"
-          onPress={() => setActiveTab('friends')}
-          style={tabStyle('friends')}
-        >
-          <Text style={tabTextStyle('friends')}>Friends</Text>
-        </Pressable>
-        <Pressable
-          testID="tab-gems"
-          onPress={() => setActiveTab('gems')}
-          style={tabStyle('gems')}
-        >
-          <Text style={tabTextStyle('gems')}>Hidden gems</Text>
-        </Pressable>
+      <View style={{ paddingHorizontal: t.spacing.s4, paddingBottom: t.spacing.s2 }}>
+        <SegmentedControl
+          options={TAB_OPTIONS}
+          value={activeTab}
+          onChange={key => setActiveTab(key as Tab)}
+        />
       </View>
 
       {activeTab === 'friends' ? (

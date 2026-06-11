@@ -8,8 +8,15 @@ import { useCity } from '../context/CityProvider';
 import { useActiveCity } from '../hooks/useActiveCity';
 import { getGemsForCity, setGemFavorite, reportGem, Gem } from '../lib/data/gems';
 import { relativeTime } from '../lib/relativeTime';
+import { SegmentedControl } from './SegmentedControl';
 
 type Sort = 'favs' | 'newest' | 'nearest';
+
+const SORT_OPTIONS = [
+  { key: 'favs',    label: 'Most favorited', testID: 'sort-favs' },
+  { key: 'newest',  label: 'Newest',         testID: 'sort-newest' },
+  { key: 'nearest', label: 'Nearest',        testID: 'sort-nearest' },
+] as const;
 
 type GemWithLocal = Gem & { reported?: boolean };
 
@@ -87,26 +94,6 @@ export function GemsTab() {
     ]);
   }
 
-  const segmentBtnStyle = (active: boolean) => ({
-    flex: 1,
-    paddingVertical: t.spacing.s2,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    borderRadius: t.radii.sm,
-    backgroundColor: active ? t.colors.amberDim : t.colors.surface2,
-    borderWidth: 1,
-    borderColor: active ? t.colors.amberLine : 'transparent',
-  });
-
-  const segmentTextStyle = (active: boolean) => [
-    t.type.caption,
-    {
-      color: active ? t.colors.amber : t.colors.text3,
-      fontFamily: t.fontFamily.monoRegular,
-      textAlign: 'center' as const,
-    },
-  ];
-
   return (
     <View style={{ flex: 1 }}>
       {/* Header: always visible, outside FlatList */}
@@ -133,17 +120,11 @@ export function GemsTab() {
           <Ionicons name="camera-outline" size={17} color="#000" />
           <Text style={[t.type.body, { color: '#000', fontFamily: t.fontFamily.sansSemibold }]}>Share a hidden gem</Text>
         </Pressable>
-        <View style={{ flexDirection: 'row', gap: t.spacing.s2 }}>
-          <Pressable testID="sort-favs" onPress={() => setSort('favs')} style={segmentBtnStyle(sort === 'favs')}>
-            <Text style={segmentTextStyle(sort === 'favs')} numberOfLines={1}>Favorites</Text>
-          </Pressable>
-          <Pressable testID="sort-newest" onPress={() => setSort('newest')} style={segmentBtnStyle(sort === 'newest')}>
-            <Text style={segmentTextStyle(sort === 'newest')} numberOfLines={1}>Newest</Text>
-          </Pressable>
-          <Pressable testID="sort-nearest" onPress={() => setSort('nearest')} style={segmentBtnStyle(sort === 'nearest')}>
-            <Text style={segmentTextStyle(sort === 'nearest')} numberOfLines={1}>Nearby</Text>
-          </Pressable>
-        </View>
+        <SegmentedControl
+          options={SORT_OPTIONS}
+          value={sort}
+          onChange={key => setSort(key as Sort)}
+        />
       </View>
 
       {/* Gem list */}
