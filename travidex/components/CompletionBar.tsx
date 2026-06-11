@@ -9,13 +9,15 @@ import { useTheme } from '@/theme';
 export function CompletionBar({ label, found, total }: { label?: string; found: number; total: number }) {
   const t = useTheme();
   const pct = total === 0 ? 0 : Math.round((found / total) * 100);
+  const complete = total > 0 && found >= total;
+  const barColor = complete ? t.colors.green : t.colors.amber;
   return (
     <View>
       {label !== undefined && (
-        <Text style={[t.type.h3, { color: t.colors.text1, marginBottom: t.spacing.s2 }]}>{`${label} · ${found} of ${total}`}</Text>
+        <Text style={[t.type.h3, { color: t.colors.text1, marginBottom: t.spacing.s2 }]}>{`${label} · ${found} / ${total}`}</Text>
       )}
       <View style={{ height: 7, backgroundColor: t.colors.progressBg, borderRadius: t.radii.xs }}>
-        <View style={{ width: `${pct}%`, height: 7, backgroundColor: t.colors.amber, borderRadius: t.radii.xs }} />
+        <View style={{ width: `${pct}%`, height: 7, backgroundColor: barColor, borderRadius: t.radii.xs }} />
       </View>
     </View>
   );

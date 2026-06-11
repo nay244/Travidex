@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Animated, FlatList, Modal, PanResponder, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { Flag } from './Flag';
 import type { Country } from '../lib/types';
@@ -128,7 +129,7 @@ export function CountryPicker({ visible, countries, progress, currentId, onPick,
                       {`${p.found}/${p.total} sights`}
                     </Text>
                   </View>
-                  {active && <Text style={{ color: t.colors.green }}>{'✓'}</Text>}
+                  <Ionicons name="chevron-forward" size={18} color={t.colors.text3} />
                 </Pressable>
               );
             }}

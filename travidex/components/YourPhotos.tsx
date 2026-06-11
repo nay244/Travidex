@@ -35,7 +35,7 @@ export function YourPhotos({ sightId }: { sightId: string }) {
       <Text style={[t.type.label, { color: t.colors.text3, marginBottom: t.spacing.s2 }]}>Your photos</Text>
       <ScrollView horizontal>
         {photos.map(p => <Image key={p.id} source={{ uri: p.photo_url }} style={{ width: 64, height: 64, borderRadius: t.radii.xs, marginRight: t.spacing.s2 }} />)}
-        <Pressable onPress={add} style={{ width: 64, height: 64, borderRadius: t.radii.xs, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable onPress={add} style={{ width: 64, height: 64, borderRadius: t.radii.xs, borderWidth: 1, borderStyle: 'dashed', borderColor: t.colors.borderStrong, alignItems: 'center', justifyContent: 'center' }}>
           <Text style={[t.type.caption, { color: t.colors.text3 }]}>+ Add photo</Text>
         </Pressable>
       </ScrollView>

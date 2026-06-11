@@ -94,7 +94,7 @@ it('row press selects the sight and shows banner with sight name', async () => {
     fireEvent.press(screen.getByText('Eiffel Tower'));
   });
   expect(screen.getByTestId('selection-banner')).toBeOnTheScreen();
-  expect(screen.getByText('Selected Eiffel Tower')).toBeOnTheScreen();
+  expect(screen.getByText('Selected: Eiffel Tower')).toBeOnTheScreen();
   // Should not have navigated
   expect(mockPush).not.toHaveBeenCalled();
 });

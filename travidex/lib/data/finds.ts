@@ -17,7 +17,7 @@ export async function getFoundSightIds(userId: string, sightIds: string[]): Prom
   return new Set((data ?? []).map((r: { sight_id: string }) => r.sight_id));
 }
 
-export type RecentFind = { id: string; comment: string | null; found_at: string; user_id: string };
+export type RecentFind = { id: string; comment: string | null; found_at: string; user_id: string; username: string | null };
 
 export async function getRecentFinds(sightId: string, limit = 10): Promise<RecentFind[]> {
   const { data, error } = await supabase
@@ -27,7 +27,18 @@ export async function getRecentFinds(sightId: string, limit = 10): Promise<Recen
     .order('found_at', { ascending: false })
     .limit(limit);
   if (error) throw new Error(error.message);
-  return (data ?? []) as RecentFind[];
+  const finds = (data ?? []) as Omit<RecentFind, 'username'>[];
+  if (finds.length === 0) return [];
+
+  // finds.user_id has no FK to profiles, so PostgREST can't embed — merge usernames manually.
+  const userIds = [...new Set(finds.map(f => f.user_id))];
+  const { data: profiles, error: pErr } = await supabase
+    .from('profiles')
+    .select('user_id, username')
+    .in('user_id', userIds);
+  if (pErr) throw new Error(pErr.message);
+  const names = new Map((profiles ?? []).map((p: { user_id: string; username: string }) => [p.user_id, p.username]));
+  return finds.map(f => ({ ...f, username: names.get(f.user_id) ?? null }));
 }
 
 export async function getUserFindCount(userId: string): Promise<number> {
