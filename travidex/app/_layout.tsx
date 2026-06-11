@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import { ReactNode } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native';
-import { Slot } from 'expo-router';
+import { Stack } from 'expo-router';
 import {
   useFonts,
   SpaceGrotesk_400Regular, SpaceGrotesk_500Medium, SpaceGrotesk_600SemiBold, SpaceGrotesk_700Bold,
@@ -43,7 +43,7 @@ export default function RootLayout() {
       <EntitlementProvider>
         <AuthProvider>
           <AuthGate>
-            <Slot />
+            <Stack screenOptions={{ headerShown: false }} />
           </AuthGate>
         </AuthProvider>
       </EntitlementProvider>

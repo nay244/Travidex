@@ -3,9 +3,10 @@ jest.mock('expo-location', () => ({
   getForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
 }));
 
+const mockBack = jest.fn();
 const mockReplace = jest.fn();
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ replace: mockReplace, push: mockPush }) }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack, replace: mockReplace, push: mockPush }) }));
 
 jest.mock('../../lib/supabase', () => ({
   supabase: {
@@ -85,4 +86,10 @@ it('restores purchases', async () => {
   await renderWithTheme(<Settings />);
   fireEvent.press(screen.getByText('Restore purchases'));
   await waitFor(() => expect(mockRestore).toHaveBeenCalled());
+});
+
+it('back-btn calls router.back()', async () => {
+  await renderWithTheme(<Settings />);
+  fireEvent.press(screen.getByTestId('back-btn'));
+  expect(mockBack).toHaveBeenCalled();
 });

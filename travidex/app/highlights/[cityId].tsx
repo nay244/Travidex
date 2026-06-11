@@ -6,6 +6,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Screen } from '../../components/Screen';
 import ViewShot, { captureRef } from 'react-native-view-shot';
@@ -115,8 +116,8 @@ export default function RegionHighlights() {
     return (
       <Screen>
         <View style={{ padding: t.spacing.s4 }}>
-          <Pressable onPress={() => router.back()} hitSlop={8}>
-            <Text style={[t.type.body, { color: t.colors.text2 }]}>← Back</Text>
+          <Pressable testID="back-btn" onPress={() => router.back()} hitSlop={8}>
+            <Ionicons name="chevron-back" size={24} color={t.colors.text1} />
           </Pressable>
         </View>
         <View
@@ -157,8 +158,8 @@ export default function RegionHighlights() {
           paddingBottom: t.spacing.s3,
         }}
       >
-        <Pressable onPress={() => router.back()} hitSlop={8}>
-          <Text style={[t.type.body, { color: t.colors.text2 }]}>← Back</Text>
+        <Pressable testID="back-btn" onPress={() => router.back()} hitSlop={8}>
+          <Ionicons name="chevron-back" size={24} color={t.colors.text1} />
         </Pressable>
         <Text
           style={[

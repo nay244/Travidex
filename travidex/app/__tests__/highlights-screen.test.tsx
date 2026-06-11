@@ -84,6 +84,13 @@ beforeEach(() => {
 
 // ── Test cases ──
 
+it('back-btn calls router.back()', async () => {
+  await act(async () => { renderWithTheme(<RegionHighlights />); });
+  await waitFor(() => expect(screen.getByTestId('back-btn')).toBeOnTheScreen());
+  fireEvent.press(screen.getByTestId('back-btn'));
+  expect(mockBack).toHaveBeenCalled();
+});
+
 it('renders card and selection grid with all photos selected (3 OF 3 SELECTED)', async () => {
   await act(async () => { renderWithTheme(<RegionHighlights />); });
   await waitFor(() => expect(screen.getByTestId('highlight-card')).toBeOnTheScreen());

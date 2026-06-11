@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
@@ -72,8 +73,32 @@ export default function Submit() {
   const input = { backgroundColor: t.colors.surface2, color: t.colors.text1, padding: t.spacing.s4, borderRadius: t.radii.sm, marginBottom: t.spacing.s3 };
   return (
     <Screen>
+    <View style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      height: 52,
+      paddingHorizontal: t.spacing.s4,
+      borderBottomWidth: 1,
+      borderBottomColor: t.colors.borderSubtle,
+    }}>
+      <Pressable
+        testID="back-btn"
+        onPress={() => router.back()}
+        hitSlop={8}
+        style={({ pressed }) => ({
+          width: 40, height: 40, borderRadius: 20,
+          alignItems: 'center', justifyContent: 'center',
+          opacity: pressed ? 0.6 : 1,
+        })}
+      >
+        <Ionicons name="chevron-back" size={24} color={t.colors.text1} />
+      </Pressable>
+      <Text style={[t.type.h2, { flex: 1, textAlign: 'center', color: t.colors.text1 }]}>
+        Submit a sight
+      </Text>
+      <View style={{ width: 40 }} />
+    </View>
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: t.spacing.s5 }}>
-      <Text style={[t.type.h2, { color: t.colors.text1, marginBottom: t.spacing.s4 }]}>Submit a sight</Text>
       <Pressable
         testID="city-picker-row"
         onPress={() => setPickerVisible(true)}

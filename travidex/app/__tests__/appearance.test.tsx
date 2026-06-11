@@ -1,5 +1,6 @@
+const mockBack = jest.fn();
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack, push: mockPush }) }));
 jest.mock('../../context/EntitlementProvider', () => ({ useEntitlement: jest.fn() }));
 
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
@@ -38,4 +39,11 @@ it('renders without crash', async () => {
   (useEntitlement as jest.Mock).mockReturnValue({ isPremium: true });
   await renderWithTheme(<Appearance />);
   expect(screen.getByText('Appearance')).toBeTruthy();
+});
+
+it('back-btn calls router.back()', async () => {
+  (useEntitlement as jest.Mock).mockReturnValue({ isPremium: false });
+  await renderWithTheme(<Appearance />);
+  fireEvent.press(screen.getByTestId('back-btn'));
+  expect(mockBack).toHaveBeenCalled();
 });

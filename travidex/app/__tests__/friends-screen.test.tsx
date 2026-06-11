@@ -81,6 +81,14 @@ it('shows empty state when no friends', async () => {
   );
 });
 
+it('back-btn calls router.back()', async () => {
+  (getFriendsOverview as jest.Mock).mockResolvedValue([]);
+  renderWithTheme(<FriendsScreen />);
+  await waitFor(() => expect(screen.getByTestId('back-btn')).toBeOnTheScreen());
+  fireEvent.press(screen.getByTestId('back-btn'));
+  expect(mockBack).toHaveBeenCalled();
+});
+
 it('already-friend users do not appear in add results', async () => {
   // alice is already a friend; search returns alice + charlie
   (searchProfiles as jest.Mock).mockResolvedValue([

@@ -25,6 +25,12 @@ import Submit from '../community/submit';
 
 beforeEach(() => jest.clearAllMocks());
 
+it('back-btn calls router.back()', async () => {
+  await renderWithTheme(<Submit />);
+  fireEvent.press(screen.getByTestId('back-btn'));
+  expect(mockBack).toHaveBeenCalled();
+});
+
 it('requires a name', async () => {
   await renderWithTheme(<Submit />);
   fireEvent.press(screen.getByText('Submit for review'));

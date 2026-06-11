@@ -1,5 +1,6 @@
+const mockBack = jest.fn();
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack, push: mockPush }) }));
 jest.mock('../../context/CityProvider', () => ({ useCity: () => ({ cityId: 'city-1' }) }));
 jest.mock('../../hooks/useCityCatalog', () => ({ useCityCatalog: jest.fn() }));
 jest.mock('../../lib/data/finds', () => ({ logFind: jest.fn() }));
@@ -55,4 +56,14 @@ it('shows the log sheet for unfound sight (does not immediately navigate)', asyn
   });
   expect(screen.getByText('Log find')).toBeTruthy();
   expect(mockPush).not.toHaveBeenCalled();
+});
+
+it('back-btn calls router.back()', async () => {
+  (useCityCatalog as jest.Mock).mockReturnValue({
+    sights: [], loading: false, reload: jest.fn(),
+    completion: { found: 0, total: 0 },
+  });
+  await renderWithTheme(<Pick />);
+  fireEvent.press(screen.getByTestId('back-btn'));
+  expect(mockBack).toHaveBeenCalled();
 });

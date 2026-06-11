@@ -31,6 +31,12 @@ beforeEach(() => {
   global.fetch = jest.fn().mockResolvedValue({ blob: () => Promise.resolve(MOCK_BLOB) });
 });
 
+it('back-btn calls router.back()', async () => {
+  const { getByTestId } = await renderWithTheme(<ShareGem />);
+  fireEvent.press(getByTestId('back-btn'));
+  expect(mockBack).toHaveBeenCalled();
+});
+
 it('submit button is disabled when no photo and no name', async () => {
   const { findByTestId } = await renderWithTheme(<ShareGem />);
   const btn = await findByTestId('submit-gem');
