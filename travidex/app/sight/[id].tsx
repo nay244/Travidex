@@ -435,8 +435,8 @@ export default function SightDetail() {
               <Text style={[t.type.body, { color: t.colors.text3 }]}>No finds yet — be the first.</Text>
             ) : (
               recentFinds.slice(0, 3).map(f => {
-                const initial = (f.user_id ?? '?')[0].toUpperCase();
-                const displayName = f.user_id ? f.user_id.slice(0, 8) : 'Unknown';
+                const displayName = f.username ?? 'Traveler';
+                const initial = displayName[0].toUpperCase();
                 return (
                   <View key={f.id} testID="recent-find-row" style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s4, paddingVertical: t.spacing.s3 }}>
                     <View style={{

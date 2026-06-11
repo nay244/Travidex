@@ -8,12 +8,17 @@ jest.mock('../../supabase', () => {
   const mockEqFinds = jest.fn(() => ({ order: mockOrderFinds }));
   const mockSelectFinds = jest.fn(() => ({ eq: mockEqFinds }));
 
+  const mockIn = jest.fn();
+  const mockSelectProfiles = jest.fn(() => ({ in: mockIn }));
+
   const mockFrom = jest.fn((t: string) =>
-    t === 'sights' ? { select: mockSelectCatalog } : { select: mockSelectFinds });
+    t === 'sights' ? { select: mockSelectCatalog }
+    : t === 'profiles' ? { select: mockSelectProfiles }
+    : { select: mockSelectFinds });
 
   return {
     supabase: { from: mockFrom },
-    __mocks: { mockMaybeSingle, mockEqId, mockSelectCatalog, mockLimit, mockOrderFinds, mockEqFinds, mockSelectFinds, mockFrom },
+    __mocks: { mockMaybeSingle, mockEqId, mockSelectCatalog, mockLimit, mockOrderFinds, mockEqFinds, mockSelectFinds, mockIn, mockSelectProfiles, mockFrom },
   };
 });
 
@@ -32,11 +37,21 @@ it('getSightById returns one sight', async () => {
   expect(s!.name).toBe('Eiffel Tower');
 });
 
-it('getRecentFinds returns latest finds for a sight', async () => {
-  m().mockLimit.mockResolvedValue({ data: [{ id: 'f1', comment: 'Found!' }], error: null });
+it('getRecentFinds returns latest finds with merged usernames', async () => {
+  m().mockLimit.mockResolvedValue({ data: [{ id: 'f1', comment: 'Found!', found_at: '2026-06-11T00:00:00Z', user_id: 'u1' }], error: null });
+  m().mockIn.mockResolvedValue({ data: [{ user_id: 'u1', username: 'admin' }], error: null });
   const finds = await getRecentFinds('s1', 10);
   expect(m().mockEqFinds).toHaveBeenCalledWith('sight_id', 's1');
   expect(m().mockOrderFinds).toHaveBeenCalledWith('found_at', { ascending: false });
   expect(m().mockLimit).toHaveBeenCalledWith(10);
+  expect(m().mockIn).toHaveBeenCalledWith('user_id', ['u1']);
   expect(finds[0].comment).toBe('Found!');
+  expect(finds[0].username).toBe('admin');
+});
+
+it('getRecentFinds skips the profile lookup when there are no finds', async () => {
+  m().mockLimit.mockResolvedValue({ data: [], error: null });
+  const finds = await getRecentFinds('s1', 10);
+  expect(finds).toEqual([]);
+  expect(m().mockIn).not.toHaveBeenCalled();
 });
