@@ -118,13 +118,57 @@ it('deselecting all disables share and shows select-at-least prompt', async () =
   expect(shareBtn.props.accessibilityState?.disabled ?? shareBtn.props.disabled).toBeTruthy();
 });
 
-it('share press calls captureRef then shareAsync', async () => {
+it('share-btn toggles destination row on press', async () => {
+  await act(async () => { renderWithTheme(<RegionHighlights />); });
+  await waitFor(() => expect(screen.getByTestId('share-btn')).toBeOnTheScreen());
+  // Destination row hidden initially
+  expect(screen.queryByTestId('dest-row')).toBeNull();
+  await act(async () => { fireEvent.press(screen.getByTestId('share-btn')); });
+  expect(screen.getByTestId('dest-row')).toBeOnTheScreen();
+  // Press again to close
+  await act(async () => { fireEvent.press(screen.getByTestId('share-btn')); });
+  expect(screen.queryByTestId('dest-row')).toBeNull();
+});
+
+it('Messages chip calls captureRef + shareAsync', async () => {
   (captureRef as jest.Mock).mockResolvedValue('file://x.png');
   await act(async () => { renderWithTheme(<RegionHighlights />); });
   await waitFor(() => expect(screen.getByTestId('share-btn')).toBeOnTheScreen());
+  // Open destination row
   await act(async () => { fireEvent.press(screen.getByTestId('share-btn')); });
+  await waitFor(() => expect(screen.getByTestId('dest-messages')).toBeOnTheScreen());
+  await act(async () => { fireEvent.press(screen.getByTestId('dest-messages')); });
   await waitFor(() => expect(captureRef).toHaveBeenCalled());
   expect(Sharing.shareAsync).toHaveBeenCalledWith('file://x.png');
+});
+
+it('Copy link chip is disabled', async () => {
+  await act(async () => { renderWithTheme(<RegionHighlights />); });
+  await waitFor(() => expect(screen.getByTestId('share-btn')).toBeOnTheScreen());
+  await act(async () => { fireEvent.press(screen.getByTestId('share-btn')); });
+  await waitFor(() => expect(screen.getByTestId('dest-copy')).toBeOnTheScreen());
+  const copyChip = screen.getByTestId('dest-copy');
+  expect(copyChip.props.accessibilityState?.disabled ?? copyChip.props.disabled).toBeTruthy();
+});
+
+it('tile dex labels render for each photo', async () => {
+  await act(async () => { renderWithTheme(<RegionHighlights />); });
+  await waitFor(() => expect(screen.getByTestId('select-p1')).toBeOnTheScreen());
+  // p1 → sight s1 → #001; p2 + p3 both → sight s2 → #002 (two tiles with same label)
+  expect(screen.getByText('#001')).toBeOnTheScreen();
+  expect(screen.getAllByText('#002').length).toBeGreaterThanOrEqual(1);
+});
+
+it('empty state shows sparkles chip, header, and body copy', async () => {
+  (useCityCatalog as jest.Mock).mockReturnValue({
+    sights: sights.map(s => ({ ...s, found: false })),
+    completion: { found: 0, total: 3 },
+    loading: false,
+  });
+  await act(async () => { renderWithTheme(<RegionHighlights />); });
+  expect(screen.getByTestId('highlights-empty')).toBeOnTheScreen();
+  expect(screen.getByText('No highlights yet')).toBeOnTheScreen();
+  expect(screen.getByText(/Find a sight in Paris and add photos/)).toBeOnTheScreen();
 });
 
 it('shows highlights-empty when no found sights', async () => {

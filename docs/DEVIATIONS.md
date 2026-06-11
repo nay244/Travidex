@@ -29,6 +29,8 @@ Updated every build round. Each entry: what differs, why, and what would close i
 | Area (§) | Deviation | Why | Closes with | Status |
 |---|---|---|---|---|
 | Highlights §3.6.1 | "Share to friends" (in-app feed post) disabled; only system-share ships | The feed has no post entity (finds only) | Feed `posts` table + card type | DEFERRED-FEATURE |
+| Highlights §3.6.1 | Save image / Messages / Stories all route via the system share sheet (`expo-sharing`); no direct Photos/Messages/Stories API integrations | Direct integrations require native modules (MediaLibrary, MessageUI, etc.) beyond OTA constraint | Add native integrations in a planned native build | PENDING-DEP |
+| Highlights §3.6.1 | "Copy link" chip disabled; no deep-link URL generated | Requires `expo-clipboard` (native module) and a deep-link resolver service | Add expo-clipboard + link service | PENDING-DEP |
 | Community §3.7 | Feed cards have no like/comment counts | Prototype-local interaction; no backend tables | `find_likes`/`find_comments` pipeline | DEFERRED-FEATURE |
 | Hidden gems §3.7.1 | "Nearby" sorts by distance from the active city's center, not device GPS | Spec's own location-off fallback; geolocation unwired | Use position when location toggle on | DEFERRED-FEATURE |
 | gems-check §3.7.1 | Automated checks = profanity wordlist + 50 km geo sanity; no image-safety classification | Needs an external classifier service | Vision-moderation API in the edge function | DEFERRED-FEATURE |
