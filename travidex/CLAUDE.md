@@ -1,1 +1,2 @@
 @AGENTS.md
+Screen mockups: design/reference/screens/ (PNG per screen, named with spec §refs — see design/reference/README.md). Match these visually; behavior lives in Travidex-Screen-Flow-and-Design.md at the §ref in each filename.
