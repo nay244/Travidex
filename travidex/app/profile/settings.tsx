@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Alert, Pressable, Switch, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { supabase } from '../../lib/supabase';
 import { useEntitlement } from '../../context/EntitlementProvider';
+import { Screen } from '../../components/Screen';
 
 export default function Settings() {
   const t = useTheme();
@@ -61,24 +63,81 @@ export default function Settings() {
     router.replace('/(auth)/welcome');
   }
 
+  const cardStyle = {
+    backgroundColor: t.colors.surface1,
+    borderRadius: t.radii.lg,
+    borderWidth: 1,
+    borderColor: t.colors.borderSubtle,
+    overflow: 'hidden' as const,
+    marginBottom: t.spacing.s4,
+  };
+
+  const rowStyle = {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    paddingVertical: t.spacing.s4,
+    paddingHorizontal: t.spacing.s5,
+    minHeight: t.size.hitMin,
+  };
+
+  const divider = {
+    height: 1,
+    backgroundColor: t.colors.divider,
+    marginHorizontal: t.spacing.s5,
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg, padding: t.spacing.s5, gap: t.spacing.s5 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={[t.type.body, { color: t.colors.text1 }]}>Use location</Text>
-        <Switch value={locationOn} onValueChange={toggleLocation} />
+    <Screen>
+      <View style={{ flex: 1, padding: t.spacing.s5 }}>
+        {/* Section 1: Location + Appearance */}
+        <View style={cardStyle}>
+          <View style={rowStyle}>
+            <Ionicons name="location-outline" size={20} color={t.colors.text2} style={{ marginRight: t.spacing.s4 }} />
+            <Text style={[t.type.body, { color: t.colors.text1, flex: 1 }]}>Use location</Text>
+            <Switch value={locationOn} onValueChange={toggleLocation} />
+          </View>
+          <View style={divider} />
+          <Pressable
+            onPress={() => router.push('/profile/appearance')}
+            style={({ pressed }) => [rowStyle, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <Ionicons name="color-palette-outline" size={20} color={t.colors.text2} style={{ marginRight: t.spacing.s4 }} />
+            <Text style={[t.type.body, { color: t.colors.text1, flex: 1 }]}>Appearance</Text>
+            <Ionicons name="chevron-forward" size={16} color={t.colors.text3} />
+          </Pressable>
+        </View>
+
+        {/* Section 2: Account actions */}
+        <View style={cardStyle}>
+          <Pressable
+            onPress={() => supabase.auth.signOut()}
+            style={({ pressed }) => [rowStyle, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <Ionicons name="log-out-outline" size={20} color={t.colors.info} style={{ marginRight: t.spacing.s4 }} />
+            <Text style={[t.type.body, { color: t.colors.info }]}>Sign out</Text>
+          </Pressable>
+          <View style={divider} />
+          <Pressable
+            onPress={restorePurchases}
+            style={({ pressed }) => [rowStyle, { opacity: pressed ? 0.7 : 1 }]}
+          >
+            <Ionicons name="refresh-outline" size={20} color={t.colors.info} style={{ marginRight: t.spacing.s4 }} />
+            <Text style={[t.type.body, { color: t.colors.info }]}>Restore purchases</Text>
+          </Pressable>
+        </View>
+
+        {/* Section 3: Danger zone */}
+        <View style={cardStyle}>
+          <Pressable
+            onPress={deleteAccount}
+            disabled={busy}
+            style={({ pressed }) => [rowStyle, { opacity: pressed || busy ? 0.7 : 1 }]}
+          >
+            <Ionicons name="trash-outline" size={20} color={t.colors.danger} style={{ marginRight: t.spacing.s4 }} />
+            <Text style={[t.type.body, { color: t.colors.danger }]}>Delete account</Text>
+          </Pressable>
+        </View>
       </View>
-      <Pressable onPress={() => router.push('/profile/appearance')}>
-        <Text style={[t.type.body, { color: t.colors.text1 }]}>Appearance</Text>
-      </Pressable>
-      <Pressable onPress={() => supabase.auth.signOut()}>
-        <Text style={[t.type.body, { color: t.colors.info }]}>Sign out</Text>
-      </Pressable>
-      <Pressable onPress={restorePurchases}>
-        <Text style={[t.type.body, { color: t.colors.info }]}>Restore purchases</Text>
-      </Pressable>
-      <Pressable onPress={deleteAccount} disabled={busy}>
-        <Text style={[t.type.body, { color: t.colors.danger }]}>Delete account</Text>
-      </Pressable>
-    </View>
+    </Screen>
   );
 }

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Purchases, { PurchasesPackage } from 'react-native-purchases';
 import { useTheme } from '@/theme';
 import { useEntitlement } from '../context/EntitlementProvider';
+import { Screen } from '../components/Screen';
 
 // add a benefit: copy a line
 const BENEFITS = [
@@ -52,55 +54,73 @@ export default function Paywall() {
   }
 
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: t.colors.bg }}
-      contentContainerStyle={{ padding: t.spacing.s7, gap: t.spacing.s5 }}
-    >
-      <Text style={[t.type.h1, { color: t.colors.text1 }]}>Travidex+</Text>
+    <Screen>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: t.spacing.s7, gap: t.spacing.s5 }}
+      >
+        {/* Header */}
+        <Text style={[t.type.h1, { color: t.colors.amber }]}>Travidex+</Text>
 
-      {BENEFITS.map(b => (
-        <Text key={b} style={[t.type.body, { color: t.colors.text2 }]}>
-          {'•'} {b}
-        </Text>
-      ))}
+        {/* Benefits — green check discs */}
+        <View style={{ gap: t.spacing.s3 }}>
+          {BENEFITS.map(b => (
+            <View key={b} style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s4 }}>
+              <View style={{
+                width: 22, height: 22, borderRadius: 11,
+                backgroundColor: t.colors.green,
+                alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <Ionicons name="checkmark" size={13} color={t.colors.textOnAccent} />
+              </View>
+              <Text style={[t.type.body, { color: t.colors.text2, flex: 1 }]}>{b}</Text>
+            </View>
+          ))}
+        </View>
 
-      {packages.map(p => (
-        <Pressable
-          key={p.identifier}
-          onPress={() => buy(p)}
-          disabled={buying}
-          style={{
-            backgroundColor: t.colors.actionPrimary,
-            padding: t.spacing.s5,
-            borderRadius: t.radii.md,
-            opacity: buying ? 0.6 : 1,
-          }}
-        >
-          <Text
-            style={[t.type.h3, { color: t.colors.textOnAccent, textAlign: 'center' }]}
+        {/* Package buttons */}
+        {packages.map(p => (
+          <Pressable
+            key={p.identifier}
+            onPress={() => buy(p)}
+            disabled={buying}
+            style={({ pressed }) => ({
+              backgroundColor: t.colors.actionPrimary,
+              padding: t.spacing.s5,
+              borderRadius: t.radii.lg,
+              alignItems: 'center',
+              opacity: buying || pressed ? 0.6 : 1,
+            })}
           >
-            {p.product.priceString}
-          </Text>
-        </Pressable>
-      ))}
+            <Text style={[t.type.h3, { color: t.colors.textOnAccent }]}>
+              {p.product.priceString}
+            </Text>
+            <Text style={[t.type.label, { color: t.colors.textOnAccent, opacity: 0.8, marginTop: 2 }]}>
+              per month
+            </Text>
+          </Pressable>
+        ))}
 
-      {error ? (
-        <Text style={[t.type.body, { color: t.colors.danger }]}>{error}</Text>
-      ) : null}
+        {error ? (
+          <Text style={[t.type.body, { color: t.colors.danger }]}>{error}</Text>
+        ) : null}
 
-      <View style={{ gap: t.spacing.s5 }}>
-        <Pressable onPress={handleRestore}>
-          <Text style={[t.type.body, { color: t.colors.info, textAlign: 'center' }]}>
-            Restore purchases
-          </Text>
-        </Pressable>
+        {/* Footer links */}
+        <View style={{ gap: t.spacing.s4 }}>
+          <Pressable onPress={handleRestore}>
+            <Text style={[t.type.body, { color: t.colors.info, textAlign: 'center' }]}>
+              Restore purchases
+            </Text>
+          </Pressable>
 
-        <Pressable onPress={() => router.back()}>
-          <Text style={[t.type.body, { color: t.colors.text2, textAlign: 'center' }]}>
-            Not now
-          </Text>
-        </Pressable>
-      </View>
-    </ScrollView>
+          <Pressable onPress={() => router.back()}>
+            <Text style={[t.type.body, { color: t.colors.text2, textAlign: 'center' }]}>
+              Not now
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </Screen>
   );
 }

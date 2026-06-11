@@ -1,12 +1,13 @@
 const mockReplace = jest.fn();
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockReplace, push: mockPush }),
+  useRouter: () => ({ replace: mockReplace, push: mockPush, back: jest.fn() }),
   useLocalSearchParams: () => ({ id: 'c1' }),
 }));
 const mockSetCityId = jest.fn();
 jest.mock('../../context/CityProvider', () => ({ useCity: () => ({ setCityId: mockSetCityId }) }));
 jest.mock('../../hooks/useCityCatalog', () => ({ useCityCatalog: jest.fn() }));
+jest.mock('../../hooks/useActiveCity', () => ({ useActiveCity: () => ({ city: { id: 'c1', name: 'Kyoto', region: 'Kansai', country_code: 'JP', country_name: 'Japan' } }) }));
 jest.mock('../../context/AuthProvider', () => ({ useAuth: () => ({ session: { user: { id: 'u1' } } }) }));
 
 const mockGetFavoriteSightIds = jest.fn();
@@ -39,7 +40,7 @@ beforeEach(() => {
 
 it('shows completion and opens the city map', async () => {
   await renderWithTheme(<City />);
-  expect(screen.getByText('2 of 5 found')).toBeOnTheScreen();
+  expect(screen.getByText('2/5 FOUND')).toBeOnTheScreen();
   fireEvent.press(screen.getByText('Open map'));
   expect(mockSetCityId).toHaveBeenCalledWith('c1');
   expect(mockReplace).toHaveBeenCalledWith('/(tabs)/map');
@@ -49,7 +50,7 @@ it('search input filters the sight rows', async () => {
   await renderWithTheme(<City />);
   expect(screen.getByText('Eiffel Tower')).toBeOnTheScreen();
   expect(screen.getByText('Louvre')).toBeOnTheScreen();
-  fireEvent.changeText(screen.getByPlaceholderText('Search sights'), 'Louvre');
+  fireEvent.changeText(screen.getByPlaceholderText('Search Kyoto'), 'Louvre');
   await waitFor(() => expect(screen.queryByText('Eiffel Tower')).toBeNull());
   expect(screen.getByText('Louvre')).toBeOnTheScreen();
 });

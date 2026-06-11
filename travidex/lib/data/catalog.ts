@@ -2,7 +2,7 @@ import { supabase } from '../supabase';
 import type { Sight } from '../types';
 
 const SIGHT_COLUMNS =
-  'id, city_id, dex_no, name, type_tags, reference_photo, about, hint, access, size, busyness, source, created_at, lat:st_y(location::geometry), lng:st_x(location::geometry)';
+  'id, city_id, dex_no, name, type_tags, reference_photo, about, hint, access, size, busyness, source, created_at, lat, lng';
 
 export async function getSightsForCity(cityId: string): Promise<Sight[]> {
   const { data, error } = await supabase

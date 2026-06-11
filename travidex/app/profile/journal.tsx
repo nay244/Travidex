@@ -3,6 +3,7 @@ import { FlatList, Image, Text, View } from 'react-native';
 import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
 import { getUserPhotos, UserPhoto } from '../../lib/data/photos';
+import { Screen } from '../../components/Screen';
 
 export default function Journal() {
   const t = useTheme();
@@ -14,7 +15,7 @@ export default function Journal() {
   }, [session?.user?.id]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
       <Text style={[t.type.caption, { color: t.colors.text2, padding: t.spacing.s5 }]}>{`${photos.length} ${photos.length === 1 ? 'photo' : 'photos'}`}</Text>
       <FlatList
         data={photos}
@@ -22,6 +23,6 @@ export default function Journal() {
         keyExtractor={p => p.id}
         renderItem={({ item }) => <Image source={{ uri: item.photo_url }} style={{ width: '33%', aspectRatio: 1, margin: 1 }} />}
       />
-    </View>
+    </Screen>
   );
 }

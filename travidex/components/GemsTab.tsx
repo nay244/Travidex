@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, FlatList, Image, Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { useAuth } from '../context/AuthProvider';
 import { useCity } from '../context/CityProvider';
@@ -106,20 +107,26 @@ export function GemsTab() {
       {/* Header: always visible, outside FlatList */}
       <View style={{ padding: t.spacing.s4 }}>
         <Text style={[t.type.caption, { color: t.colors.text2, marginBottom: t.spacing.s3 }]}>
-          {`Hidden gems near ${cityName} — spotted by travelers, not yet in the dex.`}
+          {`Hidden gems near `}
+          <Text style={{ color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold }}>{cityName}</Text>
+          {` — spotted by travelers, not yet in the dex.`}
         </Text>
         <Pressable
           testID="share-gem-btn"
           onPress={() => router.push('/community/share-gem')}
           style={{
             backgroundColor: t.colors.amber,
-            borderRadius: t.radii.sm,
+            borderRadius: t.radii.pill,
             paddingVertical: t.spacing.s3,
             alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row',
+            gap: t.spacing.s2,
             marginBottom: t.spacing.s4,
           }}
         >
-          <Text style={[t.type.body, { color: '#000' }]}>Share a hidden gem</Text>
+          <Ionicons name="camera-outline" size={17} color="#000" />
+          <Text style={[t.type.body, { color: '#000', fontFamily: t.fontFamily.sansSemibold }]}>Share a hidden gem</Text>
         </Pressable>
         <View style={{ flexDirection: 'row', gap: t.spacing.s2 }}>
           <Pressable testID="sort-favs" onPress={() => setSort('favs')} style={segmentBtnStyle(sort === 'favs')}>
@@ -154,28 +161,55 @@ export function GemsTab() {
                   marginHorizontal: t.spacing.s4,
                   marginBottom: t.spacing.s3,
                   backgroundColor: t.colors.surface1,
-                  borderRadius: t.radii.sm,
-                  padding: t.spacing.s4,
+                  borderRadius: t.radii.lg,
                   borderWidth: 1,
-                  borderColor: t.colors.borderSubtle,
+                  borderColor: t.colors.amberLine,
+                  overflow: 'hidden',
                 }}
               >
                 {gem.photo_url ? (
                   <Image
                     source={{ uri: gem.photo_url }}
-                    style={{ width: '100%', height: 160, borderRadius: t.radii.sm, marginBottom: t.spacing.s2 }}
+                    style={{ width: '100%', height: 160 }}
                     resizeMode="cover"
                   />
                 ) : null}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2, marginBottom: t.spacing.s1 }}>
-                  <Text style={[t.type.h3, { color: t.colors.text1, flex: 1 }]}>{gem.name}</Text>
-                  <View style={{ backgroundColor: t.colors.amberDim, borderRadius: t.radii.xs, paddingHorizontal: t.spacing.s2, paddingVertical: 2 }}>
-                    <Text style={[t.type.caption, { color: t.colors.amber, fontFamily: t.fontFamily.monoRegular }]}>IN REVIEW</Text>
+                <View style={{ padding: t.spacing.s4 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2, marginBottom: t.spacing.s1 }}>
+                    <Text style={[t.type.h3, { color: t.colors.text1, flex: 1 }]}>{gem.name}</Text>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 5,
+                        height: 24,
+                        paddingHorizontal: t.spacing.s2,
+                        borderRadius: t.radii.pill,
+                        backgroundColor: t.colors.amberDim,
+                        borderWidth: 1,
+                        borderColor: t.colors.amberLine,
+                      }}
+                    >
+                      <Ionicons name="time-outline" size={11} color={t.colors.amber} />
+                      <Text
+                        style={[
+                          t.type.caption,
+                          {
+                            color: t.colors.amber,
+                            fontFamily: t.fontFamily.monoBold,
+                            fontSize: 9,
+                            letterSpacing: 0.8,
+                          },
+                        ]}
+                      >
+                        IN REVIEW
+                      </Text>
+                    </View>
                   </View>
+                  {gem.note ? (
+                    <Text style={[t.type.body, { color: t.colors.text2 }]}>{gem.note}</Text>
+                  ) : null}
                 </View>
-                {gem.note ? (
-                  <Text style={[t.type.body, { color: t.colors.text2 }]}>{gem.note}</Text>
-                ) : null}
               </View>
             );
           }
@@ -188,7 +222,7 @@ export function GemsTab() {
                   marginHorizontal: t.spacing.s4,
                   marginBottom: t.spacing.s3,
                   backgroundColor: t.colors.surface2,
-                  borderRadius: t.radii.sm,
+                  borderRadius: t.radii.lg,
                   padding: t.spacing.s4,
                 }}
               >
@@ -204,7 +238,7 @@ export function GemsTab() {
                 marginHorizontal: t.spacing.s4,
                 marginBottom: t.spacing.s3,
                 backgroundColor: t.colors.surface1,
-                borderRadius: t.radii.sm,
+                borderRadius: t.radii.lg,
                 borderWidth: 1,
                 borderColor: t.colors.borderSubtle,
                 overflow: 'hidden',
@@ -218,40 +252,82 @@ export function GemsTab() {
                 />
               ) : null}
               <View style={{ padding: t.spacing.s4 }}>
-                <Text style={[t.type.h3, { color: t.colors.text1, marginBottom: t.spacing.s1 }]}>{gem.name}</Text>
-                <Text
-                  style={[
-                    t.type.caption,
-                    { color: t.colors.text3, fontFamily: t.fontFamily.monoRegular, marginBottom: t.spacing.s2, textTransform: 'uppercase' },
-                  ]}
-                >
-                  {`BY ${gem.author_name} · ${(gem.distance_m / 1000).toFixed(1)} KM · ${relativeTime(gem.approved_at ?? gem.created_at)}`}
-                </Text>
-                {gem.note ? (
-                  <Text style={[t.type.body, { color: t.colors.text2, marginBottom: t.spacing.s3 }]}>{gem.note}</Text>
-                ) : null}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s3 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: t.spacing.s2 }}>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={[t.type.h3, { color: t.colors.text1, marginBottom: t.spacing.s1 }]}>{gem.name}</Text>
+                    <Text
+                      style={[
+                        t.type.caption,
+                        {
+                          color: t.colors.text3,
+                          fontFamily: t.fontFamily.monoRegular,
+                          marginBottom: t.spacing.s2,
+                          textTransform: 'uppercase',
+                          fontSize: 10,
+                          letterSpacing: 0.5,
+                        },
+                      ]}
+                    >
+                      {`BY ${gem.author_name} · ${(gem.distance_m / 1000).toFixed(1)} KM · ${relativeTime(gem.approved_at ?? gem.created_at)}`}
+                    </Text>
+                    {gem.note ? (
+                      <Text style={[t.type.body, { color: t.colors.text2, marginBottom: t.spacing.s3 }]}>{gem.note}</Text>
+                    ) : null}
+                  </View>
+                  {/* Star chip — pinned to right of name row */}
                   <Pressable
                     testID={`star-${gem.id}`}
                     onPress={() => toggleFav(gem)}
                     style={{
-                      flexDirection: 'row',
+                      flexDirection: 'column',
                       alignItems: 'center',
-                      gap: 4,
-                      backgroundColor: gem.faved ? t.colors.amberDim : t.colors.surface2,
-                      borderRadius: t.radii.xs,
+                      gap: 2,
                       paddingHorizontal: t.spacing.s2,
-                      paddingVertical: 4,
+                      paddingVertical: t.spacing.s2,
+                      borderRadius: t.radii.sm,
+                      borderWidth: 1,
+                      backgroundColor: gem.faved ? t.colors.amberDim : t.colors.surface2,
+                      borderColor: gem.faved ? t.colors.amberLine : t.colors.borderSubtle,
+                      flexShrink: 0,
+                      minWidth: 38,
                     }}
                   >
-                    <Text style={[t.type.caption, { color: gem.faved ? t.colors.amber : t.colors.text3 }]}>
+                    <Text
+                      style={[
+                        t.type.caption,
+                        {
+                          color: gem.faved ? t.colors.amber : t.colors.text3,
+                          fontFamily: t.fontFamily.monoBold,
+                        },
+                      ]}
+                    >
                       {`★ ${gem.favs_count}`}
                     </Text>
                   </Pressable>
-                  <Pressable testID={`report-${gem.id}`} onPress={() => onReport(gem)}>
-                    <Text style={[t.type.caption, { color: t.colors.text3 }]}>Report</Text>
-                  </Pressable>
                 </View>
+
+                {/* Report */}
+                <Pressable
+                  testID={`report-${gem.id}`}
+                  onPress={() => onReport(gem)}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+                >
+                  <Ionicons name="flag-outline" size={11} color={t.colors.text3} />
+                  <Text
+                    style={[
+                      t.type.caption,
+                      {
+                        color: t.colors.text3,
+                        fontFamily: t.fontFamily.monoRegular,
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.6,
+                        fontSize: 10,
+                      },
+                    ]}
+                  >
+                    Report
+                  </Text>
+                </Pressable>
               </View>
             </View>
           );

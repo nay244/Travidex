@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Travidex — screen capture rig</title>
+  <link rel="stylesheet" href="../../styles.css">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    html, body { margin: 0; background: #000; height: 100%; overflow: hidden; }
+    #stage { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    /* the capture frame is exactly one phone, scaled to fit the viewport */
+    #root { position: relative; width: 402px; height: 874px; overflow: hidden; background: var(--bg); flex: none; }
+  </style>
+</head>
+<body>
+  <div id="stage"><div id="root"></div></div>
+  <script>
+    function fit() {
+      var s = Math.min(window.innerWidth / 402, window.innerHeight / 874);
+      document.getElementById('root').style.transform = 'scale(' + s + ')';
+      window.__phoneScale = s;
+    }
+    window.addEventListener('resize', fit); fit();
+  </script>
+
+  <script type="text/babel" src="../../ui_kits/travidex-ios/data.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/primitives.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/chrome.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/art.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/flags.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/MapHome.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/LocationPicker.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/SightDetail.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/ChunkMap.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/RegionDex.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/RegionHighlights.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/FindSuccess.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/Community.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/ShareGem.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/ProfilePages.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/Profile.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/ProfileArt.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/Appearance.jsx"></script>
+  <script type="text/babel" src="../../ui_kits/travidex-ios/Welcome.jsx"></script>
+
+  <script type="text/babel">
+    const noop = () => {};
+    const sights = KYOTO_SIGHTS.map((s) => ({ ...s }));
+    const foundSight = sights.find((s) => s.found);
+    const nishiki = { ...sights.find((s) => s.name.startsWith("Nishiki")), found: true };
+    const kyoto = { ...JAPAN_CHUNKS[0], code: "JP" };
+    const kyotoEntries = cityEntries(JAPAN_CHUNKS[0]);
+    const jpLoc = { code: "JP", city: "Kyoto" };
+    const userProgress = { sights: 62, cities: 2, countries: 3, photos: 11 };
+    const profileProps = { achievements: ACHIEVEMENTS, badgeYears: BADGE_YEARS, sightsFound: 62, citiesClaimed: 2, countries: 3, theme: "light", premium: false, artId: "aurora", onOpenAppearance: noop, onOpenArt: noop, onOpenBadges: noop, onOpenAchievements: noop };
+
+    const SCREENS = [
+      () => <Welcome onEnter={noop} />,
+      () => <React.Fragment><MapHome sights={sights} selected={nishiki} onSelect={noop} onSight={noop} location={jpLoc} onOpenLocation={noop} /><TabBar active="map" onChange={noop} onFind={noop} findEnabled={true} /></React.Fragment>,
+      () => <React.Fragment><MapHome sights={sights} selected={null} onSelect={noop} onSight={noop} location={jpLoc} onOpenLocation={noop} /><LocationPicker countries={COUNTRIES} location={jpLoc} onPick={noop} onClose={noop} /></React.Fragment>,
+      () => <SightDetail s={foundSight} onBack={noop} onLog={noop} onNavigate={noop} />,
+      () => <FindSuccess s={nishiki} foundCount={4} total={sights.length} badge={{ name: "Kyoto explorer", icon: "compass" }} onView={noop} onDone={noop} />,
+      () => <FindSuccess s={foundSight} foundCount={3} total={sights.length} already onView={noop} onDone={noop} />,
+      () => <React.Fragment><ChunkMap countries={COUNTRIES} onCity={noop} /><TabBar active="explore" onChange={noop} onFind={noop} /></React.Fragment>,
+      () => <React.Fragment><ChunkMap countries={COUNTRIES} onCity={noop} initialCode="US" /><TabBar active="explore" onChange={noop} onFind={noop} /></React.Fragment>,
+      () => <RegionDex city={kyoto} entries={kyotoEntries} onBack={noop} onSight={noop} />,
+      () => <RegionHighlights city={kyoto} entries={kyotoEntries} onClose={noop} />,
+      () => <React.Fragment><Community feed={FEED} friends={FRIENDS} location={jpLoc} /><TabBar active="community" onChange={noop} onFind={noop} /></React.Fragment>,
+      () => <FriendsList friends={FRIENDS} onBack={noop} />,
+      () => <React.Fragment><Community feed={FEED} friends={FRIENDS} location={jpLoc} initialTab="gems" /><TabBar active="community" onChange={noop} onFind={noop} /></React.Fragment>,
+      () => <React.Fragment><Community feed={FEED} friends={FRIENDS} location={jpLoc} initialTab="gems" /><ShareGem location={jpLoc} onSubmit={noop} onClose={noop} /></React.Fragment>,
+      () => <React.Fragment><Profile {...profileProps} /><TabBar active="profile" onChange={noop} onFind={noop} /></React.Fragment>,
+      () => <BadgesPage years={BADGE_YEARS} onBack={noop} />,
+      () => <AchievementsPage achievements={ACHIEVEMENTS} onBack={noop} onSelect={noop} />,
+      () => <AchievementDetail a={ACHIEVEMENTS.find((a) => !a.earned)} onClose={noop} />,
+      () => <React.Fragment><Profile {...profileProps} /><ProfileArt selected="aurora" progress={userProgress} onPick={noop} onClose={noop} /></React.Fragment>,
+      () => <React.Fragment><Profile {...profileProps} /><Appearance theme="light" premium={false} onPick={noop} onUnlock={noop} onClose={noop} /></React.Fragment>,
+    ];
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    window.showScreen = (i) => {
+      const S = SCREENS[i];
+      root.render(<div style={{ position: "absolute", inset: 0 }}>{S ? <S /> : null}</div>);
+    };
+    window.SCREEN_COUNT = SCREENS.length;
+    window.showScreen(0);
+  </script>
+</body>
+</html>

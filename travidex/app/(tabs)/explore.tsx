@@ -9,7 +9,82 @@ import { getCountryProgress, getCityProgress, Progress } from '../../lib/data/pr
 import { CountryPicker } from '../../components/CountryPicker';
 import { ChunkTile } from '../../components/ChunkTile';
 import { Flag } from '../../components/Flag';
+import { Screen } from '../../components/Screen';
 import type { City, Country } from '../../lib/types';
+
+// ── Small completion ring (SVG-free approximation using a circle border) ──
+// Renders a thin ring border in green/amber/locked depending on pct,
+// with mono "found/total" text inside.
+function MiniRing({
+  found,
+  total,
+  size = 52,
+}: {
+  found: number;
+  total: number;
+  size?: number;
+}) {
+  const t = useTheme();
+  const pct = total > 0 ? Math.min(100, Math.round((found / total) * 100)) : 0;
+  const ringColor =
+    pct >= 100 ? t.colors.green : pct > 0 ? t.colors.amber : t.colors.locked;
+
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        borderWidth: 3,
+        borderColor: ringColor,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: t.colors.surface2,
+      }}
+    >
+      <Text
+        style={[
+          t.type.label,
+          { color: t.colors.text1, fontSize: 9, textAlign: 'center', lineHeight: 12 },
+        ]}
+      >
+        {`${found}`}
+        {'\n'}
+        <Text style={{ color: t.colors.text3 }}>{`/${total}`}</Text>
+      </Text>
+    </View>
+  );
+}
+
+// ── Legend dot ──
+function LegendDot({ color, label }: { color: string; label: string }) {
+  const t = useTheme();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+      <View
+        style={{
+          width: 8,
+          height: 8,
+          borderRadius: 3,
+          backgroundColor: color,
+        }}
+      />
+      <Text
+        style={[
+          t.type.label,
+          {
+            color: t.colors.text3,
+            fontSize: 10,
+            letterSpacing: 0.5,
+            textTransform: 'uppercase',
+          },
+        ]}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
 
 export default function Explore() {
   const t = useTheme();
@@ -54,23 +129,103 @@ export default function Explore() {
 
   const selectedCountry = countries.find(c => c.id === selectedCountryId) ?? null;
 
-  // Build board content based on tier + stateFilter
+  // ── Derived header stats ──
+  // For cities-tier: claimed = cities where found >= total > 0
+  // For states-tier: claimed = states where sum-found >= sum-total > 0
+  function getHeaderStats(): {
+    ringFound: number;
+    ringTotal: number;
+    claimedLabel: string;
+    totalSightsFound: number;
+    totalSightsTotal: number;
+    hint: string;
+  } {
+    if (!selectedCountry) {
+      return { ringFound: 0, ringTotal: 0, claimedLabel: '0 of 0', totalSightsFound: 0, totalSightsTotal: 0, hint: '' };
+    }
+
+    if (selectedCountry.tier === 'cities') {
+      const claimedCount = cities.filter(c => {
+        const p = cityProg.get(c.id) ?? { found: 0, total: 0 };
+        return p.total > 0 && p.found >= p.total;
+      }).length;
+      const totalFound = cities.reduce((a, c) => a + (cityProg.get(c.id)?.found ?? 0), 0);
+      const totalSights = cities.reduce((a, c) => a + (cityProg.get(c.id)?.total ?? 0), 0);
+      return {
+        ringFound: claimedCount,
+        ringTotal: cities.length,
+        claimedLabel: `${claimedCount} of ${cities.length}`,
+        totalSightsFound: totalFound,
+        totalSightsTotal: totalSights,
+        hint: 'Find every sight in a city to claim it.',
+      };
+    }
+
+    // states tier — stateFilter open: show state stats
+    if (stateFilter !== null) {
+      const stateCities = cities.filter(c => (c.region ?? 'Other') === stateFilter);
+      const claimedCount = stateCities.filter(c => {
+        const p = cityProg.get(c.id) ?? { found: 0, total: 0 };
+        return p.total > 0 && p.found >= p.total;
+      }).length;
+      const totalFound = stateCities.reduce((a, c) => a + (cityProg.get(c.id)?.found ?? 0), 0);
+      const totalSights = stateCities.reduce((a, c) => a + (cityProg.get(c.id)?.total ?? 0), 0);
+      return {
+        ringFound: claimedCount,
+        ringTotal: stateCities.length,
+        claimedLabel: `${claimedCount} of ${stateCities.length}`,
+        totalSightsFound: totalFound,
+        totalSightsTotal: totalSights,
+        hint: 'Claim every city to complete the state.',
+      };
+    }
+
+    // states level — build state aggregates
+    const stateMap = new Map<string, { found: number; total: number }>();
+    for (const city of cities) {
+      const region = city.region ?? 'Other';
+      const existing = stateMap.get(region) ?? { found: 0, total: 0 };
+      const p = cityProg.get(city.id) ?? { found: 0, total: 0 };
+      stateMap.set(region, {
+        found: existing.found + p.found,
+        total: existing.total + p.total,
+      });
+    }
+    const stateEntries = Array.from(stateMap.values());
+    const claimedStates = stateEntries.filter(s => s.total > 0 && s.found >= s.total).length;
+    const totalFound = stateEntries.reduce((a, s) => a + s.found, 0);
+    const totalSights = stateEntries.reduce((a, s) => a + s.total, 0);
+    return {
+      ringFound: claimedStates,
+      ringTotal: stateMap.size,
+      claimedLabel: `${claimedStates} of ${stateMap.size}`,
+      totalSightsFound: totalFound,
+      totalSightsTotal: totalSights,
+      hint: 'Tap a state to explore its cities.',
+    };
+  }
+
+  const headerStats = getHeaderStats();
+
+  // ── Board rendering ──
   const renderBoard = () => {
     if (!selectedCountry) return null;
 
     if (selectedCountry.tier === 'cities') {
       return (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: t.spacing.s3 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: t.spacing.s3, gap: t.spacing.s3 }}>
           {cities.map(city => {
             const p = cityProg.get(city.id) ?? { found: 0, total: 0 };
             return (
-              <ChunkTile
-                key={city.id}
-                name={city.name}
-                found={p.found}
-                total={p.total}
-                onPress={() => router.push(`/city/${city.id}`)}
-              />
+              <View key={city.id} style={{ width: '30%' }}>
+                <ChunkTile
+                  name={city.name}
+                  found={p.found}
+                  total={p.total}
+                  region={city.region ?? undefined}
+                  onPress={() => router.push(`/city/${city.id}`)}
+                />
+              </View>
             );
           })}
         </View>
@@ -79,7 +234,6 @@ export default function Explore() {
 
     // tier === 'states'
     if (stateFilter !== null) {
-      // Show cities for the filtered state + breadcrumb
       const stateCities = cities.filter(c => (c.region ?? 'Other') === stateFilter);
       return (
         <View>
@@ -87,28 +241,54 @@ export default function Explore() {
             testID="breadcrumb"
             onPress={() => setStateFilter(null)}
             style={{
-              padding: t.spacing.s4,
-              paddingBottom: t.spacing.s3,
+              marginHorizontal: t.spacing.s4,
+              marginBottom: t.spacing.s3,
+              alignSelf: 'flex-start',
               flexDirection: 'row',
               alignItems: 'center',
-              gap: t.spacing.s2,
+              gap: t.spacing.s1,
+              paddingHorizontal: t.spacing.s3,
+              paddingVertical: 6,
+              borderRadius: t.radii.pill,
+              backgroundColor: t.colors.surface2,
+              borderWidth: 1,
+              borderColor: t.colors.borderDefault,
             }}
           >
-            <Text style={[t.type.body, { color: t.colors.blue }]}>
+            <Text
+              style={[
+                t.type.label,
+                {
+                  color: t.colors.text2,
+                  fontSize: 11,
+                  letterSpacing: 0.5,
+                  textTransform: 'uppercase',
+                },
+              ]}
+            >
               {`‹ ${selectedCountry.name} · all states`}
             </Text>
           </Pressable>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: t.spacing.s3 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              paddingHorizontal: t.spacing.s3,
+              gap: t.spacing.s3,
+            }}
+          >
             {stateCities.map(city => {
               const p = cityProg.get(city.id) ?? { found: 0, total: 0 };
               return (
-                <ChunkTile
-                  key={city.id}
-                  name={city.name}
-                  found={p.found}
-                  total={p.total}
-                  onPress={() => router.push(`/city/${city.id}`)}
-                />
+                <View key={city.id} style={{ width: '30%' }}>
+                  <ChunkTile
+                    name={city.name}
+                    found={p.found}
+                    total={p.total}
+                    region={city.region ?? undefined}
+                    onPress={() => router.push(`/city/${city.id}`)}
+                  />
+                </View>
               );
             })}
           </View>
@@ -130,34 +310,44 @@ export default function Explore() {
     }
 
     return (
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: t.spacing.s3 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          paddingHorizontal: t.spacing.s3,
+          gap: t.spacing.s3,
+        }}
+      >
         {Array.from(stateMap.entries()).map(([region, agg]) => (
-          <ChunkTile
-            key={region}
-            name={region}
-            found={agg.found}
-            total={agg.total}
-            onPress={() => setStateFilter(region)}
-          />
+          <View key={region} style={{ width: '30%' }}>
+            <ChunkTile
+              name={region}
+              found={agg.found}
+              total={agg.total}
+              onPress={() => setStateFilter(region)}
+            />
+          </View>
         ))}
       </View>
     );
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
-      {/* Header */}
+    <Screen>
+      {/* ── Top control bar: country pill + ring summary ── */}
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          padding: t.spacing.s4,
-          gap: t.spacing.s3,
+          paddingHorizontal: t.spacing.s4,
+          paddingVertical: t.spacing.s3,
           backgroundColor: t.colors.surface1,
           borderBottomWidth: 1,
           borderBottomColor: t.colors.divider,
+          gap: t.spacing.s3,
         }}
       >
+        {/* Country pill */}
         <Pressable
           testID="country-pill"
           onPress={() => setPickerOpen(true)}
@@ -176,21 +366,105 @@ export default function Explore() {
           {selectedCountry ? (
             <Flag code={selectedCountry.code} size={22} radius={5} />
           ) : null}
-          <Text style={[t.type.stat, { color: t.colors.text1, fontSize: 14 }]}>
+          <Text style={[t.type.label, { color: t.colors.text1, fontWeight: '700', fontSize: 14, letterSpacing: 0.3 }]}>
             {selectedCountry?.code ?? '—'}
           </Text>
-          <Text style={{ color: t.colors.text2, fontSize: 12 }}>{'▾'}</Text>
+          {/* chevron */}
+          <Text style={{ color: t.colors.text3, fontSize: 11 }}>{'⌃'}</Text>
         </Pressable>
 
-        {selectedCountry && (
-          <Text style={[t.type.caption, { color: t.colors.text2 }]}>
-            {`${countryProg.get(selectedCountry.id)?.found ?? 0}/${countryProg.get(selectedCountry.id)?.total ?? 0} sights`}
-          </Text>
-        )}
+        <View style={{ flex: 1 }} />
+
+        {/* Right: mini ring + caption */}
+        <View style={{ alignItems: 'flex-end', gap: 2 }}>
+          <MiniRing
+            found={headerStats.ringFound}
+            total={headerStats.ringTotal}
+            size={44}
+          />
+        </View>
       </View>
 
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: t.spacing.s8 }}>
+        {/* ── Country / state header ── */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: t.spacing.s4,
+            paddingTop: t.spacing.s4,
+            paddingBottom: t.spacing.s2,
+            gap: t.spacing.s3,
+          }}
+        >
+          {selectedCountry && stateFilter === null && (
+            <Flag code={selectedCountry.code} size={36} radius={6} />
+          )}
+          <View style={{ flex: 1 }}>
+            <Text style={[t.type.h2 ?? t.type.h3, { color: t.colors.text1 }]}>
+              {stateFilter ?? selectedCountry?.name ?? ''}
+            </Text>
+            {selectedCountry && (
+              <Text
+                style={[
+                  t.type.label,
+                  {
+                    color: t.colors.text3,
+                    fontSize: 11,
+                    letterSpacing: 0.3,
+                    marginTop: 2,
+                  },
+                ]}
+              >
+                <Text style={{ color: t.colors.green, fontWeight: '700' }}>
+                  {headerStats.claimedLabel}
+                </Text>
+                {selectedCountry.tier === 'cities' || stateFilter !== null
+                  ? ' cities claimed · '
+                  : ' states complete · '}
+                {`${headerStats.totalSightsFound}/${headerStats.totalSightsTotal} sights`}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        {/* ── Legend ── */}
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: t.spacing.s4,
+            paddingHorizontal: t.spacing.s4,
+            paddingVertical: t.spacing.s3,
+          }}
+        >
+          <LegendDot
+            color={t.colors.chunkClaimed}
+            label={selectedCountry?.tier === 'states' && stateFilter === null ? 'Complete' : 'Claimed'}
+          />
+          <LegendDot color={t.colors.chunkProgress} label="In progress" />
+          <LegendDot color={t.colors.chunkUntouched} label="Untouched" />
+        </View>
+
+        {/* ── Board ── */}
         {renderBoard()}
+
+        {/* ── Hint caption ── */}
+        {selectedCountry && (
+          <Text
+            style={[
+              t.type.body,
+              {
+                color: t.colors.text3,
+                textAlign: 'center',
+                marginTop: t.spacing.s5,
+                paddingHorizontal: t.spacing.s5,
+                lineHeight: 20,
+              },
+            ]}
+          >
+            {headerStats.hint}
+          </Text>
+        )}
       </ScrollView>
 
       <CountryPicker
@@ -204,6 +478,6 @@ export default function Explore() {
         }}
         onClose={() => setPickerOpen(false)}
       />
-    </View>
+    </Screen>
   );
 }

@@ -4,9 +4,10 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
 import { getFeed, FeedItem } from '../../lib/data/feed';
-import { getFriendsOverview } from '../../lib/data/friends';
+import { getFriendsOverview, FriendOverview } from '../../lib/data/friends';
 import { relativeTime } from '../../lib/relativeTime';
 import { GemsTab } from '../../components/GemsTab';
+import { Screen } from '../../components/Screen';
 
 type Tab = 'friends' | 'gems';
 
@@ -16,7 +17,7 @@ export default function Community() {
   const { session } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('friends');
   const [feed, setFeed] = useState<FeedItem[]>([]);
-  const [friendsCount, setFriendsCount] = useState<number>(0);
+  const [friendsList, setFriendsList] = useState<FriendOverview[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -31,9 +32,11 @@ export default function Community() {
       .catch((e: any) => setError(e.message))
       .finally(() => setLoaded(true));
     getFriendsOverview(userId)
-      .then(f => setFriendsCount(f.length))
+      .then(setFriendsList)
       .catch((e: any) => console.warn(e));
   }, [session?.user?.id]);
+
+  const friendsCount = friendsList.length;
 
   const tabStyle = (tab: Tab) => ({
     flex: 1,
@@ -51,9 +54,19 @@ export default function Community() {
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
+      {/* Screen title */}
+      <Text
+        style={[
+          t.type.h1,
+          { color: t.colors.text1, paddingHorizontal: t.spacing.s5, paddingTop: t.spacing.s4, paddingBottom: t.spacing.s3 },
+        ]}
+      >
+        Community
+      </Text>
+
       {/* Segmented control */}
-      <View style={{ flexDirection: 'row', gap: t.spacing.s2, padding: t.spacing.s4 }}>
+      <View style={{ flexDirection: 'row', gap: t.spacing.s2, paddingHorizontal: t.spacing.s4, paddingBottom: t.spacing.s2 }}>
         <Pressable
           testID="tab-friends"
           onPress={() => setActiveTab('friends')}
@@ -76,15 +89,17 @@ export default function Community() {
           keyExtractor={f => f.id}
           ListHeaderComponent={
             <>
-              {/* Your friends row */}
+              {/* Your friends card */}
               <Pressable
                 testID="your-friends-row"
                 onPress={() => router.push('/community/friends')}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
+                  gap: t.spacing.s3,
                   padding: t.spacing.s4,
                   marginHorizontal: t.spacing.s4,
+                  marginTop: t.spacing.s4,
                   marginBottom: t.spacing.s3,
                   backgroundColor: t.colors.surface1,
                   borderRadius: t.radii.lg,
@@ -92,12 +107,49 @@ export default function Community() {
                   borderColor: t.colors.borderSubtle,
                 }}
               >
-                <Text style={[t.type.body, { color: t.colors.text1, flex: 1 }]}>Your friends</Text>
-                <Text style={[t.type.caption, { color: t.colors.text3, fontFamily: t.fontFamily.monoRegular }]}>
+                {/* Stacked initials cluster */}
+                <View style={{ flexDirection: 'row' }}>
+                  {friendsList.slice(0, 3).map((f, i) => (
+                    <View
+                      key={f.friend_id}
+                      style={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 15,
+                        backgroundColor: t.colors.surface3,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginLeft: i === 0 ? 0 : -8,
+                        borderWidth: 2,
+                        borderColor: t.colors.surface1,
+                      }}
+                    >
+                      <Text
+                        style={[
+                          t.type.caption,
+                          { color: t.colors.text2, fontFamily: t.fontFamily.sansSemibold, fontSize: 12 },
+                        ]}
+                      >
+                        {f.username[0]?.toUpperCase() ?? '?'}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+
+                <Text style={[t.type.body, { color: t.colors.text1, flex: 1, fontFamily: t.fontFamily.sansSemibold }]}>
+                  Your friends
+                </Text>
+                <Text
+                  style={[
+                    t.type.caption,
+                    { color: t.colors.text3, fontFamily: t.fontFamily.monoBold },
+                  ]}
+                >
                   {friendsCount}
                 </Text>
                 <Text style={[t.type.body, { color: t.colors.text3, marginLeft: t.spacing.s2 }]}>›</Text>
               </Pressable>
+
               {error ? (
                 <Text style={[t.type.caption, { color: t.colors.danger, paddingHorizontal: t.spacing.s5 }]}>
                   {error}
@@ -111,14 +163,75 @@ export default function Community() {
             ) : null
           }
           renderItem={({ item }) => (
-            <View style={{ padding: t.spacing.s5, borderBottomColor: t.colors.divider, borderBottomWidth: 1 }}>
-              <Text style={[t.type.body, { color: t.colors.text1 }]}>
-                {`${item.username ?? 'Someone'} found ${item.sight_name}${item.city_name ? ` in ${item.city_name}` : ''}`}
-              </Text>
-              <Text style={[t.type.caption, { color: t.colors.text3 }]}>{relativeTime(item.found_at)}</Text>
-              {item.comment && (
-                <Text style={[t.type.caption, { color: t.colors.text2 }]}>{item.comment}</Text>
-              )}
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: t.spacing.s3,
+                padding: t.spacing.s3,
+                marginHorizontal: t.spacing.s4,
+                marginBottom: t.spacing.s3,
+                backgroundColor: t.colors.surface1,
+                borderRadius: t.radii.lg,
+                borderWidth: 1,
+                borderColor: t.colors.borderSubtle,
+              }}
+            >
+              {/* Avatar disc */}
+              <View
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 19,
+                  backgroundColor: t.colors.surface3,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Text
+                  style={[
+                    t.type.caption,
+                    { color: t.colors.text2, fontFamily: t.fontFamily.sansSemibold, fontSize: 13 },
+                  ]}
+                >
+                  {(item.username ?? 'S')[0]?.toUpperCase()}
+                </Text>
+              </View>
+
+              {/* Content */}
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={[t.type.body, { color: t.colors.text2, lineHeight: 20 }]}>
+                  <Text style={{ color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold }}>
+                    {item.username ?? 'Someone'}
+                  </Text>
+                  {' found '}
+                  <Text style={{ color: t.colors.green, fontFamily: t.fontFamily.sansSemibold }}>
+                    {item.sight_name}
+                  </Text>
+                  {item.city_name ? (
+                    <Text style={{ color: t.colors.text3 }}>{` in ${item.city_name}`}</Text>
+                  ) : null}
+                </Text>
+                <Text
+                  style={[
+                    t.type.caption,
+                    {
+                      color: t.colors.text3,
+                      fontFamily: t.fontFamily.monoRegular,
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                      marginTop: 2,
+                    },
+                  ]}
+                >
+                  {relativeTime(item.found_at)}
+                </Text>
+                {item.comment ? (
+                  <Text style={[t.type.caption, { color: t.colors.text2, marginTop: t.spacing.s1 }]}>
+                    {item.comment}
+                  </Text>
+                ) : null}
+              </View>
             </View>
           )}
         />
@@ -127,6 +240,6 @@ export default function Community() {
           <GemsTab />
         </View>
       )}
-    </View>
+    </Screen>
   );
 }

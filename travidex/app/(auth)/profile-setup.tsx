@@ -4,6 +4,7 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { useTheme } from '@/theme';
 import { isUsernameAvailable, createProfile } from '../../lib/profiles';
 import { useAuth } from '../../context/AuthProvider';
+import { Screen } from '../../components/Screen';
 
 export default function ProfileSetup() {
   const t = useTheme();
@@ -34,7 +35,8 @@ export default function ProfileSetup() {
 
   const input = { backgroundColor: t.colors.surface2, color: t.colors.text1, padding: t.spacing.s4, borderRadius: t.radii.sm, marginBottom: t.spacing.s3 };
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: t.spacing.s7, backgroundColor: t.colors.bg }}>
+    <Screen>
+    <View style={{ flex: 1, justifyContent: 'center', padding: t.spacing.s7 }}>
       <Text style={[t.type.h1, { color: t.colors.text1, marginBottom: t.spacing.s5 }]}>Pick a username</Text>
       <TextInput placeholder="Username" placeholderTextColor={t.colors.text3} autoCapitalize="none" value={username} onChangeText={setUsername} style={input} />
       {error && <Text style={[t.type.caption, { color: t.colors.danger, marginBottom: t.spacing.s3 }]}>{error}</Text>}
@@ -42,5 +44,6 @@ export default function ProfileSetup() {
         <Text style={[t.type.h3, { textAlign: 'center', color: t.colors.textOnAccent }]}>Continue</Text>
       </Pressable>
     </View>
+    </Screen>
   );
 }

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
+import { Screen } from '../../components/Screen';
 import { useAuth } from '../../context/AuthProvider';
 import { useCity } from '../../context/CityProvider';
 import { useActiveCity } from '../../hooks/useActiveCity';
@@ -60,12 +62,13 @@ export default function ShareGem() {
 
   if (submitted) {
     return (
-      <View style={{ flex: 1, backgroundColor: t.colors.bg, justifyContent: 'center', alignItems: 'center', padding: t.spacing.s6 }}>
+      <Screen>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: t.spacing.s6 }}>
         <Text style={[t.type.h3, { color: t.colors.amber, marginBottom: t.spacing.s3, textAlign: 'center' }]}>
           Submitted for review
         </Text>
         <Text style={[t.type.caption, { color: t.colors.text2, textAlign: 'center', marginBottom: t.spacing.s5 }]}>
-          Automated checks run first; a moderator review follows (usually ~24h).
+          Automated checks passed. A moderator will review your gem before it appears to others — usually within 24 hours.
         </Text>
         <Pressable
           onPress={() => router.back()}
@@ -74,16 +77,17 @@ export default function ShareGem() {
           <Text style={[t.type.body, { color: '#fff' }]}>Done</Text>
         </Pressable>
       </View>
+      </Screen>
     );
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: t.colors.bg }} contentContainerStyle={{ padding: t.spacing.s4 }}>
-      {/* Auto location chip */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2, marginBottom: t.spacing.s4 }}>
-        {city ? <Flag code={city.country_code} size={18} radius={2} /> : null}
-        <Text style={[t.type.caption, { color: t.colors.text2 }]}>{city?.name ?? ''}</Text>
-      </View>
+    <Screen>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: t.spacing.s4 }}>
+      {/* Title */}
+      <Text style={[t.type.h2, { color: t.colors.text1, marginBottom: t.spacing.s4 }]}>
+        Share a hidden gem
+      </Text>
 
       {/* Photo box */}
       <Pressable
@@ -91,21 +95,41 @@ export default function ShareGem() {
         onPress={pickPhoto}
         style={{
           height: 200,
-          borderRadius: t.radii.sm,
-          borderWidth: 1,
-          borderColor: t.colors.borderDefault,
+          borderRadius: t.radii.lg,
+          borderWidth: 1.5,
+          borderColor: t.colors.borderStrong,
           borderStyle: 'dashed',
           backgroundColor: 'transparent',
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: t.spacing.s4,
           overflow: 'hidden',
+          gap: t.spacing.s2,
         }}
       >
         {photoUri ? (
           <Image source={{ uri: photoUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
         ) : (
-          <Text style={[t.type.caption, { color: t.colors.text3 }]}>+ Add a photo</Text>
+          <>
+            <Ionicons name="camera-outline" size={22} color={t.colors.text3} />
+            <Text style={[t.type.body, { color: t.colors.text2, fontFamily: t.fontFamily.sansSemibold }]}>
+              Add a photo of the spot
+            </Text>
+            <Text
+              style={[
+                t.type.caption,
+                {
+                  color: t.colors.amber,
+                  fontFamily: t.fontFamily.monoRegular,
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.8,
+                  fontSize: 10,
+                },
+              ]}
+            >
+              REQUIRED
+            </Text>
+          </>
         )}
       </Pressable>
 
@@ -119,8 +143,8 @@ export default function ShareGem() {
           t.type.body,
           {
             color: t.colors.text1,
-            backgroundColor: t.colors.surface1,
-            borderRadius: t.radii.sm,
+            backgroundColor: t.colors.surface2,
+            borderRadius: t.radii.md,
             borderWidth: 1,
             borderColor: t.colors.borderSubtle,
             padding: t.spacing.s3,
@@ -141,39 +165,80 @@ export default function ShareGem() {
           t.type.body,
           {
             color: t.colors.text1,
-            backgroundColor: t.colors.surface1,
-            borderRadius: t.radii.sm,
+            backgroundColor: t.colors.surface2,
+            borderRadius: t.radii.md,
             borderWidth: 1,
             borderColor: t.colors.borderSubtle,
             padding: t.spacing.s3,
-            marginBottom: t.spacing.s4,
+            marginBottom: t.spacing.s3,
             textAlignVertical: 'top',
           },
         ]}
       />
 
+      {/* Auto location chip */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: t.spacing.s2,
+          padding: t.spacing.s3,
+          marginBottom: t.spacing.s4,
+          backgroundColor: t.colors.surface2,
+          borderRadius: t.radii.md,
+          borderWidth: 1,
+          borderColor: t.colors.borderSubtle,
+        }}
+      >
+        {city ? <Flag code={city.country_code} size={18} radius={2} /> : null}
+        <Text style={[t.type.body, { color: t.colors.text1, flex: 1 }]}>{city?.name ?? ''}</Text>
+        <Text
+          style={[
+            t.type.caption,
+            {
+              color: t.colors.text3,
+              fontFamily: t.fontFamily.monoRegular,
+              textTransform: 'uppercase',
+              letterSpacing: 1,
+              fontSize: 9,
+            },
+          ]}
+        >
+          AUTO · FROM MAP
+        </Text>
+      </View>
+
       {/* Guidelines card */}
       <View
         style={{
           backgroundColor: t.colors.infoBg,
-          borderRadius: t.radii.sm,
+          borderRadius: t.radii.lg,
+          borderWidth: 1,
+          borderColor: t.colors.blueLine,
           padding: t.spacing.s4,
           marginBottom: t.spacing.s4,
         }}
       >
-        <Text style={[t.type.caption, { color: t.colors.info, fontWeight: '600', marginBottom: t.spacing.s2 }]}>
-          Reviewed before it appears
-        </Text>
-        {[
-          'No private property or exact home addresses',
-          'No unsafe or restricted areas',
-          'No ads or self-promotion',
-          'Keep it travel-relevant',
-        ].map((line, i) => (
-          <Text key={i} style={[t.type.caption, { color: t.colors.text2, marginBottom: 2 }]}>
-            {`· ${line}`}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2, marginBottom: t.spacing.s2 }}>
+          <Ionicons name="shield-checkmark-outline" size={15} color={t.colors.info} />
+          <Text
+            style={[
+              t.type.caption,
+              {
+                color: t.colors.info,
+                fontFamily: t.fontFamily.monoBold,
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+                fontSize: 10,
+              },
+            ]}
+          >
+            Reviewed before it appears
           </Text>
-        ))}
+        </View>
+        <Text style={[t.type.caption, { color: t.colors.text2, lineHeight: 18 }]}>
+          No private property or exact home addresses, unsafe or restricted areas, ads, or off-topic content. Submissions run automated checks, then a moderator approves them.
+        </Text>
       </View>
 
       {/* Error */}
@@ -187,16 +252,25 @@ export default function ShareGem() {
         onPress={handleSubmit}
         disabled={!canSubmit || busy}
         style={{
-          backgroundColor: canSubmit ? t.colors.amber : t.colors.surface2,
-          borderRadius: t.radii.sm,
+          backgroundColor: canSubmit ? t.colors.actionPositive : t.colors.surface2,
+          borderRadius: t.radii.pill,
           paddingVertical: t.spacing.s3,
           alignItems: 'center',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          gap: t.spacing.s2,
         }}
       >
-        <Text style={[t.type.body, { color: canSubmit ? '#000' : t.colors.textDisabled }]}>
-          {busy ? 'Submitting…' : 'Share this gem'}
+        <Ionicons
+          name="send-outline"
+          size={16}
+          color={canSubmit ? t.colors.textOnAccent : t.colors.textDisabled}
+        />
+        <Text style={[t.type.body, { color: canSubmit ? t.colors.textOnAccent : t.colors.textDisabled }]}>
+          {busy ? 'Submitting…' : 'Submit for review'}
         </Text>
       </Pressable>
     </ScrollView>
+    </Screen>
   );
 }

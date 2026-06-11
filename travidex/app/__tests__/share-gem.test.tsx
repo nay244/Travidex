@@ -74,7 +74,7 @@ it('canceled picker keeps photo box empty (no photo preview)', async () => {
   const photoBox = await findByTestId('photo-box');
   fireEvent.press(photoBox);
   await waitFor(() => expect(Picker.launchImageLibraryAsync).toHaveBeenCalled());
-  expect(getByText('+ Add a photo')).toBeTruthy();
+  expect(getByText('Add a photo of the spot')).toBeTruthy();
 });
 
 // Full submit + success state in one test to avoid async state bleed between tests

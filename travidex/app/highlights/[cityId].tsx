@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Screen } from '../../components/Screen';
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { useTheme } from '@/theme';
@@ -112,7 +113,7 @@ export default function RegionHighlights() {
   // ── Empty state ──
   if (!hasContent) {
     return (
-      <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+      <Screen>
         <View style={{ padding: t.spacing.s4 }}>
           <Pressable onPress={() => router.back()} hitSlop={8}>
             <Text style={[t.type.body, { color: t.colors.text2 }]}>← Back</Text>
@@ -126,7 +127,7 @@ export default function RegionHighlights() {
             {`Find a sight in ${cityName} and add photos to build your highlights.`}
           </Text>
         </View>
-      </View>
+      </Screen>
     );
   }
 
@@ -145,7 +146,7 @@ export default function RegionHighlights() {
   const shareDisabled = selected.length === 0;
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
       {/* Header */}
       <View
         style={{
@@ -494,7 +495,7 @@ export default function RegionHighlights() {
         )}
       </ScrollView>
 
-      {/* ── Share action pinned bottom ── */}
+      {/* ── Share actions pinned bottom ── */}
       <View
         style={{
           position: 'absolute',
@@ -507,31 +508,54 @@ export default function RegionHighlights() {
           backgroundColor: t.colors.bg,
           borderTopWidth: 1,
           borderTopColor: t.colors.borderSubtle,
+          flexDirection: 'row',
+          gap: t.spacing.s3,
         }}
       >
+        {/* Share to friends — deferred until friends feed supports posts (see plan 7.6) */}
+        <Pressable
+          disabled
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: t.spacing.s2,
+            backgroundColor: shareDisabled ? t.colors.locked : t.colors.actionPositive,
+            paddingVertical: t.spacing.s4,
+            borderRadius: t.radii.pill,
+            opacity: 0.55,
+          }}
+          accessibilityState={{ disabled: true }}
+        >
+          <Text style={{ color: t.colors.textOnAccent, fontSize: 16 }}>{'👥'}</Text>
+          <Text style={[t.type.h3, { color: t.colors.textOnAccent }]}>Share to friends</Text>
+        </Pressable>
+
+        {/* Share elsewhere — system share */}
         <Pressable
           testID="share-btn"
           onPress={handleShare}
           disabled={shareDisabled}
+          accessibilityState={{ disabled: shareDisabled }}
           style={{
-            backgroundColor: shareDisabled ? t.colors.locked : t.colors.actionPositive,
-            paddingVertical: t.spacing.s4,
-            borderRadius: t.radii.sm,
+            flex: 1,
+            flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'center',
+            gap: t.spacing.s2,
+            backgroundColor: t.colors.surface2,
+            borderWidth: 1,
+            borderColor: t.colors.borderDefault,
+            paddingVertical: t.spacing.s4,
+            borderRadius: t.radii.pill,
+            opacity: shareDisabled ? 0.45 : 1,
           }}
         >
-          <Text
-            style={[
-              t.type.h3,
-              {
-                color: shareDisabled ? t.colors.lockedText : t.colors.textOnAccent,
-              },
-            ]}
-          >
-            Share
-          </Text>
+          <Text style={{ color: t.colors.text1, fontSize: 15 }}>{'↑'}</Text>
+          <Text style={[t.type.h3, { color: t.colors.text1 }]}>Share elsewhere</Text>
         </Pressable>
       </View>
-    </View>
+    </Screen>
   );
 }

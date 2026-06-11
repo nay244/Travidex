@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, TextInput } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
+import { Screen } from '../../components/Screen';
 import { useCity } from '../../context/CityProvider';
 import { useAuth } from '../../context/AuthProvider';
 import { submitSight } from '../../lib/data/community';
@@ -70,7 +71,8 @@ export default function Submit() {
 
   const input = { backgroundColor: t.colors.surface2, color: t.colors.text1, padding: t.spacing.s4, borderRadius: t.radii.sm, marginBottom: t.spacing.s3 };
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: t.colors.bg }} contentContainerStyle={{ padding: t.spacing.s5 }}>
+    <Screen>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: t.spacing.s5 }}>
       <Text style={[t.type.h2, { color: t.colors.text1, marginBottom: t.spacing.s4 }]}>Submit a sight</Text>
       <Pressable
         testID="city-picker-row"
@@ -104,5 +106,6 @@ export default function Submit() {
         onClose={() => setPickerVisible(false)}
       />
     </ScrollView>
+    </Screen>
   );
 }

@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { useTheme } from '@/theme';
 import { signInWithEmail } from '../../lib/auth';
+import { Screen } from '../../components/Screen';
 
 export default function Login() {
   const t = useTheme();
@@ -27,7 +28,8 @@ export default function Login() {
 
   const input = { backgroundColor: t.colors.surface2, color: t.colors.text1, padding: t.spacing.s4, borderRadius: t.radii.sm, marginBottom: t.spacing.s3 };
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: t.spacing.s7, backgroundColor: t.colors.bg }}>
+    <Screen>
+    <View style={{ flex: 1, justifyContent: 'center', padding: t.spacing.s7 }}>
       <Text style={[t.type.h1, { color: t.colors.text1, marginBottom: t.spacing.s5 }]}>Welcome back</Text>
       <TextInput placeholder="Email" placeholderTextColor={t.colors.text3} autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} style={input} />
       <TextInput placeholder="Password" placeholderTextColor={t.colors.text3} secureTextEntry value={pw} onChangeText={setPw} style={input} />
@@ -39,5 +41,6 @@ export default function Login() {
         <Text style={[t.type.body, { textAlign: 'center', color: t.colors.text2 }]}>Forgot password?</Text>
       </Pressable>
     </View>
+    </Screen>
   );
 }

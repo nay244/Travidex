@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { useTheme } from '@/theme';
 import { sendPasswordReset } from '../../lib/auth';
+import { Screen } from '../../components/Screen';
 
 export default function Forgot() {
   const t = useTheme();
@@ -21,7 +22,8 @@ export default function Forgot() {
 
   const input = { backgroundColor: t.colors.surface2, color: t.colors.text1, padding: t.spacing.s4, borderRadius: t.radii.sm, marginBottom: t.spacing.s3 };
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: t.spacing.s7, backgroundColor: t.colors.bg }}>
+    <Screen>
+    <View style={{ flex: 1, justifyContent: 'center', padding: t.spacing.s7 }}>
       <Text style={[t.type.h1, { color: t.colors.text1, marginBottom: t.spacing.s5 }]}>Reset password</Text>
       {sent ? (
         <Text style={[t.type.body, { color: t.colors.text2 }]}>Check your inbox for a reset link.</Text>
@@ -35,5 +37,6 @@ export default function Forgot() {
         </>
       )}
     </View>
+    </Screen>
   );
 }

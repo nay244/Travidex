@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
+import { Screen } from '../../components/Screen';
 import { useCity } from '../../context/CityProvider';
 import { useCityCatalog } from '../../hooks/useCityCatalog';
 import { SightRow } from '../../components/SightRow';
@@ -25,22 +26,24 @@ export default function Pick() {
 
   if (selected) {
     return (
-      <View style={{ flex: 1, backgroundColor: t.colors.bg, justifyContent: 'center', padding: t.spacing.s5 }}>
-        <LogFindSheet
-          sightId={selected.id}
-          onLogged={() => router.push({ pathname: '/find/success', params: { sightId: selected.id } })}
-        />
-      </View>
+      <Screen>
+        <View style={{ flex: 1, justifyContent: 'center', padding: t.spacing.s5 }}>
+          <LogFindSheet
+            sightId={selected.id}
+            onLogged={() => router.push({ pathname: '/find/success', params: { sightId: selected.id } })}
+          />
+        </View>
+      </Screen>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
+    <Screen>
       <FlatList
         data={sights}
         keyExtractor={s => s.id}
         renderItem={({ item }) => <SightRow sight={item} onPress={() => handlePress(item)} />}
       />
-    </View>
+    </Screen>
   );
 }
