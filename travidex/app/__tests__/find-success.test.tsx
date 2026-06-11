@@ -1,7 +1,8 @@
 const mockReplace = jest.fn();
+const mockPush = jest.fn();
 const mockUseLocalSearchParams = jest.fn();
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockReplace }),
+  useRouter: () => ({ replace: mockReplace, push: mockPush }),
   useLocalSearchParams: () => mockUseLocalSearchParams(),
 }));
 jest.mock('../../context/CityProvider', () => ({ useCity: () => ({ cityId: 'city-1' }) }));
@@ -10,7 +11,7 @@ jest.mock('../../lib/data/catalog', () => ({ getSightById: jest.fn() }));
 jest.mock('../../lib/data/finds', () => ({ getFoundSightIds: jest.fn(), getUserFindCount: jest.fn() }));
 jest.mock('../../context/AuthProvider', () => ({ useAuth: () => ({ session: { user: { id: 'u1' } } }) }));
 
-import { screen, waitFor } from '@testing-library/react-native';
+import { screen, waitFor, fireEvent } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test-utils';
 import { useCityCatalog } from '../../hooks/useCityCatalog';
 import { getSightById } from '../../lib/data/catalog';
@@ -21,6 +22,7 @@ const mockSight = { id: 's1', city_id: 'city-1', name: 'Eiffel Tower', dex_no: 1
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPush.mockReset();
   (useCityCatalog as jest.Mock).mockReturnValue({
     sights: [],
     completion: { found: 1, total: 8 },
@@ -122,5 +124,23 @@ describe('already variant', () => {
     await renderWithTheme(<Success />);
     await waitFor(() => expect(screen.getByText('Already in your dex')).toBeTruthy());
     expect(screen.queryByText('Added to your dex!')).toBeNull();
+  });
+});
+
+describe('View entry button', () => {
+  it('renders "View entry" in the new-find variant and navigates to /sight/s1', async () => {
+    mockUseLocalSearchParams.mockReturnValue({ sightId: 's1' });
+    await renderWithTheme(<Success />);
+    await waitFor(() => expect(screen.getByText('View entry')).toBeTruthy());
+    fireEvent.press(screen.getByText('View entry'));
+    expect(mockPush).toHaveBeenCalledWith('/sight/s1');
+  });
+
+  it('renders "View entry" in the already variant and navigates to /sight/s1', async () => {
+    mockUseLocalSearchParams.mockReturnValue({ sightId: 's1', already: '1' });
+    await renderWithTheme(<Success />);
+    await waitFor(() => expect(screen.getByText('View entry')).toBeTruthy());
+    fireEvent.press(screen.getByText('View entry'));
+    expect(mockPush).toHaveBeenCalledWith('/sight/s1');
   });
 });
