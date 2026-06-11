@@ -8,6 +8,7 @@ import { getCountries } from '../lib/data/countries';
 import { getCitiesForCountry } from '../lib/data/citiesByCountry';
 import { getCityProgress, getCountryProgress, Progress } from '../lib/data/progress';
 import { Flag } from './Flag';
+import { Glass } from './Glass';
 import type { City, Country } from '../lib/types';
 
 type Props = {
@@ -100,13 +101,14 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: t.colors.surfaceScrim, justifyContent: 'flex-end' }}>
-        <Animated.View style={{ transform: [{ translateY }] }}>
+        {/* Height lives HERE: the wrapper's parent (the scrim) is flex:1, so the
+            percentage resolves correctly and the sheet runs flush to the screen
+            bottom (ref 03). The inner sheet just fills it. */}
+        <Animated.View style={{ height: '85%', transform: [{ translateY }] }}>
         <Pressable
           onPress={() => {}}
           style={{
-            // Fixed height (not maxHeight) so the inner FlatList gets real
-            // bounds and the last row never hides behind the home indicator.
-            height: '78%',
+            flex: 1,
             backgroundColor: t.colors.surface1,
             borderTopLeftRadius: t.radii.xl,
             borderTopRightRadius: t.radii.xl,
@@ -162,35 +164,34 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
             </>
           ) : (
             <>
-              {/* Current country card — tap to change */}
+              {/* Current country card — tap to change; Glass per ref 03 */}
               <Pressable
                 onPress={() => setView('countries')}
-                style={{
+                style={{ borderRadius: t.radii.lg }}
+              >
+                <Glass style={{
                   flexDirection: 'row', alignItems: 'center', gap: t.spacing.s3,
                   paddingVertical: t.spacing.s3, paddingHorizontal: t.spacing.s4,
                   borderRadius: t.radii.lg,
-                  backgroundColor: t.colors.surface2,
-                  borderWidth: 1,
-                  borderColor: t.colors.borderSubtle,
-                }}
-              >
-                <Flag code={country?.code ?? ''} size={32} radius={6} />
-                <View style={{ flex: 1 }}>
-                  <Text style={[t.type.caption, { color: t.colors.text3, fontFamily: t.fontFamily.monoRegular, fontSize: t.fontSize.micro, letterSpacing: 0.12 * t.fontSize.micro, textTransform: 'uppercase' as const }]}>Country</Text>
-                  <Text style={[t.type.h3, { color: t.colors.text1, fontFamily: t.fontFamily.sansBold, fontSize: t.fontSize.h3, letterSpacing: -0.01 * t.fontSize.h3 }]}>{country?.name ?? ''}</Text>
-                </View>
-                {/* "Change ⇅" pill */}
-                <View style={{
-                  flexDirection: 'row', alignItems: 'center', gap: t.spacing.s1,
-                  height: 30, paddingHorizontal: t.spacing.s3,
-                  borderRadius: 999,
-                  backgroundColor: t.colors.surface3,
-                  borderWidth: 1,
-                  borderColor: t.colors.borderDefault,
                 }}>
-                  <Text style={[t.type.body, { color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold, fontSize: t.fontSize.caption }]}>Change</Text>
-                  <Ionicons name="swap-vertical-outline" size={14} color={t.colors.text3} />
-                </View>
+                  <Flag code={country?.code ?? ''} size={32} radius={6} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[t.type.caption, { color: t.colors.text3, fontFamily: t.fontFamily.monoRegular, fontSize: t.fontSize.micro, letterSpacing: 0.12 * t.fontSize.micro, textTransform: 'uppercase' as const }]}>Country</Text>
+                    <Text style={[t.type.h3, { color: t.colors.text1, fontFamily: t.fontFamily.sansBold, fontSize: t.fontSize.h3, letterSpacing: -0.01 * t.fontSize.h3 }]}>{country?.name ?? ''}</Text>
+                  </View>
+                  {/* "Change ⇅" pill */}
+                  <View style={{
+                    flexDirection: 'row', alignItems: 'center', gap: t.spacing.s1,
+                    height: 30, paddingHorizontal: t.spacing.s3,
+                    borderRadius: 999,
+                    backgroundColor: t.colors.surface3,
+                    borderWidth: 1,
+                    borderColor: t.colors.borderDefault,
+                  }}>
+                    <Text style={[t.type.body, { color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold, fontSize: t.fontSize.caption }]}>Change</Text>
+                    <Ionicons name="swap-vertical-outline" size={14} color={t.colors.text3} />
+                  </View>
+                </Glass>
               </Pressable>
 
               {/* City search field with icon */}

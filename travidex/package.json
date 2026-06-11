@@ -11,6 +11,7 @@
     "@supabase/supabase-js": "^2.108.0",
     "expo": "~56.0.9",
     "expo-apple-authentication": "~56.0.4",
+    "expo-blur": "~56.0.3",
     "expo-camera": "~56.0.7",
     "expo-constants": "~56.0.17",
     "expo-font": "~56.0.5",
@@ -75,7 +76,8 @@
       "^@expo-google-fonts/(.*)$": "<rootDir>/__mocks__/expo-google-fonts.js",
       "^expo-font$": "<rootDir>/__mocks__/expo-font.js",
       "react-native-maps": "<rootDir>/__mocks__/react-native-maps.tsx",
-      "^react-native-purchases$": "<rootDir>/__mocks__/react-native-purchases.ts"
+      "^react-native-purchases$": "<rootDir>/__mocks__/react-native-purchases.ts",
+      "^expo-blur$": "<rootDir>/__mocks__/expo-blur.tsx"
     }
   },
   "private": true

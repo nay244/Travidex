@@ -64,13 +64,13 @@ export function CountryPicker({ visible, countries, progress, currentId, onPick,
         onPress={onClose}
         style={{ flex: 1, backgroundColor: t.colors.surfaceScrim, justifyContent: 'flex-end' }}
       >
-        <Animated.View style={{ transform: [{ translateY }] }}>
+        {/* Height lives on the wrapper (its parent, the scrim, is flex:1) so the
+            percentage resolves and the sheet runs flush to the screen bottom. */}
+        <Animated.View style={{ height: '75%', transform: [{ translateY }] }}>
         <Pressable
           onPress={() => {}}
           style={{
-            // Fixed height (not maxHeight) so the FlatList gets real bounds and
-            // the last row never hides behind the home indicator.
-            height: '70%',
+            flex: 1,
             backgroundColor: t.colors.surface1,
             borderTopLeftRadius: t.radii.lg,
             borderTopRightRadius: t.radii.lg,
