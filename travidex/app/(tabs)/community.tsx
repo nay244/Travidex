@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
@@ -16,6 +17,161 @@ const TAB_OPTIONS = [
 ] as const;
 
 type Tab = 'friends' | 'gems';
+
+// ── FeedCard: local component so each card owns its liked/count state ──────
+function FeedCard({ item }: { item: FeedItem }) {
+  const t = useTheme();
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+
+  // Striped placeholder constants — same pattern as sight-detail hero/region-dex thumbs
+  const STRIPE_COUNT = 10;
+  const PHOTO_HEIGHT = 140;
+  const stripeH = PHOTO_HEIGHT / STRIPE_COUNT;
+
+  function handleLike() {
+    setLiked(prev => !prev);
+    setLikeCount(prev => (liked ? prev - 1 : prev + 1));
+  }
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        gap: t.spacing.s3,
+        padding: t.spacing.s3,
+        marginHorizontal: t.spacing.s4,
+        marginBottom: t.spacing.s3,
+        backgroundColor: t.colors.surface1,
+        borderRadius: t.radii.lg,
+        borderWidth: 1,
+        borderColor: t.colors.borderSubtle,
+      }}
+    >
+      {/* Avatar disc */}
+      <View
+        style={{
+          width: 38,
+          height: 38,
+          borderRadius: 19,
+          backgroundColor: t.colors.surface3,
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <Text
+          style={[
+            t.type.caption,
+            { color: t.colors.text2, fontFamily: t.fontFamily.sansSemibold, fontSize: 13 },
+          ]}
+        >
+          {(item.username ?? 'S')[0]?.toUpperCase()}
+        </Text>
+      </View>
+
+      {/* Content */}
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={[t.type.body, { color: t.colors.text2, lineHeight: 20 }]}>
+          <Text style={{ color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold }}>
+            {item.username ?? 'Someone'}
+          </Text>
+          {' found '}
+          <Text style={{ color: t.colors.green, fontFamily: t.fontFamily.sansSemibold }}>
+            {item.sight_name}
+          </Text>
+          {item.city_name ? (
+            <Text style={{ color: t.colors.text3 }}>{` in ${item.city_name}`}</Text>
+          ) : null}
+        </Text>
+        <Text
+          style={[
+            t.type.caption,
+            {
+              color: t.colors.text3,
+              fontFamily: t.fontFamily.monoRegular,
+              textTransform: 'uppercase',
+              letterSpacing: 0.5,
+              marginTop: 2,
+            },
+          ]}
+        >
+          {relativeTime(item.found_at)}
+        </Text>
+        {item.comment ? (
+          <Text style={[t.type.caption, { color: t.colors.text2, marginTop: t.spacing.s1 }]}>
+            {item.comment}
+          </Text>
+        ) : null}
+
+        {/* Photo block — FeedItem has no photo yet — placeholder block per notes §1.1 */}
+        <View
+          testID={`feed-photo-${item.id}`}
+          style={{
+            height: PHOTO_HEIGHT,
+            borderRadius: t.radii.md,
+            marginTop: t.spacing.s2,
+            overflow: 'hidden',
+            backgroundColor: t.colors.phBase,
+          }}
+        >
+          {Array.from({ length: STRIPE_COUNT }).map((_, i) => (
+            <View
+              key={i}
+              style={{
+                position: 'absolute',
+                left: 0, right: 0,
+                top: i * stripeH,
+                height: stripeH,
+                backgroundColor: i % 2 === 0 ? t.colors.phBase : t.colors.phStripe,
+              }}
+            />
+          ))}
+        </View>
+
+        {/* Social row: ♥ like chip + 💬 comment chip */}
+        <View style={{ flexDirection: 'row', gap: t.spacing.s4, marginTop: t.spacing.s2 }}>
+          {/* Like chip — toggles locally, green when liked */}
+          <Pressable
+            testID={`like-${item.id}`}
+            onPress={handleLike}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+          >
+            <Ionicons
+              name={liked ? 'heart' : 'heart-outline'}
+              size={15}
+              color={liked ? t.colors.green : t.colors.text3}
+            />
+            <Text
+              style={[
+                t.type.caption,
+                {
+                  fontFamily: t.fontFamily.monoBold,
+                  color: liked ? t.colors.green : t.colors.text3,
+                },
+              ]}
+            >
+              {likeCount}
+            </Text>
+          </Pressable>
+
+          {/* Comment chip — non-interactive, static 0 */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Ionicons name="chatbubble-outline" size={15} color={t.colors.text3} />
+            <Text
+              style={[
+                t.type.caption,
+                { fontFamily: t.fontFamily.monoBold, color: t.colors.text3 },
+              ]}
+            >
+              0
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export default function Community() {
   const t = useTheme();
@@ -144,78 +300,7 @@ export default function Community() {
               <Text style={[t.type.body, { color: t.colors.text3, padding: t.spacing.s5 }]}>No finds yet</Text>
             ) : null
           }
-          renderItem={({ item }) => (
-            <View
-              style={{
-                flexDirection: 'row',
-                gap: t.spacing.s3,
-                padding: t.spacing.s3,
-                marginHorizontal: t.spacing.s4,
-                marginBottom: t.spacing.s3,
-                backgroundColor: t.colors.surface1,
-                borderRadius: t.radii.lg,
-                borderWidth: 1,
-                borderColor: t.colors.borderSubtle,
-              }}
-            >
-              {/* Avatar disc */}
-              <View
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 19,
-                  backgroundColor: t.colors.surface3,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <Text
-                  style={[
-                    t.type.caption,
-                    { color: t.colors.text2, fontFamily: t.fontFamily.sansSemibold, fontSize: 13 },
-                  ]}
-                >
-                  {(item.username ?? 'S')[0]?.toUpperCase()}
-                </Text>
-              </View>
-
-              {/* Content */}
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={[t.type.body, { color: t.colors.text2, lineHeight: 20 }]}>
-                  <Text style={{ color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold }}>
-                    {item.username ?? 'Someone'}
-                  </Text>
-                  {' found '}
-                  <Text style={{ color: t.colors.green, fontFamily: t.fontFamily.sansSemibold }}>
-                    {item.sight_name}
-                  </Text>
-                  {item.city_name ? (
-                    <Text style={{ color: t.colors.text3 }}>{` in ${item.city_name}`}</Text>
-                  ) : null}
-                </Text>
-                <Text
-                  style={[
-                    t.type.caption,
-                    {
-                      color: t.colors.text3,
-                      fontFamily: t.fontFamily.monoRegular,
-                      textTransform: 'uppercase',
-                      letterSpacing: 0.5,
-                      marginTop: 2,
-                    },
-                  ]}
-                >
-                  {relativeTime(item.found_at)}
-                </Text>
-                {item.comment ? (
-                  <Text style={[t.type.caption, { color: t.colors.text2, marginTop: t.spacing.s1 }]}>
-                    {item.comment}
-                  </Text>
-                ) : null}
-              </View>
-            </View>
-          )}
+          renderItem={({ item }) => <FeedCard item={item} />}
         />
       ) : (
         <View testID="gems-tab" style={{ flex: 1 }}>

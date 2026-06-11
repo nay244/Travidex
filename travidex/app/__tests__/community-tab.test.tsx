@@ -109,3 +109,40 @@ it('shows empty state and does not call getFeed when no session', async () => {
   await waitFor(() => expect(screen.getByText('No finds yet')).toBeOnTheScreen());
   expect(getFeed).not.toHaveBeenCalled();
 });
+
+it('feed card renders photo placeholder block', async () => {
+  (getFeed as jest.Mock).mockResolvedValue([
+    { id: 'f1', comment: null, sight_name: 'Tower', username: 'nay', found_at: '2026-06-09T11:55:00Z', city_name: 'Paris' },
+  ]);
+  renderWithTheme(<Community />);
+  await waitFor(() => expect(screen.getByTestId('feed-photo-f1')).toBeOnTheScreen());
+});
+
+it('like chip starts at 0, increments to 1 on press, decrements back on second press', async () => {
+  (getFeed as jest.Mock).mockResolvedValue([
+    { id: 'f1', comment: null, sight_name: 'Tower', username: 'nay', found_at: '2026-06-09T11:55:00Z', city_name: 'Paris' },
+  ]);
+  renderWithTheme(<Community />);
+  await waitFor(() => screen.getByTestId('like-f1'));
+
+  // before press: count is 0
+  const likeBtn = screen.getByTestId('like-f1');
+  expect(screen.getAllByText('0').length).toBeGreaterThanOrEqual(1);
+
+  fireEvent.press(likeBtn);
+  await waitFor(() => expect(screen.getByText('1')).toBeOnTheScreen());
+
+  fireEvent.press(likeBtn);
+  await waitFor(() => expect(screen.queryByText('1')).toBeNull());
+});
+
+it('comment chip renders with static 0 count', async () => {
+  (getFeed as jest.Mock).mockResolvedValue([
+    { id: 'f1', comment: null, sight_name: 'Tower', username: 'nay', found_at: '2026-06-09T11:55:00Z', city_name: 'Paris' },
+  ]);
+  renderWithTheme(<Community />);
+  await waitFor(() => screen.getByTestId('like-f1'));
+  // The comment chip renders "0" (there are two 0s — like and comment)
+  const zeros = screen.getAllByText('0');
+  expect(zeros.length).toBeGreaterThanOrEqual(2);
+});
