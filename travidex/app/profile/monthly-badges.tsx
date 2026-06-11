@@ -114,8 +114,10 @@ export default function MonthlyBadges({ now = new Date() }: { now?: Date }) {
                     <View
                       key={key}
                       style={{
-                        // 3-col layout: (100% - 2 gaps) / 3 — use fixed fraction
-                        width: '30%',
+                        // 3-col layout: guarantee 3-up on narrow screens
+                        // (30% + gaps could wrap the 3rd column)
+                        flexBasis: '28%',
+                        flexGrow: 1,
                         alignItems: 'center',
                         gap: t.spacing.s2,
                       }}

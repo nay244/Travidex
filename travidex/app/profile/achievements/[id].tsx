@@ -79,7 +79,7 @@ export default function AchievementDetail() {
             overflow: 'hidden',
           }}>
             <View style={{
-              width: `${(value / achievement.goal) * 100}%`,
+              width: `${Math.min(100, (value / achievement.goal) * 100)}%`,
               height: '100%',
               backgroundColor: done ? t.colors.green : t.colors.amber,
               borderRadius: 4,

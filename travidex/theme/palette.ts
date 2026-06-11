@@ -24,7 +24,7 @@ export type ColorTokens = {
   // Amber
   amber: string; amberBright: string; amberDeep: string; amberDim: string; amberLine: string; amberGlow: string;
   // Blue
-  blue: string; blueBright: string; blueDeep: string; blueDim: string; blueLine: string;
+  blue: string; blueBright: string; blueDeep: string; blueDim: string; blueLine: string; blueGlow: string;
   // Locked / destructive
   locked: string; lockedText: string; danger: string; dangerDim: string;
   // Map
@@ -48,7 +48,7 @@ export const lightColors: ColorTokens = {
 
   green: '#1f9d57', greenBright: '#27b566', greenDeep: '#15663b', greenDim: 'rgba(31,157,87,0.12)', greenLine: 'rgba(31,157,87,0.30)', greenGlow: 'rgba(31,157,87,0.22)',
   amber: '#bd7d12', amberBright: '#e0a23c', amberDeep: '#8f5e0e', amberDim: 'rgba(189,125,18,0.13)', amberLine: 'rgba(189,125,18,0.34)', amberGlow: 'rgba(189,125,18,0.22)',
-  blue: '#2f6fe0', blueBright: '#5187e8', blueDeep: '#1d4fac', blueDim: 'rgba(47,111,224,0.11)', blueLine: 'rgba(47,111,224,0.30)',
+  blue: '#2f6fe0', blueBright: '#5187e8', blueDeep: '#1d4fac', blueDim: 'rgba(47,111,224,0.11)', blueLine: 'rgba(47,111,224,0.30)', blueGlow: 'rgba(47,111,224,0.22)',
 
   locked: '#aab2c0', lockedText: '#838b99', danger: '#d83a3a', dangerDim: 'rgba(216,58,58,0.12)',
 
@@ -72,7 +72,7 @@ export const darkColors: ColorTokens = {
 
   green: '#4ade80', greenBright: '#6ef0a0', greenDeep: '#2e8b57', greenDim: 'rgba(74,222,128,0.16)', greenLine: 'rgba(74,222,128,0.40)', greenGlow: 'rgba(74,222,128,0.45)',
   amber: '#e0a23c', amberBright: '#f4b850', amberDeep: '#c9882b', amberDim: 'rgba(224,162,60,0.16)', amberLine: 'rgba(224,162,60,0.40)', amberGlow: 'rgba(224,162,60,0.45)',
-  blue: '#8fb6ff', blueBright: '#aecbff', blueDeep: '#5b7fd6', blueDim: 'rgba(143,182,255,0.16)', blueLine: 'rgba(143,182,255,0.40)',
+  blue: '#8fb6ff', blueBright: '#aecbff', blueDeep: '#5b7fd6', blueDim: 'rgba(143,182,255,0.16)', blueLine: 'rgba(143,182,255,0.40)', blueGlow: 'rgba(143,182,255,0.45)',
 
   locked: '#3a4150', lockedText: '#717b8b', danger: '#ff6b6b', dangerDim: 'rgba(255,107,107,0.16)',
 
