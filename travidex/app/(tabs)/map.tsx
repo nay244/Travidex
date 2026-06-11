@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Modal, Pressable, Text, View } from 'react-native';
+import { Modal, Pressable, Text, TextInput, View } from 'react-native';
 import MapView from 'react-native-maps';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,12 +26,13 @@ export default function MapScreen() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selected, setSelected] = useState<SightWithFind | null>(null);
   const [logModalOpen, setLogModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Finding 1: reload on focus so pins/rows refresh after logging elsewhere
+  // Reload on focus so pins/rows refresh after logging elsewhere
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
   // Clear selection on any city change (picker, Explore's "Open map", etc.)
-  useEffect(() => { setSelected(null); setLogModalOpen(false); }, [cityId]);
+  useEffect(() => { setSelected(null); setLogModalOpen(false); setSearchQuery(''); }, [cityId]);
 
   const handleSelect = useCallback((id: string) => {
     const sight = sights.find(s => s.id === id) ?? null;
@@ -59,11 +61,18 @@ export default function MapScreen() {
     router.push({ pathname: '/find/success', params: { sightId } });
   }, [selected, reload, router]);
 
+  // Glass overlay style shared by search row and filter button
+  const glassStyle = {
+    backgroundColor: t.colors.surfaceOverlay,
+    borderWidth: 1,
+    borderColor: t.colors.borderSubtle,
+  } as const;
+
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       <View style={{ flex: 1 }}>
         <MapView
-          key={cityId} // remount per city: fresh initialRegion without fighting user panning
+          key={cityId}
           style={{ flex: 1 }}
           testID="map-view"
           initialRegion={city ? { latitude: city.lat, longitude: city.lng, latitudeDelta: 0.08, longitudeDelta: 0.08 } : undefined}
@@ -72,18 +81,48 @@ export default function MapScreen() {
             <SightPin key={s.id} sight={s} onPress={handleSelect} selected={selected?.id === s.id} />
           ))}
         </MapView>
-        <Pressable
-          testID="location-pill"
-          onPress={() => setPickerOpen(true)}
-          style={{ position: 'absolute', top: insets.top + t.spacing.s2, left: t.spacing.s4, flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2, paddingVertical: t.spacing.s2, paddingHorizontal: t.spacing.s3, borderRadius: 999, backgroundColor: t.colors.surfaceOverlay, borderWidth: 1, borderColor: t.colors.borderSubtle }}
-        >
-          <Flag code={city?.country_code ?? ''} size={22} radius={5} />
-          <Text style={[t.type.body, { color: t.colors.text1 }]}>{city?.name ?? ''}</Text>
-          <Text style={{ color: t.colors.text3 }}>{'▾'}</Text>
-        </Pressable>
+
+        {/* Top overlay: search row (flex) + filter icon button */}
+        <View style={{ position: 'absolute', top: insets.top + t.spacing.s2, left: t.spacing.s4, right: t.spacing.s4, zIndex: 20, gap: t.spacing.s3 }}>
+          <View style={{ flexDirection: 'row', gap: t.spacing.s2 }}>
+            {/* Glass search field */}
+            <View style={[glassStyle, { flex: 1, flexDirection: 'row', alignItems: 'center', height: 46, paddingHorizontal: t.spacing.s4, borderRadius: t.radii.md, gap: t.spacing.s2 }]}>
+              <Ionicons name="search" size={16} color={t.colors.text3} />
+              <TextInput
+                placeholder="Search sights"
+                placeholderTextColor={t.colors.text3}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                style={[t.type.body, { flex: 1, color: t.colors.text1, padding: 0 }]}
+              />
+            </View>
+            {/* Glass filter icon button (decorative) */}
+            <View style={[glassStyle, { width: 46, height: 46, borderRadius: t.radii.md, alignItems: 'center', justifyContent: 'center' }]}>
+              <Ionicons name="options-outline" size={18} color={t.colors.text1} />
+            </View>
+          </View>
+
+          {/* Location pill */}
+          <Pressable
+            testID="location-pill"
+            onPress={() => setPickerOpen(true)}
+            style={[glassStyle, {
+              alignSelf: 'flex-start',
+              flexDirection: 'row', alignItems: 'center',
+              gap: t.spacing.s2,
+              height: 38,
+              paddingHorizontal: t.spacing.s3,
+              borderRadius: 999,
+            }]}
+          >
+            <Flag code={city?.country_code ?? ''} size={22} radius={5} />
+            <Text style={[t.type.body, { color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold }]}>{city?.name ?? ''}</Text>
+            <Ionicons name="chevron-down" size={14} color={t.colors.text3} />
+          </Pressable>
+        </View>
       </View>
 
-      {/* Selection banner (Finding 2: select-to-log per design §3.2/§5) */}
+      {/* Selection banner (§3.2 select-to-log) */}
       {selected && (
         <Pressable
           testID="selection-banner"
@@ -92,23 +131,25 @@ export default function MapScreen() {
             backgroundColor: t.colors.amberDim,
             borderWidth: 1,
             borderColor: t.colors.amberLine,
-            borderRadius: t.radii.sm,
-            marginHorizontal: t.spacing.s4,
+            borderRadius: t.radii.md,
+            marginHorizontal: t.spacing.s3,
             marginBottom: t.spacing.s2,
             paddingVertical: t.spacing.s3,
-            paddingHorizontal: t.spacing.s4,
+            paddingHorizontal: t.spacing.s3,
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            gap: t.spacing.s2,
           }}
         >
-          <Text style={[t.type.body, { color: t.colors.text1, flex: 1 }]}>
-            {'Selected ' + selected.name}
+          <Ionicons name="ribbon-outline" size={16} color={t.colors.amber} />
+          <Text style={[t.type.body, { color: t.colors.text1, flex: 1, fontSize: t.fontSize.caption }]} numberOfLines={1}>
+            {'Selected '}
+            <Text style={{ fontFamily: t.fontFamily.sansBold }}>{selected.name}</Text>
           </Text>
           {selected.found ? (
             <Text style={[t.type.caption, { color: t.colors.text2 }]}>Already in your dex</Text>
           ) : (
-            <Text testID="banner-tap-to-log" style={[t.type.caption, { color: t.colors.amber }]}>TAP TO LOG</Text>
+            <Text testID="banner-tap-to-log" style={{ fontFamily: t.fontFamily.monoBold, fontSize: t.fontSize.micro, letterSpacing: 0.08 * t.fontSize.micro, color: t.colors.amber }}>TAP TO LOG ↓</Text>
           )}
         </Pressable>
       )}
@@ -120,6 +161,7 @@ export default function MapScreen() {
           onSelect={handleSelect}
           selectedId={selected?.id ?? null}
           onSeeMore={handleSeeMore}
+          query={searchQuery}
         />
       </View>
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { useAuth } from '../context/AuthProvider';
 import { getCountries } from '../lib/data/countries';
@@ -27,8 +28,7 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
   const [cityProg, setCityProg] = useState<Map<string, Progress>>(new Map());
   const [countryProg, setCountryProg] = useState<Map<string, Progress>>(new Map());
 
-  // Re-sync to the active city's country each time the sheet opens; the Modal
-  // stays mounted, so local state would otherwise go stale across reopens.
+  // Re-sync to the active city's country each time the sheet opens
   useEffect(() => {
     if (!visible) return;
     setBrowseId(initialCountryId);
@@ -59,16 +59,29 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: t.colors.surfaceScrim, justifyContent: 'flex-end' }}>
-        <Pressable onPress={() => {}} style={{ maxHeight: '86%', backgroundColor: t.colors.surface1, borderTopLeftRadius: t.radii.lg, borderTopRightRadius: t.radii.lg, padding: t.spacing.s4, gap: t.spacing.s3 }}>
-          <View style={{ width: 38, height: 5, borderRadius: 999, backgroundColor: t.colors.borderStrong, alignSelf: 'center' }} />
+        <Pressable
+          onPress={() => {}}
+          style={{
+            maxHeight: '86%',
+            backgroundColor: t.colors.surface1,
+            borderTopLeftRadius: t.radii.xl,
+            borderTopRightRadius: t.radii.xl,
+            paddingTop: t.spacing.s3,
+            paddingHorizontal: t.spacing.s5,
+            paddingBottom: t.spacing.s8,
+            gap: t.spacing.s3,
+          }}
+        >
+          {/* Grabber */}
+          <View style={{ width: 38, height: 5, borderRadius: 999, backgroundColor: t.colors.borderStrong, alignSelf: 'center', marginBottom: t.spacing.s2 }} />
 
           {view === 'countries' ? (
             <>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2 }}>
                 <Pressable onPress={() => setView('cities')} hitSlop={8}>
-                  <Text style={[t.type.h3, { color: t.colors.text1 }]}>{'‹'}</Text>
+                  <Ionicons name="chevron-back" size={22} color={t.colors.text1} />
                 </Pressable>
-                <Text style={[t.type.h3, { color: t.colors.text1 }]}>Choose a country</Text>
+                <Text style={[t.type.h3, { color: t.colors.text1, fontFamily: t.fontFamily.sansBold, fontSize: t.fontSize.h2 }]}>Choose a country</Text>
               </View>
               <FlatList
                 data={countries}
@@ -79,14 +92,22 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
                   return (
                     <Pressable
                       onPress={() => { setBrowseId(item.id); setQ(''); setView('cities'); }}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s3, padding: t.spacing.s3, borderRadius: t.radii.sm, backgroundColor: active ? t.colors.surface3 : t.colors.surface2, borderWidth: 1, borderColor: active ? t.colors.greenLine : t.colors.borderSubtle, marginBottom: t.spacing.s2 }}
+                      style={{
+                        flexDirection: 'row', alignItems: 'center', gap: t.spacing.s4,
+                        paddingVertical: t.spacing.s3, paddingHorizontal: t.spacing.s4,
+                        borderRadius: t.radii.lg,
+                        backgroundColor: active ? t.colors.surface3 : t.colors.surface2,
+                        borderWidth: 1,
+                        borderColor: active ? t.colors.greenLine : t.colors.borderSubtle,
+                        marginBottom: t.spacing.s2,
+                      }}
                     >
                       <Flag code={item.code} size={34} radius={6} />
                       <View style={{ flex: 1 }}>
-                        <Text style={[t.type.body, { color: t.colors.text1 }]}>{item.name}</Text>
-                        <Text style={[t.type.caption, { color: t.colors.text3 }]}>{`${p.found}/${p.total} sights`}</Text>
+                        <Text style={[t.type.body, { color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold }]}>{item.name}</Text>
+                        <Text style={[t.type.caption, { color: t.colors.text3, fontFamily: t.fontFamily.monoRegular, fontSize: t.fontSize.micro, letterSpacing: 0.03 * t.fontSize.micro, textTransform: 'uppercase' as const }]}>{`${p.found}/${p.total} sights`}</Text>
                       </View>
-                      <Text style={{ color: t.colors.text3 }}>{'›'}</Text>
+                      <Ionicons name="chevron-forward" size={18} color={t.colors.text3} />
                     </Pressable>
                   );
                 }}
@@ -94,27 +115,61 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
             </>
           ) : (
             <>
+              {/* Current country card — tap to change */}
               <Pressable
                 onPress={() => setView('countries')}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s3, padding: t.spacing.s3, borderRadius: t.radii.sm, backgroundColor: t.colors.surface2, borderWidth: 1, borderColor: t.colors.borderSubtle }}
+                style={{
+                  flexDirection: 'row', alignItems: 'center', gap: t.spacing.s3,
+                  paddingVertical: t.spacing.s3, paddingHorizontal: t.spacing.s4,
+                  borderRadius: t.radii.lg,
+                  backgroundColor: t.colors.surface2,
+                  borderWidth: 1,
+                  borderColor: t.colors.borderSubtle,
+                }}
               >
                 <Flag code={country?.code ?? ''} size={32} radius={6} />
                 <View style={{ flex: 1 }}>
-                  <Text style={[t.type.label, { color: t.colors.text3 }]}>Country</Text>
-                  <Text style={[t.type.h3, { color: t.colors.text1 }]}>{country?.name ?? ''}</Text>
+                  <Text style={[t.type.caption, { color: t.colors.text3, fontFamily: t.fontFamily.monoRegular, fontSize: t.fontSize.micro, letterSpacing: 0.12 * t.fontSize.micro, textTransform: 'uppercase' as const }]}>Country</Text>
+                  <Text style={[t.type.h3, { color: t.colors.text1, fontFamily: t.fontFamily.sansBold, fontSize: t.fontSize.h3, letterSpacing: -0.01 * t.fontSize.h3 }]}>{country?.name ?? ''}</Text>
                 </View>
-                <Text style={[t.type.body, { color: t.colors.text1 }]}>Change</Text>
+                {/* "Change ⇅" pill */}
+                <View style={{
+                  flexDirection: 'row', alignItems: 'center', gap: t.spacing.s1,
+                  height: 30, paddingHorizontal: t.spacing.s3,
+                  borderRadius: 999,
+                  backgroundColor: t.colors.surface3,
+                  borderWidth: 1,
+                  borderColor: t.colors.borderDefault,
+                }}>
+                  <Text style={[t.type.body, { color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold, fontSize: t.fontSize.caption }]}>Change</Text>
+                  <Ionicons name="swap-vertical-outline" size={14} color={t.colors.text3} />
+                </View>
               </Pressable>
 
-              <TextInput
-                value={q}
-                onChangeText={setQ}
-                placeholder={`Search cities in ${country?.name ?? ''}`}
-                placeholderTextColor={t.colors.text3}
-                style={[t.type.body, { backgroundColor: t.colors.surface2, color: t.colors.text1, padding: t.spacing.s3, borderRadius: t.radii.sm }]}
-              />
+              {/* City search field with icon */}
+              <View style={{
+                flexDirection: 'row', alignItems: 'center', gap: t.spacing.s2,
+                height: 46, paddingHorizontal: t.spacing.s4,
+                backgroundColor: t.colors.surface2,
+                borderRadius: t.radii.md,
+                borderWidth: 1,
+                borderColor: t.colors.borderSubtle,
+              }}>
+                <Ionicons name="search" size={16} color={t.colors.text3} />
+                <TextInput
+                  value={q}
+                  onChangeText={setQ}
+                  placeholder={`Search cities in ${country?.name ?? ''}`}
+                  placeholderTextColor={t.colors.text3}
+                  style={[t.type.body, { flex: 1, color: t.colors.text1, padding: 0 }]}
+                />
+              </View>
 
-              <Text style={[t.type.label, { color: t.colors.text3 }]}>{`Cities in ${country?.name ?? ''}`}</Text>
+              {/* "CITIES IN {COUNTRY}" mono overline */}
+              <Text style={[t.type.caption, { color: t.colors.text3, fontFamily: t.fontFamily.monoRegular, fontSize: t.fontSize.micro, letterSpacing: 0.10 * t.fontSize.micro, textTransform: 'uppercase' as const, marginTop: t.spacing.s1 }]}>
+                {`Cities in ${country?.name ?? ''}`}
+              </Text>
+
               <FlatList
                 data={visibleCities}
                 keyExtractor={c => c.id}
@@ -125,14 +180,39 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
                   return (
                     <Pressable
                       onPress={() => onPick(item.id)}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s3, padding: t.spacing.s3, borderRadius: t.radii.sm, backgroundColor: current ? t.colors.surface3 : 'transparent', borderWidth: current ? 1 : 0, borderColor: t.colors.greenLine }}
+                      style={{
+                        flexDirection: 'row', alignItems: 'center', gap: t.spacing.s3,
+                        paddingVertical: t.spacing.s3, paddingHorizontal: t.spacing.s2,
+                        borderRadius: t.radii.md,
+                        backgroundColor: current ? t.colors.surface3 : 'transparent',
+                        borderWidth: current ? 1 : 0,
+                        borderColor: t.colors.greenLine,
+                      }}
                     >
+                      {/* Map-pin icon colored green when claimed */}
+                      <Ionicons name="location-outline" size={16} color={claimed ? t.colors.green : t.colors.text3} />
+
                       <View style={{ flex: 1 }}>
-                        <Text style={[t.type.body, { color: t.colors.text1 }]}>{item.name}</Text>
-                        {item.region ? <Text style={[t.type.caption, { color: t.colors.text3 }]}>{item.region}</Text> : null}
+                        <Text style={[t.type.body, { color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold }]}>{item.name}</Text>
+                        {item.region ? (
+                          <Text style={[t.type.caption, { color: t.colors.text3, fontFamily: t.fontFamily.monoRegular, fontSize: t.fontSize.micro, letterSpacing: 0.03 * t.fontSize.micro, textTransform: 'uppercase' as const }]}>{item.region}</Text>
+                        ) : null}
                       </View>
-                      <Text style={[t.type.stat, { color: claimed ? t.colors.green : t.colors.text3 }]}>{`${p.found}/${p.total}`}</Text>
-                      <Text style={{ color: current ? t.colors.green : t.colors.text3 }}>{current ? '✓' : '›'}</Text>
+
+                      {/* Mono found/total (green when claimed) */}
+                      <Text style={{ fontFamily: t.fontFamily.monoBold, fontSize: t.fontSize.caption, color: claimed ? t.colors.green : t.colors.text3 }}>
+                        <Text style={{ color: claimed ? t.colors.green : t.colors.text3 }}>{p.found}</Text>
+                        <Text style={{ color: t.colors.text3 }}>/{p.total}</Text>
+                      </Text>
+
+                      {/* Current = green check disc; otherwise chevron */}
+                      {current ? (
+                        <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: t.colors.green, alignItems: 'center', justifyContent: 'center' }}>
+                          <Ionicons name="checkmark" size={12} color={t.colors.textOnAccent} />
+                        </View>
+                      ) : (
+                        <Ionicons name="chevron-forward" size={16} color={t.colors.text3} />
+                      )}
                     </Pressable>
                   );
                 }}
