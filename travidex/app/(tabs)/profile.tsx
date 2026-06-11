@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -5,6 +6,8 @@ import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
 import { useProfile } from '../../hooks/useProfile';
 import { Screen } from '../../components/Screen';
+import { artById, ArtSwatch } from '../../lib/profileArt';
+import { getArtId } from '../../lib/data/profile';
 
 // TODO: username from profiles table (Phase 9+); fallback to email local-part
 function useDisplayName() {
@@ -25,6 +28,17 @@ export default function Profile() {
   const { stats } = useProfile();
   const displayName = useDisplayName();
   const initials = getInitials(displayName);
+  const { session } = useAuth();
+  const [artId, setArtId] = useState('trailhead');
+
+  useEffect(() => {
+    if (!session?.user) return;
+    getArtId(session.user.id)
+      .then(setArtId)
+      .catch(err => console.warn('getArtId failed', err));
+  }, [session?.user?.id]);
+
+  const art = artById(artId);
 
   // Stat cell: equal flex, centered, never overlaps on 390pt device
   const StatCell = ({ value, label }: { value: number; label: string }) => (
@@ -75,17 +89,31 @@ export default function Profile() {
   return (
     <Screen>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: t.spacing.s5 }}>
-        {/* Identity header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s5, marginBottom: t.spacing.s5 }}>
+        {/* Identity header with art backdrop */}
+        <View style={{
+          borderRadius: t.radii.lg,
+          overflow: 'hidden',
+          marginBottom: t.spacing.s5,
+          borderWidth: 1,
+          borderColor: t.colors.borderSubtle,
+        }}>
+          <ArtSwatch art={art} style={{ position: 'absolute', inset: 0, borderRadius: 0 }} />
           <View style={{
-            width: 56, height: 56, borderRadius: 28,
-            backgroundColor: t.colors.surface3,
-            alignItems: 'center', justifyContent: 'center',
-            borderWidth: 3, borderColor: t.colors.bg,
+            flexDirection: 'row', alignItems: 'center',
+            gap: t.spacing.s5,
+            padding: t.spacing.s5,
+            backgroundColor: 'rgba(0,0,0,0.08)',
           }}>
-            <Text style={[t.type.h2, { color: t.colors.text2 }]}>{initials}</Text>
+            <View style={{
+              width: 56, height: 56, borderRadius: 28,
+              backgroundColor: t.colors.surface3,
+              alignItems: 'center', justifyContent: 'center',
+              borderWidth: 3, borderColor: t.colors.bg,
+            }}>
+              <Text style={[t.type.h2, { color: t.colors.text2 }]}>{initials}</Text>
+            </View>
+            <Text style={[t.type.h2, { color: t.colors.text1, flex: 1 }]}>{displayName}</Text>
           </View>
-          <Text style={[t.type.h2, { color: t.colors.text1, flex: 1 }]}>{displayName}</Text>
         </View>
 
         {/* Stat row — 3 equal cells, cannot overlap */}
@@ -106,6 +134,7 @@ export default function Profile() {
         </View>
 
         {/* Nav rail */}
+        <NavRow label="Profile art" to="/profile/art" icon="color-palette-outline" testID="nav-profile-art" />
         <NavRow label="Badges" to="/profile/badges" icon="ribbon-outline" />
         <NavRow label="Achievements" to="/profile/achievements" icon="trophy-outline" testID="nav-achievements" />
         <NavRow label="Photo journal" to="/profile/journal" icon="images-outline" />
