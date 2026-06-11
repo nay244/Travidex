@@ -3,7 +3,6 @@ import { Redirect, Tabs, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
-import { CityProvider } from '../../context/CityProvider';
 import { SelectionProvider, useSelection } from '../../context/SelectionProvider';
 import { useAuth } from '../../context/AuthProvider';
 
@@ -59,33 +58,31 @@ export default function TabsLayout() {
   const { session, loading } = useAuth();
   if (!loading && !session) return <Redirect href="/(auth)/welcome" />;
   return (
-    <CityProvider>
-      <SelectionProvider>
-        <Tabs
-          screenOptions={{
-            headerShown: false,
-            tabBarActiveTintColor: t.colors.green,
-            tabBarInactiveTintColor: t.colors.text3,
-            tabBarStyle: {
-              backgroundColor: t.colors.surface1,
-              borderTopColor: t.colors.divider,
-              overflow: 'visible',
-            },
+    <SelectionProvider>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: t.colors.green,
+          tabBarInactiveTintColor: t.colors.text3,
+          tabBarStyle: {
+            backgroundColor: t.colors.surface1,
+            borderTopColor: t.colors.divider,
+            overflow: 'visible',
+          },
+        }}
+      >
+        <Tabs.Screen name="map" options={{ title: 'Map', tabBarIcon: ({ color, size }) => <Ionicons name="map" color={color} size={size} /> }} />
+        <Tabs.Screen name="explore" options={{ title: 'Explore', tabBarIcon: ({ color, size }) => <Ionicons name="compass" color={color} size={size} /> }} />
+        <Tabs.Screen
+          name="find"
+          options={{
+            title: 'Find',
+            tabBarButton: (props) => <StampFab onPress={props.onPress ?? undefined} />,
           }}
-        >
-          <Tabs.Screen name="map" options={{ title: 'Map', tabBarIcon: ({ color, size }) => <Ionicons name="map" color={color} size={size} /> }} />
-          <Tabs.Screen name="explore" options={{ title: 'Explore', tabBarIcon: ({ color, size }) => <Ionicons name="compass" color={color} size={size} /> }} />
-          <Tabs.Screen
-            name="find"
-            options={{
-              title: 'Find',
-              tabBarButton: (props) => <StampFab onPress={props.onPress ?? undefined} />,
-            }}
-          />
-          <Tabs.Screen name="community" options={{ title: 'Community', tabBarIcon: ({ color, size }) => <Ionicons name="people" color={color} size={size} /> }} />
-          <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: ({ color, size }) => <Ionicons name="person" color={color} size={size} /> }} />
-        </Tabs>
-      </SelectionProvider>
-    </CityProvider>
+        />
+        <Tabs.Screen name="community" options={{ title: 'Community', tabBarIcon: ({ color, size }) => <Ionicons name="people" color={color} size={size} /> }} />
+        <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: ({ color, size }) => <Ionicons name="person" color={color} size={size} /> }} />
+      </Tabs>
+    </SelectionProvider>
   );
 }

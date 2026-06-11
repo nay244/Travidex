@@ -10,6 +10,7 @@ import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/spac
 import Purchases from 'react-native-purchases';
 import { ThemeProvider } from '@/theme';
 import { AuthProvider, useAuth } from '../context/AuthProvider';
+import { CityProvider } from '../context/CityProvider';
 import { EntitlementProvider } from '../context/EntitlementProvider';
 
 // Configure RevenueCat at module load so it runs before any provider effect
@@ -43,7 +44,11 @@ export default function RootLayout() {
       <EntitlementProvider>
         <AuthProvider>
           <AuthGate>
-            <Stack screenOptions={{ headerShown: false }} />
+            {/* CityProvider must wrap the ROOT stack: pushed screens outside the
+                tabs (/location, /city/[id], /find/*) read and set the active city. */}
+            <CityProvider>
+              <Stack screenOptions={{ headerShown: false }} />
+            </CityProvider>
           </AuthGate>
         </AuthProvider>
       </EntitlementProvider>
