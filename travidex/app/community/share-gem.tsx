@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { Screen } from '../../components/Screen';
+import { Medallion } from '../../components/Medallion';
 import { useAuth } from '../../context/AuthProvider';
 import { useCity } from '../../context/CityProvider';
 import { useActiveCity } from '../../hooks/useActiveCity';
@@ -64,17 +65,19 @@ export default function ShareGem() {
     return (
       <Screen>
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: t.spacing.s6 }}>
-        <Text style={[t.type.h3, { color: t.colors.amber, marginBottom: t.spacing.s3, textAlign: 'center' }]}>
+        <Medallion icon="time-outline" tone="amber" earned size={72} />
+        <Text style={[t.type.h3, { color: t.colors.text1, marginTop: t.spacing.s4, marginBottom: t.spacing.s2, textAlign: 'center' }]}>
           Submitted for review
         </Text>
         <Text style={[t.type.caption, { color: t.colors.text2, textAlign: 'center', marginBottom: t.spacing.s5 }]}>
-          Automated checks passed. A moderator will review your gem before it appears to others — usually within 24 hours.
+          Automated checks passed — a moderator will review it, usually within 24 hours.
         </Text>
         <Pressable
+          testID="done-btn"
           onPress={() => router.back()}
-          style={{ backgroundColor: t.colors.info, borderRadius: t.radii.sm, paddingVertical: t.spacing.s3, paddingHorizontal: t.spacing.s5 }}
+          style={{ backgroundColor: t.colors.actionPositive, borderRadius: t.radii.pill, paddingVertical: t.spacing.s3, paddingHorizontal: t.spacing.s5 }}
         >
-          <Text style={[t.type.body, { color: '#fff' }]}>Done</Text>
+          <Text style={[t.type.body, { color: t.colors.textOnAccent }]}>Done</Text>
         </Pressable>
       </View>
       </Screen>
@@ -158,7 +161,7 @@ export default function ShareGem() {
       <TextInput
         value={name}
         onChangeText={setName}
-        placeholder="Name this gem"
+        placeholder="Name the spot"
         placeholderTextColor={t.colors.text3}
         style={[
           t.type.body,
@@ -178,7 +181,7 @@ export default function ShareGem() {
       <TextInput
         value={note}
         onChangeText={setNote}
-        placeholder="Why is it special?"
+        placeholder="Why is it special? What should travelers look for?"
         placeholderTextColor={t.colors.text3}
         multiline
         numberOfLines={3}
