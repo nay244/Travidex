@@ -249,14 +249,14 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
                         ) : null}
                       </View>
 
-                      {/* Mono found/total (green when claimed) */}
-                      <Text style={{ fontFamily: t.fontFamily.monoBold, fontSize: t.fontSize.caption, color: claimed ? t.colors.green : t.colors.text3 }}>
-                        <Text style={{ color: claimed ? t.colors.green : t.colors.text3 }}>{p.found}</Text>
+                      {/* Mono found/total: green when claimed, amber when in-progress, dim when untouched */}
+                      <Text style={{ fontFamily: t.fontFamily.monoBold, fontSize: t.fontSize.caption, color: claimed ? t.colors.green : (p.found > 0 ? t.colors.amber : t.colors.text3) }}>
+                        <Text style={{ color: claimed ? t.colors.green : (p.found > 0 ? t.colors.amber : t.colors.text3) }}>{p.found}</Text>
                         <Text style={{ color: t.colors.text3 }}>/{p.total}</Text>
                       </Text>
 
-                      {/* Current = green check disc; otherwise chevron */}
-                      {current ? (
+                      {/* Claimed = green check disc; otherwise chevron (current only affects row bg/ring) */}
+                      {claimed ? (
                         <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: t.colors.green, alignItems: 'center', justifyContent: 'center' }}>
                           <Ionicons name="checkmark" size={12} color={t.colors.textOnAccent} />
                         </View>
