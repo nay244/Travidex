@@ -39,6 +39,10 @@ const FLAGS: Record<string, { name: string; spec: Spec }> = {
   NO: { name: 'Norway',        spec: ['nordic', '#BA0C2F', '#ffffff', '#00205B'] },
   CH: { name: 'Switzerland',   spec: ['plus', '#D52B1E', '#ffffff'] },
   US: { name: 'United States', spec: ['usa'] },
+  // Simplified emblems (see docs/DEVIATIONS.md)
+  MX: { name: 'Mexico',        spec: ['v', ['#006847', '#ffffff', '#CE1126']] },
+  KR: { name: 'South Korea',   spec: ['circle', '#ffffff', '#CD2E3A', 38] },
+  CN: { name: 'China',         spec: ['circle', '#DE2910', '#FFDE00', 26] },
 };
 
 function Stripes({ dir, parts }: { dir: 'v' | 'h'; parts: [string, number][] }) {
