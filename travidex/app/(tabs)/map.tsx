@@ -155,6 +155,17 @@ export default function MapScreen() {
   // Reset to half snap on city change
   useEffect(() => { snapTo('half'); }, [cityId, snapTo]);
 
+  // Recenter when the active city resolves. initialRegion only applies at
+  // mount, and at mount time `city` may still be the previous city (it loads
+  // async after cityId changes) — animating on the loaded city avoids both.
+  useEffect(() => {
+    if (!city) return;
+    mapRef.current?.animateToRegion(
+      { latitude: city.lat, longitude: city.lng, latitudeDelta: 0.08, longitudeDelta: 0.08 },
+      350,
+    );
+  }, [city?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSelect = useCallback((id: string) => {
     const sight = sights.find(s => s.id === id) ?? null;
     setSelected(sight);
@@ -210,7 +221,6 @@ export default function MapScreen() {
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       {/* Map takes full height; sheet is absolutely positioned over it */}
       <MapView
-        key={cityId}
         ref={mapRef}
         style={{ flex: 1 }}
         testID="map-view"

@@ -18,8 +18,10 @@ jest.mock('../../hooks/useCityCatalog', () => ({
     reload: mockReload,
   }),
 }));
+const PARIS = { id: 'c1', country_id: 'k1', name: 'Paris', region: null as string | null, lat: 48.85, lng: 2.35, country_code: 'FR', country_name: 'France' };
+const mockUseActiveCity = jest.fn(() => ({ city: PARIS }));
 jest.mock('../../hooks/useActiveCity', () => ({
-  useActiveCity: () => ({ city: { id: 'c1', country_id: 'k1', name: 'Paris', region: null, lat: 48.85, lng: 2.35, country_code: 'FR', country_name: 'France' } }),
+  useActiveCity: () => mockUseActiveCity(),
 }));
 // LocationPicker is no longer used by map (modal stays for submit). Stub harmlessly.
 jest.mock('../../components/LocationPicker', () => ({ LocationPicker: () => null }));
@@ -55,7 +57,10 @@ function WrappedMapScreen() {
   );
 }
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockUseActiveCity.mockReturnValue({ city: PARIS });
+});
 
 it('shows the location pill and pressing it pushes /location', async () => {
   await renderWithTheme(<WrappedMapScreen />);
@@ -148,6 +153,30 @@ it('selecting a found sight also calls animateToRegion with correct coords', asy
       latitudeDelta: 0.012,
       longitudeDelta: 0.012,
     },
+    350,
+  );
+});
+
+it('changing the active city recenters the map (regression: map showed the previous city)', async () => {
+  const { SafeAreaProvider } = require('react-native-safe-area-context');
+  const { ThemeProvider } = require('@/theme');
+  const METRICS = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 47, left: 0, right: 0, bottom: 34 } };
+  const tree = () => (
+    <SafeAreaProvider initialMetrics={METRICS}>
+      <ThemeProvider><WrappedMapScreen /></ThemeProvider>
+    </SafeAreaProvider>
+  );
+  const { rerender } = await renderWithTheme(tree());
+  mockAnimateToRegion.mockClear();
+
+  // Location screen picks Tokyo → useActiveCity resolves the new city
+  mockUseActiveCity.mockReturnValue({
+    city: { id: 'c9', country_id: 'k2', name: 'Tokyo', region: 'Kanto', lat: 35.6895, lng: 139.6917, country_code: 'JP', country_name: 'Japan' },
+  });
+  await act(async () => { rerender(tree()); });
+
+  expect(mockAnimateToRegion).toHaveBeenCalledWith(
+    { latitude: 35.6895, longitude: 139.6917, latitudeDelta: 0.08, longitudeDelta: 0.08 },
     350,
   );
 });
