@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { FlatList, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, FlatList, Modal, PanResponder, Pressable, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { useAuth } from '../context/AuthProvider';
@@ -27,6 +27,45 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
   const [cities, setCities] = useState<City[]>([]);
   const [cityProg, setCityProg] = useState<Map<string, Progress>>(new Map());
   const [countryProg, setCountryProg] = useState<Map<string, Progress>>(new Map());
+
+  // drag-down to dismiss — copy this pattern for new sheets
+  const translateY = useRef(new Animated.Value(0)).current;
+  const dragPan = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gs) => gs.dy > 4,
+      onPanResponderGrant: () => {
+        (translateY as any).setOffset((translateY as any)._value);
+        (translateY as any).setValue(0);
+      },
+      onPanResponderMove: (_, gs) => {
+        // clamp: only allow dragging downward
+        translateY.setValue(Math.max(0, gs.dy));
+      },
+      onPanResponderRelease: (_, gs) => {
+        (translateY as any).flattenOffset();
+        if (gs.dy > 120 || gs.vy > 0.8) {
+          // Dismiss: animate off-screen then call onClose
+          Animated.timing(translateY, { toValue: 600, duration: 220, useNativeDriver: true }).start(() => {
+            translateY.setValue(0);
+            onClose();
+          });
+        } else {
+          // Snap back
+          Animated.spring(translateY, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
+        }
+      },
+      onPanResponderTerminate: () => {
+        (translateY as any).flattenOffset();
+        Animated.spring(translateY, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
+      },
+    }),
+  ).current;
+
+  // Reset translateY when sheet opens
+  useEffect(() => {
+    if (visible) translateY.setValue(0);
+  }, [visible, translateY]);
 
   // Re-sync to the active city's country each time the sheet opens
   useEffect(() => {
@@ -59,6 +98,7 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: t.colors.surfaceScrim, justifyContent: 'flex-end' }}>
+        <Animated.View style={{ transform: [{ translateY }] }}>
         <Pressable
           onPress={() => {}}
           style={{
@@ -72,8 +112,10 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
             gap: t.spacing.s3,
           }}
         >
-          {/* Grabber */}
-          <View style={{ width: 38, height: 5, borderRadius: 999, backgroundColor: t.colors.borderStrong, alignSelf: 'center', marginBottom: t.spacing.s2 }} />
+          {/* Grabber — drag handle to dismiss */}
+          <View {...dragPan.panHandlers} style={{ paddingBottom: t.spacing.s2 }}>
+            <View style={{ width: 38, height: 5, borderRadius: 999, backgroundColor: t.colors.borderStrong, alignSelf: 'center' }} />
+          </View>
 
           {view === 'countries' ? (
             <>
@@ -221,6 +263,7 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
             </>
           )}
         </Pressable>
+        </Animated.View>
       </Pressable>
     </Modal>
   );

@@ -1,4 +1,5 @@
-import { FlatList, Modal, Pressable, Text, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, FlatList, Modal, PanResponder, Pressable, Text, View } from 'react-native';
 import { useTheme } from '@/theme';
 import { Flag } from './Flag';
 import type { Country } from '../lib/types';
@@ -16,12 +17,52 @@ type Props = {
 export function CountryPicker({ visible, countries, progress, currentId, onPick, onClose }: Props) {
   const t = useTheme();
 
+  // drag-down to dismiss — copy this pattern for new sheets
+  const translateY = useRef(new Animated.Value(0)).current;
+  const dragPan = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gs) => gs.dy > 4,
+      onPanResponderGrant: () => {
+        (translateY as any).setOffset((translateY as any)._value);
+        (translateY as any).setValue(0);
+      },
+      onPanResponderMove: (_, gs) => {
+        // clamp: only allow dragging downward
+        translateY.setValue(Math.max(0, gs.dy));
+      },
+      onPanResponderRelease: (_, gs) => {
+        (translateY as any).flattenOffset();
+        if (gs.dy > 120 || gs.vy > 0.8) {
+          // Dismiss: animate off-screen then call onClose
+          Animated.timing(translateY, { toValue: 600, duration: 220, useNativeDriver: true }).start(() => {
+            translateY.setValue(0);
+            onClose();
+          });
+        } else {
+          // Snap back
+          Animated.spring(translateY, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
+        }
+      },
+      onPanResponderTerminate: () => {
+        (translateY as any).flattenOffset();
+        Animated.spring(translateY, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
+      },
+    }),
+  ).current;
+
+  // Reset translateY when sheet opens
+  useEffect(() => {
+    if (visible) translateY.setValue(0);
+  }, [visible, translateY]);
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable
         onPress={onClose}
         style={{ flex: 1, backgroundColor: t.colors.surfaceScrim, justifyContent: 'flex-end' }}
       >
+        <Animated.View style={{ transform: [{ translateY }] }}>
         <Pressable
           onPress={() => {}}
           style={{
@@ -33,16 +74,23 @@ export function CountryPicker({ visible, countries, progress, currentId, onPick,
             gap: t.spacing.s3,
           }}
         >
-          {/* Grabber */}
+          {/* Grabber — drag handle to dismiss */}
           <View
+            {...dragPan.panHandlers}
             style={{
-              width: 38,
-              height: 5,
-              borderRadius: 999,
-              backgroundColor: t.colors.borderStrong,
-              alignSelf: 'center',
+              paddingBottom: t.spacing.s2,
+              alignItems: 'center',
             }}
-          />
+          >
+            <View
+              style={{
+                width: 38,
+                height: 5,
+                borderRadius: 999,
+                backgroundColor: t.colors.borderStrong,
+              }}
+            />
+          </View>
 
           <Text style={[t.type.h3, { color: t.colors.text1 }]}>Choose a country</Text>
 
@@ -80,6 +128,7 @@ export function CountryPicker({ visible, countries, progress, currentId, onPick,
             }}
           />
         </Pressable>
+        </Animated.View>
       </Pressable>
     </Modal>
   );

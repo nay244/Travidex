@@ -15,8 +15,12 @@ import type { SightWithFind } from '../lib/types';
  *
  * Uncontrolled search (existing behaviour for city/[id], find/pick, etc.):
  *   Neither prop provided → renders its own TextInput (same as before).
+ *
+ * Drag handle (map snap sheet):
+ *   dragHandleProps → spread onto the grabber+header zone so map.tsx can
+ *   attach its PanResponder without knowing DexSheet's internal layout.
  */
-export function DexSheet({ cityName, sights, onSelect, selectedId, onSeeMore, query: externalQuery, onQueryChange }: {
+export function DexSheet({ cityName, sights, onSelect, selectedId, onSeeMore, query: externalQuery, onQueryChange, dragHandleProps }: {
   cityName: string;
   sights: SightWithFind[];
   onSelect: (id: string) => void;
@@ -26,6 +30,8 @@ export function DexSheet({ cityName, sights, onSelect, selectedId, onSeeMore, qu
   query?: string;
   /** Fires as the user types in the internal input; never fires in controlled mode (the input is hidden). */
   onQueryChange?: (q: string) => void;
+  /** Spread onto the grabber+header container for drag-snap from map.tsx (optional, backward-compatible). */
+  dragHandleProps?: object;
 }) {
   const t = useTheme();
   const [internalQuery, setInternalQuery] = useState('');
@@ -38,21 +44,24 @@ export function DexSheet({ cityName, sights, onSelect, selectedId, onSeeMore, qu
 
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.surface1, borderTopLeftRadius: t.radii.xl, borderTopRightRadius: t.radii.xl }}>
-      {/* Grabber */}
-      <View style={{ width: 38, height: 5, borderRadius: 999, backgroundColor: t.colors.borderStrong, alignSelf: 'center', marginTop: t.spacing.s3, marginBottom: t.spacing.s4 }} />
+      {/* Grabber + header zone: dragHandleProps spreads here so map.tsx PanResponder attaches */}
+      <View {...dragHandleProps} testID="dex-drag-handle">
+        {/* Grabber pill */}
+        <View style={{ width: 38, height: 5, borderRadius: 999, backgroundColor: t.colors.borderStrong, alignSelf: 'center', marginTop: t.spacing.s3, marginBottom: t.spacing.s4 }} />
 
-      {/* Header: city name (h2-weight) + "X / Y found" mono right-aligned */}
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: t.spacing.s5, marginBottom: t.spacing.s3 }}>
-        <Text style={[t.type.h3, { color: t.colors.text1, fontFamily: t.fontFamily.sansBold, fontSize: t.fontSize.h2 }]}>{cityName}</Text>
-        <Text style={[t.type.caption, { fontFamily: t.fontFamily.monoBold, letterSpacing: 0.04 * t.fontSize.caption }]}>
-          <Text style={{ color: t.colors.amber }}>{found}</Text>
-          <Text style={{ color: t.colors.text3 }}>{` / ${total} found`}</Text>
-        </Text>
-      </View>
+        {/* Header: city name (h2-weight) + "X / Y found" mono right-aligned */}
+        <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', paddingHorizontal: t.spacing.s5, marginBottom: t.spacing.s3 }}>
+          <Text style={[t.type.h3, { color: t.colors.text1, fontFamily: t.fontFamily.sansBold, fontSize: t.fontSize.h2 }]}>{cityName}</Text>
+          <Text style={[t.type.caption, { fontFamily: t.fontFamily.monoBold, letterSpacing: 0.04 * t.fontSize.caption }]}>
+            <Text style={{ color: t.colors.amber }}>{found}</Text>
+            <Text style={{ color: t.colors.text3 }}>{` / ${total} found`}</Text>
+          </Text>
+        </View>
 
-      {/* CompletionBar: thin 7px progress bar, no label */}
-      <View style={{ paddingHorizontal: t.spacing.s5, marginBottom: t.spacing.s3 }}>
-        <CompletionBar found={found} total={total} />
+        {/* CompletionBar: thin 7px progress bar, no label */}
+        <View style={{ paddingHorizontal: t.spacing.s5, marginBottom: t.spacing.s3 }}>
+          <CompletionBar found={found} total={total} />
+        </View>
       </View>
 
       {/* Uncontrolled search input (only shown when not driven from the map overlay) */}

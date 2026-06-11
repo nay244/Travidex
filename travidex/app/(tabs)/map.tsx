@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { Animated, Modal, PanResponder, Pressable, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import MapView from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -19,6 +19,7 @@ import type { SightWithFind } from '../../lib/types';
 export default function MapScreen() {
   const t = useTheme();
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const router = useRouter();
   const { cityId, setCityId } = useCity();
   const { sights, reload } = useCityCatalog(cityId);
@@ -28,11 +29,112 @@ export default function MapScreen() {
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // --- 3-snap sheet --------------------------------------------------------
+  // Snap points as distance from top of screen (smaller = taller sheet).
+  // peek  ≈ 140pt from bottom (just grabber + header visible)
+  // half  ≈ 45 % of screen height from top (≈ current 42 % feel)
+  // full  ≈ top safe-area inset + 60
+  const usableHeight = height;
+  const snapPoints = useRef({
+    peek: usableHeight - 140,
+    half: usableHeight * 0.55,
+    full: insets.top + 60,
+  });
+
+  // Keep snap points up-to-date if dimensions change (orientation, etc.)
+  useEffect(() => {
+    snapPoints.current = {
+      peek: usableHeight - 140,
+      half: usableHeight * 0.55,
+      full: insets.top + 60,
+    };
+  }, [usableHeight, insets.top]);
+
+  // Animated top edge of the sheet container. Default snap = half.
+  const sheetTop = useRef(new Animated.Value(usableHeight * 0.55)).current;
+  // Track the committed snap so we know the base position on each new drag.
+  const currentSnap = useRef<'peek' | 'half' | 'full'>('half');
+
+  const snapTo = useCallback((target: 'peek' | 'half' | 'full') => {
+    currentSnap.current = target;
+    Animated.spring(sheetTop, {
+      toValue: snapPoints.current[target],
+      useNativeDriver: false,
+      bounciness: 2,
+      speed: 14,
+    }).start();
+  }, [sheetTop]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gs) => Math.abs(gs.dy) > 4,
+      onPanResponderGrant: () => {
+        // Stop any in-flight spring so drag starts from current rendered position.
+        sheetTop.stopAnimation();
+        // Flatten so getAnimatedValue reads correctly from here.
+        (sheetTop as any).setOffset((sheetTop as any)._value);
+        (sheetTop as any).setValue(0);
+      },
+      onPanResponderMove: (_, gs) => {
+        const pts = snapPoints.current;
+        // Clamp: don't go above full or below peek.
+        const clamped = Math.max(pts.full, Math.min(pts.peek, gs.dy));
+        sheetTop.setValue(clamped);
+      },
+      onPanResponderRelease: (_, gs) => {
+        (sheetTop as any).flattenOffset();
+        const pts = snapPoints.current;
+        // Current raw position after release.
+        const cur = (sheetTop as any)._value as number;
+        // Find nearest snap point.
+        let best: 'peek' | 'half' | 'full' = 'half';
+        let bestDist = Infinity;
+        for (const k of ['peek', 'half', 'full'] as const) {
+          const d = Math.abs(pts[k] - cur);
+          if (d < bestDist) { bestDist = d; best = k; }
+        }
+        // Fast flick: velocity > 0.8 toward peek → peek; < -0.8 → full.
+        if (gs.vy > 0.8) best = 'peek';
+        else if (gs.vy < -0.8) best = 'full';
+        currentSnap.current = best;
+        Animated.spring(sheetTop, {
+          toValue: pts[best],
+          useNativeDriver: false,
+          bounciness: 2,
+          speed: 14,
+        }).start();
+      },
+      onPanResponderTerminate: (_, gs) => {
+        (sheetTop as any).flattenOffset();
+        const pts = snapPoints.current;
+        const cur = (sheetTop as any)._value as number;
+        let best: 'peek' | 'half' | 'full' = 'half';
+        let bestDist = Infinity;
+        for (const k of ['peek', 'half', 'full'] as const) {
+          const d = Math.abs(pts[k] - cur);
+          if (d < bestDist) { bestDist = d; best = k; }
+        }
+        currentSnap.current = best;
+        Animated.spring(sheetTop, {
+          toValue: pts[best],
+          useNativeDriver: false,
+          bounciness: 2,
+          speed: 14,
+        }).start();
+      },
+    }),
+  ).current;
+  // -------------------------------------------------------------------------
+
   // Reload on focus so pins/rows refresh after logging elsewhere
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
   // Clear selection on any city change (picker, Explore's "Open map", etc.)
   useEffect(() => { setSelected(null); setLogModalOpen(false); setSearchQuery(''); }, [cityId]);
+
+  // Reset to half snap on city change
+  useEffect(() => { snapTo('half'); }, [cityId, snapTo]);
 
   const handleSelect = useCallback((id: string) => {
     const sight = sights.find(s => s.id === id) ?? null;
@@ -70,91 +172,106 @@ export default function MapScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
-      <View style={{ flex: 1 }}>
-        <MapView
-          key={cityId}
-          style={{ flex: 1 }}
-          testID="map-view"
-          initialRegion={city ? { latitude: city.lat, longitude: city.lng, latitudeDelta: 0.08, longitudeDelta: 0.08 } : undefined}
-        >
-          {sights.map(s => (
-            <SightPin key={s.id} sight={s} onPress={handleSelect} selected={selected?.id === s.id} />
-          ))}
-        </MapView>
+      {/* Map takes full height; sheet is absolutely positioned over it */}
+      <MapView
+        key={cityId}
+        style={{ flex: 1 }}
+        testID="map-view"
+        initialRegion={city ? { latitude: city.lat, longitude: city.lng, latitudeDelta: 0.08, longitudeDelta: 0.08 } : undefined}
+      >
+        {sights.map(s => (
+          <SightPin key={s.id} sight={s} onPress={handleSelect} selected={selected?.id === s.id} />
+        ))}
+      </MapView>
 
-        {/* Top overlay: search row (flex) + filter icon button */}
-        <View style={{ position: 'absolute', top: insets.top + t.spacing.s2, left: t.spacing.s4, right: t.spacing.s4, zIndex: 20, gap: t.spacing.s3 }}>
-          <View style={{ flexDirection: 'row', gap: t.spacing.s2 }}>
-            {/* Glass search field */}
-            <View style={[glassStyle, { flex: 1, flexDirection: 'row', alignItems: 'center', height: 46, paddingHorizontal: t.spacing.s4, borderRadius: t.radii.md, gap: t.spacing.s2 }]}>
-              <Ionicons name="search" size={16} color={t.colors.text3} />
-              <TextInput
-                placeholder="Search sights"
-                placeholderTextColor={t.colors.text3}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                style={[t.type.body, { flex: 1, color: t.colors.text1, padding: 0 }]}
-              />
-            </View>
-            {/* Glass filter icon button (decorative) */}
-            <View style={[glassStyle, { width: 46, height: 46, borderRadius: t.radii.md, alignItems: 'center', justifyContent: 'center' }]}>
-              <Ionicons name="options-outline" size={18} color={t.colors.text1} />
-            </View>
+      {/* Top overlay: search row (flex) + filter icon button */}
+      <View style={{ position: 'absolute', top: insets.top + t.spacing.s2, left: t.spacing.s4, right: t.spacing.s4, zIndex: 20, gap: t.spacing.s3 }}>
+        <View style={{ flexDirection: 'row', gap: t.spacing.s2 }}>
+          {/* Glass search field */}
+          <View style={[glassStyle, { flex: 1, flexDirection: 'row', alignItems: 'center', height: 46, paddingHorizontal: t.spacing.s4, borderRadius: t.radii.md, gap: t.spacing.s2 }]}>
+            <Ionicons name="search" size={16} color={t.colors.text3} />
+            <TextInput
+              placeholder="Search sights"
+              placeholderTextColor={t.colors.text3}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={[t.type.body, { flex: 1, color: t.colors.text1, padding: 0 }]}
+            />
           </View>
-
-          {/* Location pill */}
-          <Pressable
-            testID="location-pill"
-            onPress={() => setPickerOpen(true)}
-            style={[glassStyle, {
-              alignSelf: 'flex-start',
-              flexDirection: 'row', alignItems: 'center',
-              gap: t.spacing.s2,
-              height: 38,
-              paddingHorizontal: t.spacing.s3,
-              borderRadius: 999,
-            }]}
-          >
-            <Flag code={city?.country_code ?? ''} size={22} radius={5} />
-            <Text style={[t.type.body, { color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold }]}>{city?.name ?? ''}</Text>
-            <Ionicons name="chevron-down" size={14} color={t.colors.text3} />
-          </Pressable>
+          {/* Glass filter icon button (decorative) */}
+          <View style={[glassStyle, { width: 46, height: 46, borderRadius: t.radii.md, alignItems: 'center', justifyContent: 'center' }]}>
+            <Ionicons name="options-outline" size={18} color={t.colors.text1} />
+          </View>
         </View>
+
+        {/* Location pill */}
+        <Pressable
+          testID="location-pill"
+          onPress={() => setPickerOpen(true)}
+          style={[glassStyle, {
+            alignSelf: 'flex-start',
+            flexDirection: 'row', alignItems: 'center',
+            gap: t.spacing.s2,
+            height: 38,
+            paddingHorizontal: t.spacing.s3,
+            borderRadius: 999,
+          }]}
+        >
+          <Flag code={city?.country_code ?? ''} size={22} radius={5} />
+          <Text style={[t.type.body, { color: t.colors.text1, fontFamily: t.fontFamily.sansSemibold }]}>{city?.name ?? ''}</Text>
+          <Ionicons name="chevron-down" size={14} color={t.colors.text3} />
+        </Pressable>
       </View>
 
-      {/* Selection banner (§3.2 select-to-log) */}
-      {selected && (
-        <Pressable
-          testID="selection-banner"
-          onPress={handleBannerPress}
-          style={{
-            backgroundColor: t.colors.amberDim,
-            borderWidth: 1,
-            borderColor: t.colors.amberLine,
-            borderRadius: t.radii.md,
-            marginHorizontal: t.spacing.s3,
-            marginBottom: t.spacing.s2,
-            paddingVertical: t.spacing.s3,
-            paddingHorizontal: t.spacing.s3,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: t.spacing.s2,
-          }}
-        >
-          <Ionicons name="ribbon-outline" size={16} color={t.colors.amber} />
-          <Text style={[t.type.body, { color: t.colors.text1, flex: 1, fontSize: t.fontSize.caption }]} numberOfLines={1}>
-            {'Selected '}
-            <Text style={{ fontFamily: t.fontFamily.sansBold }}>{selected.name}</Text>
-          </Text>
-          {selected.found ? (
-            <Text style={[t.type.caption, { color: t.colors.text2 }]}>Already in your dex</Text>
-          ) : (
-            <Text testID="banner-tap-to-log" style={{ fontFamily: t.fontFamily.monoBold, fontSize: t.fontSize.micro, letterSpacing: 0.08 * t.fontSize.micro, color: t.colors.amber }}>TAP TO LOG ↓</Text>
-          )}
-        </Pressable>
-      )}
+      {/* 3-snap dex sheet — absolutely positioned, animated top edge */}
+      <Animated.View
+        testID="dex-sheet-container"
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          top: sheetTop,
+          zIndex: 25,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.12,
+          shadowRadius: 8,
+          elevation: 10,
+        }}
+      >
+        {/* Selection banner sits at the top of the sheet container, visible at all snaps */}
+        {selected && (
+          <Pressable
+            testID="selection-banner"
+            onPress={handleBannerPress}
+            style={{
+              backgroundColor: t.colors.amberDim,
+              borderWidth: 1,
+              borderColor: t.colors.amberLine,
+              borderRadius: t.radii.md,
+              marginHorizontal: t.spacing.s3,
+              marginBottom: t.spacing.s2,
+              paddingVertical: t.spacing.s3,
+              paddingHorizontal: t.spacing.s3,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: t.spacing.s2,
+            }}
+          >
+            <Ionicons name="ribbon-outline" size={16} color={t.colors.amber} />
+            <Text style={[t.type.body, { color: t.colors.text1, flex: 1, fontSize: t.fontSize.caption }]} numberOfLines={1}>
+              {'Selected '}
+              <Text style={{ fontFamily: t.fontFamily.sansBold }}>{selected.name}</Text>
+            </Text>
+            {selected.found ? (
+              <Text style={[t.type.caption, { color: t.colors.text2 }]}>Already in your dex</Text>
+            ) : (
+              <Text testID="banner-tap-to-log" style={{ fontFamily: t.fontFamily.monoBold, fontSize: t.fontSize.micro, letterSpacing: 0.08 * t.fontSize.micro, color: t.colors.amber }}>TAP TO LOG ↓</Text>
+            )}
+          </Pressable>
+        )}
 
-      <View style={{ height: '42%' }}>
         <DexSheet
           cityName={city?.name ?? ''}
           sights={sights}
@@ -162,8 +279,9 @@ export default function MapScreen() {
           selectedId={selected?.id ?? null}
           onSeeMore={handleSeeMore}
           query={searchQuery}
+          dragHandleProps={panResponder.panHandlers}
         />
-      </View>
+      </Animated.View>
 
       <LocationPicker
         visible={pickerOpen}
