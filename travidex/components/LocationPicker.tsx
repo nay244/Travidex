@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Animated, FlatList, Modal, PanResponder, Pressable, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { useAuth } from '../context/AuthProvider';
@@ -19,6 +20,7 @@ type Props = {
 
 export function LocationPicker({ visible, currentCityId, initialCountryId, onPick, onClose }: Props) {
   const t = useTheme();
+  const insets = useSafeAreaInsets();
   const { session } = useAuth();
   const [view, setView] = useState<'cities' | 'countries'>('cities');
   const [browseId, setBrowseId] = useState<string | null>(initialCountryId);
@@ -102,13 +104,14 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
         <Pressable
           onPress={() => {}}
           style={{
-            maxHeight: '86%',
+            // Fixed height (not maxHeight) so the inner FlatList gets real
+            // bounds and the last row never hides behind the home indicator.
+            height: '78%',
             backgroundColor: t.colors.surface1,
             borderTopLeftRadius: t.radii.xl,
             borderTopRightRadius: t.radii.xl,
             paddingTop: t.spacing.s3,
             paddingHorizontal: t.spacing.s5,
-            paddingBottom: t.spacing.s8,
             gap: t.spacing.s3,
           }}
         >
@@ -126,6 +129,8 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
                 <Text style={[t.type.h3, { color: t.colors.text1, fontFamily: t.fontFamily.sansBold, fontSize: t.fontSize.h2 }]}>Choose a country</Text>
               </View>
               <FlatList
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + t.spacing.s6 }}
                 data={countries}
                 keyExtractor={c => c.id}
                 renderItem={({ item }) => {
@@ -213,6 +218,8 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
               </Text>
 
               <FlatList
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + t.spacing.s6 }}
                 data={visibleCities}
                 keyExtractor={c => c.id}
                 renderItem={({ item }) => {

@@ -43,9 +43,9 @@ export function SightRow({
     ? t.colors.greenLine
     : t.colors.borderSubtle;
 
-  const allChips = sight.type_tags ?? [];
-  const chips = allChips.slice(0, 2);
-  const extraCount = allChips.length - chips.length;
+  // Show every tag as its own chip (wrapping to a second line if ever needed) —
+  // never collapse into a "+N" chip.
+  const chips = sight.type_tags ?? [];
 
   return (
     <Pressable
@@ -127,9 +127,9 @@ export function SightRow({
           {sight.name}
         </Text>
 
-        {/* Type chips — single row, no wrap, capped at 2 + overflow chip */}
-        {allChips.length > 0 && (
-          <View style={{ flexDirection: 'row', gap: t.spacing.s1, overflow: 'hidden' }}>
+        {/* Type chips — every tag, text centered in its border; wraps if tight */}
+        {chips.length > 0 && (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.s1 }}>
             {chips.map(tag => {
               const tone = getTone(tag);
               const bg =
@@ -154,22 +154,27 @@ export function SightRow({
                 <View
                   key={tag}
                   style={{
-                    flexDirection: 'row',
                     alignItems: 'center',
-                    gap: 3,
-                    height: 20,
+                    justifyContent: 'center',
+                    paddingVertical: 2,
                     paddingHorizontal: t.spacing.s2,
                     borderRadius: t.radii.pill,
                     backgroundColor: bg,
                     borderWidth: 1,
                     borderColor: border,
-                    flexShrink: 0,
                   }}
                 >
                   <Text
                     style={[
                       t.type.label,
-                      { color: fg, fontSize: 10, textTransform: 'none', letterSpacing: 0 },
+                      {
+                        color: fg,
+                        fontSize: 10,
+                        lineHeight: 13,
+                        textTransform: 'none',
+                        letterSpacing: 0,
+                        textAlign: 'center',
+                      },
                     ]}
                     numberOfLines={1}
                   >
@@ -178,30 +183,6 @@ export function SightRow({
                 </View>
               );
             })}
-            {extraCount > 0 && (
-              <View
-                style={{
-                  height: 20,
-                  paddingHorizontal: t.spacing.s2,
-                  borderRadius: t.radii.pill,
-                  backgroundColor: t.colors.surface2,
-                  borderWidth: 1,
-                  borderColor: t.colors.borderDefault,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <Text
-                  style={[
-                    t.type.label,
-                    { color: t.colors.text3, fontSize: 10, textTransform: 'none', letterSpacing: 0 },
-                  ]}
-                >
-                  {`+${extraCount}`}
-                </Text>
-              </View>
-            )}
           </View>
         )}
       </View>

@@ -370,7 +370,7 @@ export default function Explore() {
             <Flag code={selectedCountry.code} size={22} radius={5} />
           ) : null}
           <Text
-            style={[t.type.label, { color: t.colors.text1, fontWeight: '700', fontSize: 13, letterSpacing: 0.3 }]}
+            style={[t.type.label, { color: t.colors.text1, fontWeight: '700', fontSize: 13, lineHeight: 17, letterSpacing: 0.3 }]}
             numberOfLines={1}
           >
             {selectedCountry?.code ?? '—'}

@@ -30,7 +30,17 @@ export function ChunkTile({
   const state = progressState(found, total);
   const pct = total > 0 ? Math.min(100, Math.round((found / total) * 100)) : 0;
 
+  // Translucent fill (Dim tokens) so the name stays readable where the fill
+  // crosses it — the spec calls for "no hard line through the label". A solid
+  // 3px line marks the completion level instead.
   const fillColor =
+    state === 'claimed'
+      ? t.colors.greenDim
+      : state === 'in-progress'
+      ? t.colors.amberDim
+      : 'transparent';
+
+  const fillLineColor =
     state === 'claimed'
       ? t.colors.chunkClaimed
       : state === 'in-progress'
@@ -60,7 +70,7 @@ export function ChunkTile({
         justifyContent: 'space-between',
       }}
     >
-      {/* Bottom-up fill */}
+      {/* Bottom-up fill (translucent) + solid level line at its top edge */}
       <View
         pointerEvents="none"
         style={{
@@ -70,6 +80,8 @@ export function ChunkTile({
           bottom: 0,
           height: `${pct}%`,
           backgroundColor: fillColor,
+          borderTopWidth: pct > 0 && pct < 100 ? 3 : 0,
+          borderTopColor: fillLineColor,
         }}
       />
 

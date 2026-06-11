@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Animated, FlatList, Modal, PanResponder, Pressable, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme';
 import { Flag } from './Flag';
 import type { Country } from '../lib/types';
@@ -16,6 +17,7 @@ type Props = {
 
 export function CountryPicker({ visible, countries, progress, currentId, onPick, onClose }: Props) {
   const t = useTheme();
+  const insets = useSafeAreaInsets();
 
   // drag-down to dismiss — copy this pattern for new sheets
   const translateY = useRef(new Animated.Value(0)).current;
@@ -66,7 +68,9 @@ export function CountryPicker({ visible, countries, progress, currentId, onPick,
         <Pressable
           onPress={() => {}}
           style={{
-            maxHeight: '80%',
+            // Fixed height (not maxHeight) so the FlatList gets real bounds and
+            // the last row never hides behind the home indicator.
+            height: '70%',
             backgroundColor: t.colors.surface1,
             borderTopLeftRadius: t.radii.lg,
             borderTopRightRadius: t.radii.lg,
@@ -95,6 +99,8 @@ export function CountryPicker({ visible, countries, progress, currentId, onPick,
           <Text style={[t.type.h3, { color: t.colors.text1 }]}>Choose a country</Text>
 
           <FlatList
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: insets.bottom + t.spacing.s6 }}
             data={countries}
             keyExtractor={c => c.id}
             renderItem={({ item }) => {

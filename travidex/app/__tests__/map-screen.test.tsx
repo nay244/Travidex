@@ -122,8 +122,15 @@ it('selecting a sight calls animateToRegion with the sight coords', async () => 
   await act(async () => {
     fireEvent.press(screen.getByText('Eiffel Tower'));
   });
+  // Center is shifted south by 20% of the delta so the pin sits in the
+  // visible area above the sheet.
   expect(mockAnimateToRegion).toHaveBeenCalledWith(
-    { latitude: 48.85, longitude: 2.29, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+    {
+      latitude: expect.closeTo(48.85 - 0.012 * 0.2, 5),
+      longitude: 2.29,
+      latitudeDelta: 0.012,
+      longitudeDelta: 0.012,
+    },
     350,
   );
 });
@@ -134,7 +141,12 @@ it('selecting a found sight also calls animateToRegion with correct coords', asy
     fireEvent.press(screen.getByText('Louvre'));
   });
   expect(mockAnimateToRegion).toHaveBeenCalledWith(
-    { latitude: 48.86, longitude: 2.33, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+    {
+      latitude: expect.closeTo(48.86 - 0.012 * 0.2, 5),
+      longitude: 2.33,
+      latitudeDelta: 0.012,
+      longitudeDelta: 0.012,
+    },
     350,
   );
 });
@@ -179,9 +191,14 @@ it('pressing a suggestion selects the sight, shows banner, clears query, and cal
   });
   // Banner visible
   expect(screen.getByTestId('selection-banner')).toBeOnTheScreen();
-  // Map focused
+  // Map focused (center shifted south so the pin clears the sheet)
   expect(mockAnimateToRegion).toHaveBeenCalledWith(
-    { latitude: 48.85, longitude: 2.29, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+    {
+      latitude: expect.closeTo(48.85 - 0.012 * 0.2, 5),
+      longitude: 2.29,
+      latitudeDelta: 0.012,
+      longitudeDelta: 0.012,
+    },
     350,
   );
   // Query cleared — suggestion card gone

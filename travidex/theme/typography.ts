@@ -21,11 +21,13 @@ export const textStyles = {
   bodyLg:   { fontFamily: fontFamily.sansRegular,  fontSize: 16, lineHeight: 25, letterSpacing: 0 },
   body:     { fontFamily: fontFamily.sansRegular,  fontSize: 15, lineHeight: 23, letterSpacing: 0 },
   caption:  { fontFamily: fontFamily.sansRegular,  fontSize: 13, lineHeight: 18, letterSpacing: 0 },
-  label:    { fontFamily: fontFamily.monoRegular,  fontSize: 11, lineHeight: 11, letterSpacing: 1.32, textTransform: 'uppercase' },
-  dexNo:    { fontFamily: fontFamily.monoBold,     fontSize: 12, lineHeight: 12, letterSpacing: 0.48 },
-  stat:     { fontFamily: fontFamily.monoBold,     fontSize: 19, lineHeight: 19, letterSpacing: 0 },
-  statXl:   { fontFamily: fontFamily.monoBold,     fontSize: 26, lineHeight: 26, letterSpacing: 0 },
-  monoSm:   { fontFamily: fontFamily.monoRegular,  fontSize: 12, lineHeight: 12, letterSpacing: 0.48 },
+  // Mono roles need lineHeight ≥ 1.25× fontSize on iOS — equal values clip
+  // Space Mono's ascenders (glyph tops get cut off).
+  label:    { fontFamily: fontFamily.monoRegular,  fontSize: 11, lineHeight: 14, letterSpacing: 1.32, textTransform: 'uppercase' },
+  dexNo:    { fontFamily: fontFamily.monoBold,     fontSize: 12, lineHeight: 15, letterSpacing: 0.48 },
+  stat:     { fontFamily: fontFamily.monoBold,     fontSize: 19, lineHeight: 24, letterSpacing: 0 },
+  statXl:   { fontFamily: fontFamily.monoBold,     fontSize: 26, lineHeight: 33, letterSpacing: 0 },
+  monoSm:   { fontFamily: fontFamily.monoRegular,  fontSize: 12, lineHeight: 15, letterSpacing: 0.48 },
 } satisfies Record<string, TextStyle>;
 
 export type TextRole = keyof typeof textStyles;

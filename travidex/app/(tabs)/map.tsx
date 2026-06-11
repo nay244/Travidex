@@ -35,12 +35,12 @@ export default function MapScreen() {
   // --- 3-snap sheet --------------------------------------------------------
   // Snap points as distance from top of screen (smaller = taller sheet).
   // peek  ≈ 140pt from bottom (just grabber + header visible)
-  // half  ≈ 45 % of screen height from top (≈ current 42 % feel)
+  // half  ≈ sheet covers the bottom 40 % of the screen (per device feedback)
   // full  ≈ top safe-area inset + 60
   const usableHeight = height;
   const snapPoints = useRef({
     peek: usableHeight - 140,
-    half: usableHeight * 0.55,
+    half: usableHeight * 0.6,
     full: insets.top + 60,
   });
 
@@ -48,13 +48,13 @@ export default function MapScreen() {
   useEffect(() => {
     snapPoints.current = {
       peek: usableHeight - 140,
-      half: usableHeight * 0.55,
+      half: usableHeight * 0.6,
       full: insets.top + 60,
     };
   }, [usableHeight, insets.top]);
 
   // Animated top edge of the sheet container. Default snap = half.
-  const sheetTop = useRef(new Animated.Value(usableHeight * 0.55)).current;
+  const sheetTop = useRef(new Animated.Value(usableHeight * 0.6)).current;
   // Track the committed snap so we know the base position on each new drag.
   const currentSnap = useRef<'peek' | 'half' | 'full'>('half');
   const dragStart = useRef(0); // sheet position when a drag begins, for clamping
@@ -148,8 +148,16 @@ export default function MapScreen() {
     const sight = sights.find(s => s.id === id) ?? null;
     setSelected(sight);
     if (sight) {
+      // Tight zoom, and shift the region center south so the pin lands in the
+      // middle of the VISIBLE map area (the sheet covers the bottom ~40%).
+      const latitudeDelta = 0.012;
       mapRef.current?.animateToRegion(
-        { latitude: sight.lat, longitude: sight.lng, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+        {
+          latitude: sight.lat - latitudeDelta * 0.2,
+          longitude: sight.lng,
+          latitudeDelta,
+          longitudeDelta: 0.012,
+        },
         350,
       );
     }
