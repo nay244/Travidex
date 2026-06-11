@@ -100,13 +100,14 @@ export function LocationPicker({ visible, currentCityId, initialCountryId, onPic
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: t.colors.surfaceScrim, justifyContent: 'flex-end' }}>
-        <Animated.View style={{ transform: [{ translateY }] }}>
+        {/* Height lives HERE: the wrapper's parent (the scrim) is flex:1, so the
+            percentage resolves correctly and the sheet runs flush to the screen
+            bottom (ref 03). The inner sheet just fills it. */}
+        <Animated.View style={{ height: '85%', transform: [{ translateY }] }}>
         <Pressable
           onPress={() => {}}
           style={{
-            // Fixed height (not maxHeight) so the inner FlatList gets real
-            // bounds and the last row never hides behind the home indicator.
-            height: '78%',
+            flex: 1,
             backgroundColor: t.colors.surface1,
             borderTopLeftRadius: t.radii.xl,
             borderTopRightRadius: t.radii.xl,
