@@ -1,6 +1,12 @@
 // Mocks must precede imports
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('expo-router', () => {
+  const { useEffect } = require('react');
+  return {
+    useRouter: () => ({ push: mockPush }),
+    useFocusEffect: (cb: () => void) => { useEffect(() => { cb(); }, []); },
+  };
+});
 
 jest.mock('../../lib/data/gems', () => ({
   getGemsForCity: jest.fn(),

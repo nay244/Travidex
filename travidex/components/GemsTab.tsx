@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Image, Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/theme';
 import { useAuth } from '../context/AuthProvider';
@@ -45,7 +45,7 @@ export function GemsTab() {
 
   const uid = session?.user?.id ?? '';
 
-  useEffect(() => {
+  const loadGems = useCallback(() => {
     if (!uid || !cityId) { setLoaded(true); return; }
     setLoaded(false);
     getGemsForCity(cityId, uid)
@@ -53,6 +53,10 @@ export function GemsTab() {
       .catch((e: any) => console.warn('GemsTab load failed', e))
       .finally(() => setLoaded(true));
   }, [cityId, uid]);
+
+  useEffect(() => { loadGems(); }, [loadGems]);
+
+  useFocusEffect(useCallback(() => { loadGems(); }, [loadGems]));
 
   const cityName = city?.name ?? '';
 

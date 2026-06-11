@@ -16,6 +16,9 @@ jest.mock('expo-image-picker', () => ({
 jest.mock('../../components/Flag', () => ({
   Flag: () => null,
 }));
+jest.mock('../../components/Medallion', () => ({
+  Medallion: () => null,
+}));
 
 import { fireEvent, waitFor, act } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test-utils';
@@ -53,7 +56,7 @@ it('submit button is disabled when photo selected but name < 3 chars', async () 
   const photoBox = await findByTestId('photo-box');
   fireEvent.press(photoBox);
   await waitFor(() => expect(Picker.launchImageLibraryAsync).toHaveBeenCalled());
-  fireEvent.changeText(getByPlaceholderText('Name this gem'), 'ab');
+  fireEvent.changeText(getByPlaceholderText('Name the spot'), 'ab');
   const btn = await findByTestId('submit-gem');
   const isDisabled = btn.props.accessibilityState?.disabled ?? btn.props.disabled ?? false;
   expect(isDisabled).toBe(true);
@@ -68,7 +71,7 @@ it('submit button is enabled when photo selected and name >= 3 chars', async () 
   const photoBox = await findByTestId('photo-box');
   fireEvent.press(photoBox);
   await waitFor(() => expect(Picker.launchImageLibraryAsync).toHaveBeenCalled());
-  fireEvent.changeText(getByPlaceholderText('Name this gem'), 'Cool Spot');
+  fireEvent.changeText(getByPlaceholderText('Name the spot'), 'Cool Spot');
   const btn = await findByTestId('submit-gem');
   const isDisabled = btn.props.accessibilityState?.disabled ?? btn.props.disabled ?? false;
   expect(isDisabled).toBe(false);
@@ -95,8 +98,8 @@ it('full submit calls submitGem and shows Submitted for review; Done goes back',
   const photoBox = await findByTestId('photo-box');
   fireEvent.press(photoBox);
   await waitFor(() => expect(Picker.launchImageLibraryAsync).toHaveBeenCalled());
-  fireEvent.changeText(getByPlaceholderText('Name this gem'), 'Cool Spot');
-  fireEvent.changeText(getByPlaceholderText('Why is it special?'), 'Great views');
+  fireEvent.changeText(getByPlaceholderText('Name the spot'), 'Cool Spot');
+  fireEvent.changeText(getByPlaceholderText('Why is it special? What should travelers look for?'), 'Great views');
   fireEvent.press(await findByTestId('submit-gem'));
 
   // Verify submitGem received the correct arguments
@@ -111,6 +114,7 @@ it('full submit calls submitGem and shows Submitted for review; Done goes back',
 
   // Verify success state transition and Done navigation
   expect(await findByText('Submitted for review')).toBeTruthy();
-  fireEvent.press(await findByText('Done'));
+  expect(await findByText('Automated checks passed — a moderator will review it, usually within 24 hours.')).toBeTruthy();
+  fireEvent.press(await findByTestId('done-btn'));
   expect(mockBack).toHaveBeenCalled();
 });
