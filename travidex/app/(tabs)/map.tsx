@@ -15,6 +15,7 @@ import { DexSheet } from '../../components/DexSheet';
 import { LogFindSheet } from '../../components/LogFindSheet';
 import { Flag } from '../../components/Flag';
 import { filterSights } from '../../lib/sightList';
+import { sheetSnapPoints } from '../../lib/sheetSnapPoints';
 import type { SightWithFind } from '../../lib/types';
 
 export default function MapScreen() {
@@ -32,25 +33,14 @@ export default function MapScreen() {
   const mapRef = useRef<MapView>(null);
 
   // --- 3-snap sheet --------------------------------------------------------
-  // Snap points as distance from top of screen (smaller = taller sheet).
-  // peek  ≈ 140pt from bottom (just grabber + header visible)
-  // half  ≈ sheet covers the bottom 40 % of the screen (per device feedback)
-  // full  ≈ top safe-area inset + 60
+  // Snap geometry lives in lib/sheetSnapPoints.ts. The selection banner sits
+  // above the sheet header, so while a sight is selected `peek` rises by the
+  // banner's measured height — otherwise the banner fills the peek strip and
+  // pushes the grabber below the tab bar (sheet invisible + un-draggable).
   const usableHeight = height;
-  const snapPoints = useRef({
-    peek: usableHeight - 140,
-    half: usableHeight * 0.6,
-    full: insets.top + 60,
-  });
-
-  // Keep snap points up-to-date if dimensions change (orientation, etc.)
-  useEffect(() => {
-    snapPoints.current = {
-      peek: usableHeight - 140,
-      half: usableHeight * 0.6,
-      full: insets.top + 60,
-    };
-  }, [usableHeight, insets.top]);
+  const [bannerHeight, setBannerHeight] = useState(0);
+  const selectionOffset = selected ? bannerHeight : 0;
+  const snapPoints = useRef(sheetSnapPoints(usableHeight, insets.top, 0));
 
   // Animated top edge of the sheet container. Default snap = half.
   const sheetTop = useRef(new Animated.Value(usableHeight * 0.6)).current;
@@ -67,6 +57,14 @@ export default function MapScreen() {
       speed: 14,
     }).start();
   }, [sheetTop]);
+
+  // Keep snap points current (orientation, selection banner appearing or
+  // clearing) and re-apply the committed snap so the sheet moves to honour
+  // the new geometry.
+  useEffect(() => {
+    snapPoints.current = sheetSnapPoints(usableHeight, insets.top, selectionOffset);
+    snapTo(currentSnap.current);
+  }, [usableHeight, insets.top, selectionOffset, snapTo]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -331,6 +329,8 @@ export default function MapScreen() {
           <Pressable
             testID="selection-banner"
             onPress={handleBannerPress}
+            // Height feeds the peek snap offset (+ marginBottom below)
+            onLayout={e => setBannerHeight(Math.ceil(e.nativeEvent.layout.height) + t.spacing.s2)}
             style={{
               backgroundColor: t.colors.amberDim,
               borderWidth: 1,
