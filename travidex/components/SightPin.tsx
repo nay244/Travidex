@@ -37,7 +37,8 @@ export function SightPin({ sight, onPress, selected }: { sight: SightWithFind; o
       }
     : {};
 
-  const showCheck = isFound || selected;
+  // The check marks FOUND only — selection is conveyed by amber + size, never a check.
+  const showCheck = isFound;
 
   return (
     <Marker
