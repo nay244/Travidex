@@ -34,6 +34,7 @@ Updated every build round. Each entry: what differs, why, and what would close i
 | gems-check §3.7.1 | Automated checks = profanity wordlist + 50 km geo sanity; no image-safety classification | Needs an external classifier service | Vision-moderation API in the edge function | DEFERRED-FEATURE |
 | Monthly badges §3.9 | A month is "earned" by ≥1 find that month (local time) — the kit's per-month *challenges* are not modeled | No challenge system in the data model | Challenge definitions + tracking | DEFERRED-FEATURE |
 | Profile §3.8 header | `@handle · SINCE {current year}` — join year is not the real account creation date | `profiles` has created_at but isn't fetched here yet | Read created_at with the profile | STANDING (small) |
+| Region Dex §3.6 | Full-width green "Open map" button replaced by a compact glass chip (`open-map-chip`, Ionicons `map-outline`) in the header row | Spec has no map link; full-width button removed per build notes 2.3; chip preserves the capability without dominating the layout | Remove if product decides map access belongs elsewhere | STANDING |
 
 ## Resolved (was a deviation, now closed)
 

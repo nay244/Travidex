@@ -38,10 +38,10 @@ beforeEach(() => {
   });
 });
 
-it('shows completion and opens the city map', async () => {
+it('shows completion and opens the city map via the chip', async () => {
   await renderWithTheme(<City />);
   expect(screen.getByText('2/5 FOUND')).toBeOnTheScreen();
-  fireEvent.press(screen.getByText('Open map'));
+  fireEvent.press(screen.getByTestId('open-map-chip'));
   expect(mockSetCityId).toHaveBeenCalledWith('c1');
   expect(mockReplace).toHaveBeenCalledWith('/(tabs)/map');
 });

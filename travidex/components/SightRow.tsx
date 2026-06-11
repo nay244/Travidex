@@ -22,17 +22,14 @@ export function SightRow({
 }) {
   const t = useTheme();
 
-  // Found rows get a subtle foundBg gradient tint; selected takes precedence
+  // Dex rows stay neutral; only selected gets the amber highlight.
+  // Map rows keep their found tint for the map-sheet context.
   const rowBg = selected
     ? t.colors.surface3
-    : sight.found
-    ? t.colors.foundBg
     : t.colors.surface1;
 
   const rowBorderColor = selected
     ? t.colors.amberLine
-    : sight.found
-    ? t.colors.greenLine
     : t.colors.borderSubtle;
 
   const chips = sight.type_tags ?? [];
@@ -188,26 +185,63 @@ export function SightRow({
         </Pressable>
       ) : null}
 
-      {/* Thumbnail: found = foundBg fill + green border, unfound = hollow + locked border */}
-      <View
-        style={{
-          width: 52,
-          height: 52,
-          borderRadius: t.radii.md,
-          backgroundColor: sight.found ? t.colors.foundBg : t.colors.surface2,
-          borderWidth: 1.5,
-          borderColor: sight.found ? t.colors.green : t.colors.borderDefault,
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
-        {sight.found ? (
-          <Text testID="found-check" style={{ color: t.colors.green, fontSize: 14 }}>{'✓'}</Text>
-        ) : (
-          <Text style={{ color: t.colors.locked, fontSize: 18 }}>{'⌂'}</Text>
-        )}
-      </View>
+      {/* Thumbnail: found = striped photo placeholder; unfound = hollow box + faint glyph */}
+      {sight.found ? (
+        <View
+          testID="thumb-found"
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: t.radii.md,
+            backgroundColor: t.colors.phBase,
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}
+        >
+          {Array.from({ length: 8 }).map((_, i) => (
+            <View
+              key={i}
+              style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: i * (52 / 8),
+                height: 52 / 8,
+                backgroundColor: i % 2 === 0 ? t.colors.phBase : t.colors.phStripe,
+              }}
+            />
+          ))}
+          {/* Faint green corner accent */}
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              width: 10,
+              height: 10,
+              backgroundColor: t.colors.greenDim,
+              borderTopLeftRadius: t.radii.sm,
+            }}
+          />
+        </View>
+      ) : (
+        <View
+          testID="thumb-unfound"
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: t.radii.md,
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            borderColor: t.colors.borderDefault,
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Ionicons name="business-outline" size={20} color={t.colors.locked} />
+        </View>
+      )}
 
       {/* Middle: name + chips (blue-only) — flex:1 with minWidth:0 to prevent overflow */}
       <View style={{ flex: 1, minWidth: 0, gap: t.spacing.s1 }}>
@@ -265,22 +299,22 @@ export function SightRow({
         )}
       </View>
 
-      {/* Right column: dex number — fixed width, no overflow into middle */}
-      <View style={{ width: 40, alignItems: 'flex-end', flexShrink: 0 }}>
-        <Text
-          style={[
-            t.type.dexNo,
-            {
-              color: t.colors.text3,
-              opacity: sight.found ? 0.9 : 0.55,
-              fontSize: 10,
-            },
-          ]}
-          numberOfLines={1}
-        >
-          {`#${String(sight.dex_no).padStart(3, '0')}`}
-        </Text>
-      </View>
+      {/* Dex # — absolute bottom-right corner */}
+      <Text
+        style={[
+          t.type.dexNo,
+          {
+            position: 'absolute',
+            bottom: t.spacing.s2,
+            right: t.spacing.s3,
+            color: t.colors.text3,
+            fontSize: 10,
+          },
+        ]}
+        numberOfLines={1}
+      >
+        {`#${String(sight.dex_no).padStart(3, '0')}`}
+      </Text>
 
       {/* Chevron see-more */}
       {onSeeMore && (
