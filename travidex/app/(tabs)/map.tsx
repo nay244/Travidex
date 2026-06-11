@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Animated, Modal, PanResponder, Pressable, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Animated, Keyboard, Modal, PanResponder, Pressable, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import MapView from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -14,6 +14,7 @@ import { DexSheet } from '../../components/DexSheet';
 import { LocationPicker } from '../../components/LocationPicker';
 import { LogFindSheet } from '../../components/LogFindSheet';
 import { Flag } from '../../components/Flag';
+import { filterSights } from '../../lib/sightList';
 import type { SightWithFind } from '../../lib/types';
 
 export default function MapScreen() {
@@ -28,6 +29,8 @@ export default function MapScreen() {
   const [selected, setSelected] = useState<SightWithFind | null>(null);
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+  const mapRef = useRef<MapView>(null);
 
   // --- 3-snap sheet --------------------------------------------------------
   // Snap points as distance from top of screen (smaller = taller sheet).
@@ -127,6 +130,9 @@ export default function MapScreen() {
   ).current;
   // -------------------------------------------------------------------------
 
+  // Stop animation on unmount to prevent rAF callbacks firing outside act() in tests
+  useEffect(() => () => { sheetTop.stopAnimation(); }, [sheetTop]);
+
   // Reload on focus so pins/rows refresh after logging elsewhere
   useFocusEffect(useCallback(() => { reload(); }, [reload]));
 
@@ -139,6 +145,12 @@ export default function MapScreen() {
   const handleSelect = useCallback((id: string) => {
     const sight = sights.find(s => s.id === id) ?? null;
     setSelected(sight);
+    if (sight) {
+      mapRef.current?.animateToRegion(
+        { latitude: sight.lat, longitude: sight.lng, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+        350,
+      );
+    }
   }, [sights]);
 
   const handleSeeMore = useCallback((id: string) => {
@@ -170,11 +182,15 @@ export default function MapScreen() {
     borderColor: t.colors.borderSubtle,
   } as const;
 
+  const showSuggestions = searchFocused && searchQuery.trim().length >= 1;
+  const suggestions = showSuggestions ? filterSights(sights, searchQuery).slice(0, 5) : [];
+
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       {/* Map takes full height; sheet is absolutely positioned over it */}
       <MapView
         key={cityId}
+        ref={mapRef}
         style={{ flex: 1 }}
         testID="map-view"
         initialRegion={city ? { latitude: city.lat, longitude: city.lng, latitudeDelta: 0.08, longitudeDelta: 0.08 } : undefined}
@@ -191,10 +207,13 @@ export default function MapScreen() {
           <View style={[glassStyle, { flex: 1, flexDirection: 'row', alignItems: 'center', height: 46, paddingHorizontal: t.spacing.s4, borderRadius: t.radii.md, gap: t.spacing.s2 }]}>
             <Ionicons name="search" size={16} color={t.colors.text3} />
             <TextInput
+              testID="map-search"
               placeholder="Search sights"
               placeholderTextColor={t.colors.text3}
               value={searchQuery}
               onChangeText={setSearchQuery}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
               style={[t.type.body, { flex: 1, color: t.colors.text1, padding: 0 }]}
             />
           </View>
@@ -203,6 +222,42 @@ export default function MapScreen() {
             <Ionicons name="options-outline" size={18} color={t.colors.text1} />
           </View>
         </View>
+
+        {/* Search suggestions */}
+        {showSuggestions && (
+          <View style={[glassStyle, {
+            borderRadius: t.radii.md,
+            overflow: 'hidden',
+            zIndex: 30,
+          }]}>
+            {suggestions.length === 0 ? (
+              <View style={{ paddingVertical: t.spacing.s3, paddingHorizontal: t.spacing.s4 }}>
+                <Text style={[t.type.body, { color: t.colors.text3 }]}>No sights match</Text>
+              </View>
+            ) : suggestions.map(s => (
+              <Pressable
+                key={s.id}
+                testID={`suggestion-${s.id}`}
+                onPress={() => {
+                  handleSelect(s.id);
+                  setSearchQuery('');
+                  Keyboard.dismiss();
+                }}
+                style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: t.spacing.s3, paddingHorizontal: t.spacing.s4, gap: t.spacing.s2 }}
+              >
+                <Text style={[t.type.body, { flex: 1, color: t.colors.text1 }]} numberOfLines={1}>{s.name}</Text>
+                <Text style={[t.type.body, { fontFamily: t.fontFamily.monoRegular, fontSize: t.fontSize.caption, color: t.colors.text3 }]}>
+                  #{String(s.dex_no).padStart(3, '0')}
+                </Text>
+                {s.found ? (
+                  <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: t.colors.found }} />
+                ) : (
+                  <View style={{ width: 12, height: 12, borderRadius: 6, borderWidth: 1.5, borderColor: t.colors.text3 }} />
+                )}
+              </Pressable>
+            ))}
+          </View>
+        )}
 
         {/* Location pill */}
         <Pressable
