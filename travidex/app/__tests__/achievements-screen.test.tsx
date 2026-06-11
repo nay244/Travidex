@@ -7,6 +7,12 @@ jest.mock('expo-router', () => ({
 }));
 jest.mock('../../hooks/useProfile', () => ({ useProfile: jest.fn() }));
 jest.mock('../../context/AuthProvider', () => ({ useAuth: () => ({ session: { user: { id: 'u1' } } }) }));
+jest.mock('../../context/EntitlementProvider', () => ({
+  useEntitlement: () => ({ isPremium: false }),
+}));
+jest.mock('../../lib/data/profile', () => ({
+  getArtId: jest.fn(() => Promise.resolve('trailhead')),
+}));
 
 import { screen, fireEvent } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test-utils';
@@ -22,7 +28,7 @@ import Profile from '../(tabs)/profile';
 // fifty_sights (goal=50, value=12) → locked
 // city_claimer (goal=1, value=1)  → done
 // globetrotter (goal=5, value=1)  → locked
-const STATS = { totalFinds: 12, citiesClaimed: 1, countriesExplored: 1 };
+const STATS = { totalFinds: 12, citiesClaimed: 1, countriesExplored: 1, worldFound: 62, worldTotal: 400 };
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -76,7 +82,7 @@ describe('Profile rail', () => {
   it('Achievements row routes to /profile/achievements', async () => {
     (useProfile as jest.Mock).mockReturnValue({ stats: STATS, earnedBadges: [], loading: false });
     await renderWithTheme(<Profile />);
-    fireEvent.press(screen.getByTestId('nav-achievements'));
+    fireEvent.press(screen.getByTestId('achievements-page-btn'));
     expect(mockPush).toHaveBeenCalledWith('/profile/achievements');
   });
 });
