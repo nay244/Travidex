@@ -339,13 +339,13 @@ export default function MapScreen() {
           >
             <Ionicons name="ribbon-outline" size={16} color={t.colors.amber} />
             <Text style={[t.type.body, { color: t.colors.text1, flex: 1, fontSize: t.fontSize.caption }]} numberOfLines={1}>
-              {'Selected '}
+              {'Selected: '}
               <Text style={{ fontFamily: t.fontFamily.sansBold }}>{selected.name}</Text>
             </Text>
             {selected.found ? (
               <Text style={[t.type.caption, { color: t.colors.text2 }]}>Already in your dex</Text>
             ) : (
-              <Text testID="banner-tap-to-log" style={{ fontFamily: t.fontFamily.monoBold, fontSize: t.fontSize.micro, letterSpacing: 0.08 * t.fontSize.micro, color: t.colors.amber }}>TAP TO LOG ↓</Text>
+              <Text testID="banner-tap-to-log" style={{ fontFamily: t.fontFamily.monoBold, fontSize: t.fontSize.micro, letterSpacing: 0.08 * t.fontSize.micro, color: t.colors.amber }}>{'TAP ⬗ TO LOG'}</Text>
             )}
           </Pressable>
         )}

@@ -88,6 +88,7 @@ export function DexSheet({ cityName, sights, onSelect, selectedId, onSeeMore, qu
             onPress={onSelect}
             selected={selectedId === item.id}
             onSeeMore={onSeeMore}
+            variant="map"
           />
         )}
       />
