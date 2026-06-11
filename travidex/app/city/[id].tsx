@@ -9,6 +9,7 @@ import { filterSights, sortSights } from '../../lib/sightList';
 import { getFavoriteSightIds, setFavorite } from '../../lib/data/favorites';
 import { useAuth } from '../../context/AuthProvider';
 import { Screen } from '../../components/Screen';
+import { useActiveCity } from '../../hooks/useActiveCity';
 
 export default function City() {
   const t = useTheme();
@@ -17,6 +18,7 @@ export default function City() {
   const { setCityId } = useCity();
   const { session } = useAuth();
   const { sights, completion } = useCityCatalog(id!);
+  const { city } = useActiveCity(id!);
 
   const [query, setQuery] = useState('');
   const [favIds, setFavIds] = useState<Set<string>>(new Set());
@@ -60,55 +62,168 @@ export default function City() {
 
   const displayed = sortSights(filterSights(sights, query), 'dex');
 
+  const cityName = city?.name ?? '…';
+  const regionLabel = city?.region ?? '';
+
   return (
     <Screen>
-      <View style={{ padding: t.spacing.s5, gap: t.spacing.s3 }}>
-        {/* Header row: completion + sparkles */}
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={[t.type.stat, { color: t.colors.text1, flex: 1 }]}>
-            {`${completion.found} of ${completion.total} found`}
-          </Text>
+      {/* ── Region Dex header ── */}
+      <View
+        style={{
+          paddingTop: t.spacing.s3,
+          paddingBottom: t.spacing.s3,
+          paddingHorizontal: t.spacing.s3,
+          backgroundColor: t.colors.surfaceOverlay,
+          borderBottomWidth: 1,
+          borderBottomColor: t.colors.borderSubtle,
+          gap: t.spacing.s2,
+        }}
+      >
+        {/* Back + city name row */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: t.spacing.s1 }}>
+          <Pressable
+            onPress={() => router.back()}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            hitSlop={8}
+          >
+            <Text style={{ color: t.colors.text1, fontSize: 22, lineHeight: 26 }}>{'‹'}</Text>
+          </Pressable>
+          <View style={{ flex: 1 }}>
+            <Text style={[t.type.h2, { color: t.colors.text1 }]} numberOfLines={1}>
+              {cityName}
+            </Text>
+            <Text
+              style={[
+                t.type.label,
+                { color: t.colors.text3, fontSize: 10, marginTop: 1 },
+              ]}
+            >
+              {regionLabel ? `${regionLabel} · ` : ''}
+              <Text
+                style={{
+                  color:
+                    completion.found >= completion.total && completion.total > 0
+                      ? t.colors.green
+                      : t.colors.text2,
+                }}
+              >
+                {`${completion.found}/${completion.total} FOUND`}
+              </Text>
+            </Text>
+          </View>
+        </View>
+
+        {/* Search + sort/filter + sparkles row */}
+        <View style={{ flexDirection: 'row', gap: t.spacing.s2 }}>
+          {/* Search field */}
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: t.spacing.s2,
+              height: 42,
+              paddingHorizontal: t.spacing.s3,
+              backgroundColor: t.colors.surface2,
+              borderRadius: t.radii.md,
+              borderWidth: 1,
+              borderColor: t.colors.borderSubtle,
+            }}
+          >
+            <Text style={{ color: t.colors.text3, fontSize: 15 }}>{'⌕'}</Text>
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder={`Search ${cityName}`}
+              placeholderTextColor={t.colors.text3}
+              style={[
+                t.type.body,
+                {
+                  flex: 1,
+                  color: t.colors.text1,
+                },
+              ]}
+            />
+          </View>
+
+          {/* Sort button */}
+          <View
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: t.radii.md,
+              backgroundColor: t.colors.surface2,
+              borderWidth: 1,
+              borderColor: t.colors.borderSubtle,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ color: t.colors.text2, fontSize: 15 }}>{'⇅'}</Text>
+          </View>
+
+          {/* Filter button */}
+          <View
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: t.radii.md,
+              backgroundColor: t.colors.surface2,
+              borderWidth: 1,
+              borderColor: t.colors.borderSubtle,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ color: t.colors.text2, fontSize: 15 }}>{'≡'}</Text>
+          </View>
+
+          {/* Sparkles / highlights button */}
           <Pressable
             testID="highlights-btn"
             onPress={() => router.push('/highlights/' + id)}
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: t.radii.md,
+              backgroundColor: t.colors.amberDim,
+              borderWidth: 1,
+              borderColor: t.colors.amberLine,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={{ fontSize: 20 }}>✨</Text>
+            <Text style={{ color: t.colors.amber, fontSize: 16 }}>{'✨'}</Text>
           </Pressable>
         </View>
-
-        {/* Open map button */}
-        <Pressable
-          onPress={openMap}
-          style={{ backgroundColor: t.colors.actionPositive, padding: t.spacing.s4, borderRadius: t.radii.sm }}
-        >
-          <Text style={[t.type.h3, { textAlign: 'center', color: t.colors.textOnAccent }]}>Open map</Text>
-        </Pressable>
-
-        {/* Search input */}
-        <TextInput
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Search sights"
-          placeholderTextColor={t.colors.text3}
-          style={[
-            t.type.body,
-            {
-              color: t.colors.text1,
-              backgroundColor: t.colors.surface2,
-              borderRadius: t.radii.sm,
-              borderWidth: 1,
-              borderColor: t.colors.borderSubtle,
-              paddingHorizontal: t.spacing.s4,
-              paddingVertical: t.spacing.s3,
-            },
-          ]}
-        />
       </View>
+
+      {/* ── Open map button ── */}
+      <Pressable
+        onPress={openMap}
+        style={{
+          backgroundColor: t.colors.actionPositive,
+          marginHorizontal: t.spacing.s4,
+          marginTop: t.spacing.s3,
+          marginBottom: t.spacing.s2,
+          padding: t.spacing.s4,
+          borderRadius: t.radii.sm,
+        }}
+      >
+        <Text style={[t.type.h3, { textAlign: 'center', color: t.colors.textOnAccent }]}>Open map</Text>
+      </Pressable>
 
       <FlatList
         data={displayed}
         keyExtractor={s => s.id}
+        contentContainerStyle={{ paddingHorizontal: t.spacing.s4, paddingBottom: t.spacing.s8 }}
         renderItem={({ item }) => (
           <SightRow
             sight={item}

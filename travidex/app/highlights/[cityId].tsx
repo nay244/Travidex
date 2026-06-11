@@ -495,7 +495,7 @@ export default function RegionHighlights() {
         )}
       </ScrollView>
 
-      {/* ── Share action pinned bottom ── */}
+      {/* ── Share actions pinned bottom ── */}
       <View
         style={{
           position: 'absolute',
@@ -508,29 +508,52 @@ export default function RegionHighlights() {
           backgroundColor: t.colors.bg,
           borderTopWidth: 1,
           borderTopColor: t.colors.borderSubtle,
+          flexDirection: 'row',
+          gap: t.spacing.s3,
         }}
       >
+        {/* Share to friends — deferred until friends feed supports posts (see plan 7.6) */}
+        <Pressable
+          disabled
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: t.spacing.s2,
+            backgroundColor: shareDisabled ? t.colors.locked : t.colors.actionPositive,
+            paddingVertical: t.spacing.s4,
+            borderRadius: t.radii.pill,
+            opacity: 0.55,
+          }}
+          accessibilityState={{ disabled: true }}
+        >
+          <Text style={{ color: t.colors.textOnAccent, fontSize: 16 }}>{'👥'}</Text>
+          <Text style={[t.type.h3, { color: t.colors.textOnAccent }]}>Share to friends</Text>
+        </Pressable>
+
+        {/* Share elsewhere — system share */}
         <Pressable
           testID="share-btn"
           onPress={handleShare}
           disabled={shareDisabled}
+          accessibilityState={{ disabled: shareDisabled }}
           style={{
-            backgroundColor: shareDisabled ? t.colors.locked : t.colors.actionPositive,
-            paddingVertical: t.spacing.s4,
-            borderRadius: t.radii.sm,
+            flex: 1,
+            flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'center',
+            gap: t.spacing.s2,
+            backgroundColor: t.colors.surface2,
+            borderWidth: 1,
+            borderColor: t.colors.borderDefault,
+            paddingVertical: t.spacing.s4,
+            borderRadius: t.radii.pill,
+            opacity: shareDisabled ? 0.45 : 1,
           }}
         >
-          <Text
-            style={[
-              t.type.h3,
-              {
-                color: shareDisabled ? t.colors.lockedText : t.colors.textOnAccent,
-              },
-            ]}
-          >
-            Share
-          </Text>
+          <Text style={{ color: t.colors.text1, fontSize: 15 }}>{'↑'}</Text>
+          <Text style={[t.type.h3, { color: t.colors.text1 }]}>Share elsewhere</Text>
         </Pressable>
       </View>
     </Screen>
