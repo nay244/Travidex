@@ -43,7 +43,9 @@ export function SightRow({
     ? t.colors.greenLine
     : t.colors.borderSubtle;
 
-  const chips = (sight.type_tags ?? []).slice(0, 3);
+  const allChips = sight.type_tags ?? [];
+  const chips = allChips.slice(0, 2);
+  const extraCount = allChips.length - chips.length;
 
   return (
     <Pressable
@@ -87,23 +89,6 @@ export function SightRow({
         </Pressable>
       ) : null}
 
-      {/* Dex number — bottom-right absolute */}
-      <Text
-        style={[
-          t.type.dexNo,
-          {
-            position: 'absolute',
-            right: t.spacing.s4,
-            bottom: t.spacing.s3,
-            color: t.colors.text3,
-            opacity: sight.found ? 0.9 : 0.55,
-          },
-        ]}
-        pointerEvents="none"
-      >
-        {`#${String(sight.dex_no).padStart(3, '0')}`}
-      </Text>
-
       {/* Thumbnail: found = foundBg fill + green border, unfound = hollow + locked border */}
       <View
         style={{
@@ -125,8 +110,8 @@ export function SightRow({
         )}
       </View>
 
-      {/* Middle: name + chips — leave room for the absolute dex number */}
-      <View style={{ flex: 1, gap: t.spacing.s1, paddingRight: t.spacing.s9 }}>
+      {/* Middle: name + chips — flex:1 with minWidth:0 to prevent overflow */}
+      <View style={{ flex: 1, minWidth: 0, gap: t.spacing.s1 }}>
         <Text
           style={[
             t.type.body,
@@ -134,6 +119,7 @@ export function SightRow({
               color: sight.found ? t.colors.text1 : t.colors.text2,
               fontWeight: '700',
               fontSize: 16,
+              flexShrink: 1,
             },
           ]}
           numberOfLines={1}
@@ -141,9 +127,9 @@ export function SightRow({
           {sight.name}
         </Text>
 
-        {/* Type chips */}
-        {chips.length > 0 && (
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: t.spacing.s1 }}>
+        {/* Type chips — single row, no wrap, capped at 2 + overflow chip */}
+        {allChips.length > 0 && (
+          <View style={{ flexDirection: 'row', gap: t.spacing.s1, overflow: 'hidden' }}>
             {chips.map(tag => {
               const tone = getTone(tag);
               const bg =
@@ -177,21 +163,64 @@ export function SightRow({
                     backgroundColor: bg,
                     borderWidth: 1,
                     borderColor: border,
+                    flexShrink: 0,
                   }}
                 >
                   <Text
                     style={[
                       t.type.label,
-                      { color: fg, fontSize: 11, textTransform: 'none', letterSpacing: 0 },
+                      { color: fg, fontSize: 10, textTransform: 'none', letterSpacing: 0 },
                     ]}
+                    numberOfLines={1}
                   >
                     {tag}
                   </Text>
                 </View>
               );
             })}
+            {extraCount > 0 && (
+              <View
+                style={{
+                  height: 20,
+                  paddingHorizontal: t.spacing.s2,
+                  borderRadius: t.radii.pill,
+                  backgroundColor: t.colors.surface2,
+                  borderWidth: 1,
+                  borderColor: t.colors.borderDefault,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Text
+                  style={[
+                    t.type.label,
+                    { color: t.colors.text3, fontSize: 10, textTransform: 'none', letterSpacing: 0 },
+                  ]}
+                >
+                  {`+${extraCount}`}
+                </Text>
+              </View>
+            )}
           </View>
         )}
+      </View>
+
+      {/* Right column: dex number — fixed width, no overflow into middle */}
+      <View style={{ width: 40, alignItems: 'flex-end', flexShrink: 0 }}>
+        <Text
+          style={[
+            t.type.dexNo,
+            {
+              color: t.colors.text3,
+              opacity: sight.found ? 0.9 : 0.55,
+              fontSize: 10,
+            },
+          ]}
+          numberOfLines={1}
+        >
+          {`#${String(sight.dex_no).padStart(3, '0')}`}
+        </Text>
       </View>
 
       {/* Chevron see-more */}

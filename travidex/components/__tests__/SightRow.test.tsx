@@ -19,13 +19,16 @@ it('fires onPress with the sight id', async () => {
   expect(onPress).toHaveBeenCalledWith('s1');
 });
 
-it('renders type chips from type_tags, capped at 3', async () => {
+it('renders type chips from type_tags, capped at 2 with +N overflow chip', async () => {
   await renderWithTheme(<SightRow sight={sightWithTags} onPress={() => {}} />);
+  // First 2 chips rendered
   expect(screen.getByText('Historic')).toBeOnTheScreen();
   expect(screen.getByText('Scenic')).toBeOnTheScreen();
-  expect(screen.getByText('Food')).toBeOnTheScreen();
-  // 4th chip should NOT render
+  // 3rd and 4th chips replaced by overflow indicator
+  expect(screen.queryByText('Food')).toBeNull();
   expect(screen.queryByText('Modern')).toBeNull();
+  // Overflow chip shows correct count
+  expect(screen.getByText('+2')).toBeOnTheScreen();
 });
 
 it('does NOT render a favorite heart when onToggleFavorite is not provided', async () => {

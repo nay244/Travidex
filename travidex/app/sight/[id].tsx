@@ -1,5 +1,6 @@
 import { ScrollView, Text, View, Pressable } from 'react-native';
 import { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/theme';
 import { Screen } from '../../components/Screen';
@@ -22,6 +23,29 @@ export default function SightDetail() {
 
   return (
     <Screen>
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 52,
+        paddingHorizontal: t.spacing.s4,
+        borderBottomWidth: 1,
+        borderBottomColor: t.colors.borderSubtle,
+      }}>
+        <Pressable
+          testID="back-btn"
+          onPress={() => router.back()}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            width: 40, height: 40, borderRadius: 20,
+            alignItems: 'center', justifyContent: 'center',
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <Ionicons name="chevron-back" size={24} color={t.colors.text1} />
+        </Pressable>
+        <View style={{ flex: 1 }} />
+        <View style={{ width: 40 }} />
+      </View>
       <ScrollView style={{ flex: 1 }}>
 
         {/* Hero block */}

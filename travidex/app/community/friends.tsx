@@ -71,8 +71,17 @@ export default function FriendsScreen() {
           backgroundColor: t.colors.surfaceOverlay,
         }}
       >
-        <Pressable onPress={() => router.back()} style={{ padding: t.spacing.s2 }}>
-          <Text style={[t.type.body, { color: t.colors.text1 }]}>‹</Text>
+        <Pressable
+          testID="back-btn"
+          onPress={() => router.back()}
+          hitSlop={8}
+          style={({ pressed }) => ({
+            width: 40, height: 40, borderRadius: 20,
+            alignItems: 'center', justifyContent: 'center',
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <Ionicons name="chevron-back" size={24} color={t.colors.text1} />
         </Pressable>
         <Text style={[t.type.h3, { color: t.colors.text1, flex: 1, textAlign: 'center' }]}>Friends</Text>
         <View style={{ width: 32 }} />

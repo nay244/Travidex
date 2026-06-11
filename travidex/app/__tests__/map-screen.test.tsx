@@ -40,6 +40,7 @@ jest.mock('../../components/LogFindSheet', () => ({
 import { screen, fireEvent, act } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test-utils';
 import MapScreen from '../(tabs)/map';
+import { mockAnimateToRegion } from '../../__mocks__/react-native-maps';
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -112,4 +113,77 @@ it('banner for found sight shows "Already in your dex" and routes to success wit
     fireEvent.press(screen.getByTestId('selection-banner'));
   });
   expect(mockPush).toHaveBeenCalledWith({ pathname: '/find/success', params: { sightId: 's2', already: '1' } });
+});
+
+// --- Map focus -----------------------------------------------------------
+
+it('selecting a sight calls animateToRegion with the sight coords', async () => {
+  await renderWithTheme(<MapScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByText('Eiffel Tower'));
+  });
+  expect(mockAnimateToRegion).toHaveBeenCalledWith(
+    { latitude: 48.85, longitude: 2.29, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+    350,
+  );
+});
+
+it('selecting a found sight also calls animateToRegion with correct coords', async () => {
+  await renderWithTheme(<MapScreen />);
+  await act(async () => {
+    fireEvent.press(screen.getByText('Louvre'));
+  });
+  expect(mockAnimateToRegion).toHaveBeenCalledWith(
+    { latitude: 48.86, longitude: 2.33, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+    350,
+  );
+});
+
+// --- Search suggestions --------------------------------------------------
+
+it('no suggestion card shown before typing', async () => {
+  await renderWithTheme(<MapScreen />);
+  await act(async () => {
+    fireEvent(screen.getByTestId('map-search'), 'focus');
+  });
+  expect(screen.queryByTestId('suggestion-s1')).toBeNull();
+});
+
+it('typing a query while focused shows matching suggestions', async () => {
+  await renderWithTheme(<MapScreen />);
+  await act(async () => {
+    fireEvent(screen.getByTestId('map-search'), 'focus');
+    fireEvent.changeText(screen.getByTestId('map-search'), 'eiff');
+  });
+  expect(screen.getByTestId('suggestion-s1')).toBeOnTheScreen();
+  expect(screen.queryByTestId('suggestion-s2')).toBeNull();
+});
+
+it('typing a query shows no-match row when nothing matches', async () => {
+  await renderWithTheme(<MapScreen />);
+  await act(async () => {
+    fireEvent(screen.getByTestId('map-search'), 'focus');
+    fireEvent.changeText(screen.getByTestId('map-search'), 'zzz');
+  });
+  expect(screen.getByText('No sights match')).toBeOnTheScreen();
+});
+
+it('pressing a suggestion selects the sight, shows banner, clears query, and calls animateToRegion', async () => {
+  await renderWithTheme(<MapScreen />);
+  await act(async () => {
+    fireEvent(screen.getByTestId('map-search'), 'focus');
+    fireEvent.changeText(screen.getByTestId('map-search'), 'eiff');
+  });
+  await act(async () => {
+    fireEvent.press(screen.getByTestId('suggestion-s1'));
+  });
+  // Banner visible
+  expect(screen.getByTestId('selection-banner')).toBeOnTheScreen();
+  // Map focused
+  expect(mockAnimateToRegion).toHaveBeenCalledWith(
+    { latitude: 48.85, longitude: 2.29, latitudeDelta: 0.02, longitudeDelta: 0.02 },
+    350,
+  );
+  // Query cleared — suggestion card gone
+  expect(screen.queryByTestId('suggestion-s1')).toBeNull();
 });

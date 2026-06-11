@@ -1,5 +1,6 @@
+const mockBack = jest.fn();
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useLocalSearchParams: () => ({ id: 's1' }) }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack, push: mockPush }), useLocalSearchParams: () => ({ id: 's1' }) }));
 jest.mock('../../hooks/useSight', () => ({ useSight: jest.fn() }));
 import { screen, fireEvent, act } from '@testing-library/react-native';
 import { renderWithTheme } from '../../test-utils';
@@ -38,6 +39,16 @@ it('shows hero-found when found', async () => {
   await renderWithTheme(<SightDetail />);
   expect(screen.getByTestId('hero-found')).toBeOnTheScreen();
   expect(screen.queryByTestId('hero-unfound')).toBeNull();
+});
+
+it('back-btn calls router.back()', async () => {
+  (useSight as jest.Mock).mockReturnValue({
+    sight: { id: 's1', dex_no: 1, name: 'Eiffel Tower', type_tags: [], about: null, hint: null, access: 'Easy', size: 'Large', busyness: 'Busy', lat: 48.85, lng: 2.29 },
+    found: false, recentFinds: [], loading: false, reload: jest.fn(),
+  });
+  await renderWithTheme(<SightDetail />);
+  fireEvent.press(screen.getByTestId('back-btn'));
+  expect(mockBack).toHaveBeenCalled();
 });
 
 it('hint text is hidden initially and visible after pressing toggle', async () => {

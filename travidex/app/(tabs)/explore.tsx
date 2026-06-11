@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/theme';
 import { useAuth } from '../../context/AuthProvider';
@@ -60,13 +61,14 @@ function MiniRing({
 function LegendDot({ color, label }: { color: string; label: string }) {
   const t = useTheme();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
       <View
         style={{
-          width: 8,
-          height: 8,
+          width: 7,
+          height: 7,
           borderRadius: 3,
           backgroundColor: color,
+          flexShrink: 0,
         }}
       />
       <Text
@@ -74,11 +76,12 @@ function LegendDot({ color, label }: { color: string; label: string }) {
           t.type.label,
           {
             color: t.colors.text3,
-            fontSize: 10,
-            letterSpacing: 0.5,
+            fontSize: 9,
+            letterSpacing: 0.4,
             textTransform: 'uppercase',
           },
         ]}
+        numberOfLines={1}
       >
         {label}
       </Text>
@@ -354,9 +357,9 @@ export default function Explore() {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
+            height: 36,
             gap: t.spacing.s2,
             paddingHorizontal: t.spacing.s3,
-            paddingVertical: t.spacing.s2,
             borderRadius: t.radii.pill,
             backgroundColor: t.colors.surface2,
             borderWidth: 1,
@@ -366,11 +369,14 @@ export default function Explore() {
           {selectedCountry ? (
             <Flag code={selectedCountry.code} size={22} radius={5} />
           ) : null}
-          <Text style={[t.type.label, { color: t.colors.text1, fontWeight: '700', fontSize: 14, letterSpacing: 0.3 }]}>
+          <Text
+            style={[t.type.label, { color: t.colors.text1, fontWeight: '700', fontSize: 13, letterSpacing: 0.3 }]}
+            numberOfLines={1}
+          >
             {selectedCountry?.code ?? '—'}
           </Text>
-          {/* chevron */}
-          <Text style={{ color: t.colors.text3, fontSize: 11 }}>{'⌃'}</Text>
+          {/* chevron — Ionicons for correct rendering, no glyph clip */}
+          <Ionicons name="chevron-down" size={14} color={t.colors.text3} />
         </Pressable>
 
         <View style={{ flex: 1 }} />
@@ -415,6 +421,9 @@ export default function Explore() {
                     marginTop: 2,
                   },
                 ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
               >
                 <Text style={{ color: t.colors.green, fontWeight: '700' }}>
                   {headerStats.claimedLabel}
@@ -432,7 +441,8 @@ export default function Explore() {
         <View
           style={{
             flexDirection: 'row',
-            gap: t.spacing.s4,
+            flexWrap: 'wrap',
+            gap: t.spacing.s3,
             paddingHorizontal: t.spacing.s4,
             paddingVertical: t.spacing.s3,
           }}
