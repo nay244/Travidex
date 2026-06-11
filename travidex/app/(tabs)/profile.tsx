@@ -107,6 +107,7 @@ export default function Profile() {
 
         {/* Nav rail */}
         <NavRow label="Badges" to="/profile/badges" icon="ribbon-outline" />
+        <NavRow label="Achievements" to="/profile/achievements" icon="trophy-outline" testID="nav-achievements" />
         <NavRow label="Photo journal" to="/profile/journal" icon="images-outline" />
         <NavRow label="Settings" to="/profile/settings" icon="settings-outline" />
       </ScrollView>
