@@ -52,7 +52,7 @@ it('search >= 2 chars surfaces a non-friend profile with Add button', async () =
   renderWithTheme(<FriendsScreen />);
   await waitFor(() => screen.getByTestId('friend-f1'));
 
-  fireEvent.changeText(screen.getByPlaceholderText('Search people'), 'ch');
+  fireEvent.changeText(screen.getByPlaceholderText('Search friends'), 'ch');
 
   await waitFor(() => expect(screen.getByTestId('add-u99')).toBeOnTheScreen());
   expect(screen.getByText('charlie')).toBeOnTheScreen();
@@ -66,7 +66,7 @@ it('pressing Add calls addFriend with uid and friend id', async () => {
   renderWithTheme(<FriendsScreen />);
   await waitFor(() => screen.getByTestId('friend-f1'));
 
-  fireEvent.changeText(screen.getByPlaceholderText('Search people'), 'ch');
+  fireEvent.changeText(screen.getByPlaceholderText('Search friends'), 'ch');
   await waitFor(() => screen.getByTestId('add-u99'));
 
   fireEvent.press(screen.getByTestId('add-u99'));
@@ -90,7 +90,7 @@ it('already-friend users do not appear in add results', async () => {
   renderWithTheme(<FriendsScreen />);
   await waitFor(() => screen.getByTestId('friend-f1'));
 
-  fireEvent.changeText(screen.getByPlaceholderText('Search people'), 'al');
+  fireEvent.changeText(screen.getByPlaceholderText('Search friends'), 'al');
   await waitFor(() => screen.getByTestId('add-u99'));
 
   // alice should NOT appear as an add row (she's already a friend by user_id 'f1')
